@@ -14,6 +14,7 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Size } from "~/server/api/routers/sizes";
 
 export default async function Home() {
   const sizes = await api.size.get.query();
@@ -21,8 +22,8 @@ export default async function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b  text-black">
-      {sizes.map((size) => {
-        return <p>{size.description}</p>;
+      {sizes.map((size: Size) => {
+        return <p>{size.nombre}</p>;
       })}
     </main>
   );
