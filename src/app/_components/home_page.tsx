@@ -25,7 +25,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [creationDate, setCreationDate] = useState<string>("");
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
-  const [idLocker, setIdLocker] = useState<Number>(0);
+  const [idLocker, setIdLocker] = useState<number>(0);
   const [reserva, setReserva] = useState<Reserve | undefined>(undefined);
   const { mutateAsync: reservarBox } = api.pokemon.reserveBox.useMutation();
 
