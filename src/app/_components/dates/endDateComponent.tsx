@@ -3,7 +3,7 @@ import { Title } from "~/components/title";
 import { Calendar } from "~/components/ui/calendar";
 
 export default function EndDateComponent(props: {
-  endDate: String;
+  endDate: string;
   setEndDate: (endDate: string) => void;
 }) {
   return (
@@ -13,7 +13,6 @@ export default function EndDateComponent(props: {
           <Title>Fecha fin</Title>
           <Calendar
             mode="single"
-            selected={props.endDate}
             onSelect={(e) => {
               const formattedDate = format(e!, "yyyy-MM-dd'T'HH:mm:ss");
               props.setEndDate(formattedDate);

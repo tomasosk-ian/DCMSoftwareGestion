@@ -22,7 +22,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [store, setStore] = useState<Store | null>(null);
   const [stores, setStores] = useState<Store[] | undefined>();
   const [size, setSize] = useState<Size | null>(null);
-  const [creationDate, setCreationDate] = useState<String>("");
+  const [creationDate, setCreationDate] = useState<string>("");
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
   const [idLocker, setIdLocker] = useState<Number>(0);

@@ -3,7 +3,7 @@ import { Calendar } from "~/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 
 export default function StartDateComponent(props: {
-  startDate: String;
+  startDate: string;
   setStartDate: (startDate: string) => void;
 }) {
   return (
@@ -13,7 +13,6 @@ export default function StartDateComponent(props: {
           <Title>Fecha inicio</Title>
           <Calendar
             mode="single"
-            selected={props.startDate}
             onSelect={(e) => {
               const formattedDate = format(e!, "yyyy-MM-dd'T'HH:mm:ss");
               props.setStartDate(formattedDate);
