@@ -26,8 +26,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
   const [idLocker, setIdLocker] = useState<number>(0);
-  const [reserva, setReserva] = useState<Reserve | undefined>(undefined);
+  const [reserva, setReserva] = useState<boolean>(false);
+  const [idToken, setIdToken] = useState<number>(0);
+
   const { mutateAsync: reservarBox } = api.pokemon.reserveBox.useMutation();
+  const { mutateAsync: confirmarBox } = api.pokemon.confirmBox.useMutation();
 
   if (city != null) {
   }
@@ -74,12 +77,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         {endDate && (
           <SizeSelector sizes={props.sizes} size={size} setSize={setSize} />
         )}
-        {size && (
+        {size && !reserva && (
           <Button
             type="submit"
             onClick={async () => {
-              console.log(startDate);
-              console.log(endDate);
               const response = await reservarBox({
                 NroSerie: store!.serieLocker!,
                 IdLocker: null,
@@ -93,14 +94,32 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 Confirmado: false,
                 Modo: "Por fecha",
               });
-              if (response.ok) {
-                // const fecha =         `http://192.168.88.191:8000/api/token/reservar/${startDate.}`;
-                const jsonResponse = await response.json();
-                console.log(response);
+              console.log(response);
+              if (response != 0) {
+                setIdToken(response);
+                setReserva(true);
                 toast.success("Reserva exitosa");
               } else {
-                console.log(response);
+                console.log("error");
                 toast.error("Reserva errónea");
+              }
+            }}
+          >
+            Reservar locker
+          </Button>
+        )}
+        {reserva && (
+          <Button
+            type="submit"
+            onClick={async () => {
+              const response = await confirmarBox({ idToken });
+              if (response.ok) {
+                const jsonResponse = await response.json();
+                console.log(response);
+                toast.success("Confirmación exitosa");
+              } else {
+                console.log(response);
+                toast.error("Confirmación errónea");
               }
               setCity(null);
               setSize(null);
@@ -108,9 +127,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               setStartDate(undefined);
               setEndDate(undefined);
               setStores(undefined);
+              setReserva(false);
             }}
           >
-            Reservar locker
+            Confirmar locker
           </Button>
         )}
       </div>

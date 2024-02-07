@@ -39,7 +39,7 @@ export const pokemonRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const reservationResponse = await fetch(
-        `http://192.168.88.191:8000/api/token/reservar/${input.NroSerie}`,
+        `http://192.168.88.250:8000/api/token/reservar/${input.NroSerie}`,
         {
           method: "POST",
           headers: {
@@ -47,6 +47,40 @@ export const pokemonRouter = createTRPCRouter({
             // Add any additional headers needed for authentication or other purposes
           },
           body: JSON.stringify(input),
+        },
+      );
+
+      // Handle the response from the external API
+      if (!reservationResponse.ok) {
+        // Extract the error message from the response
+        const errorResponse = await reservationResponse.json();
+        console.log(errorResponse);
+        // Throw an error or return the error message
+        return errorResponse.message || "Unknown error";
+      }
+
+      const reservedBoxData = await reservationResponse.json();
+
+      return reservedBoxData;
+    }),
+
+  confirmBox: publicProcedure
+    .input(
+      z.object({
+        idToken: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      console.log(JSON.stringify(input));
+      const reservationResponse = await fetch(
+        `http://192.168.88.250:8000/api/token/confirmar`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: `${input.idToken}`,
         },
       );
 

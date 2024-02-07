@@ -10,7 +10,7 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const sizeRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    const sizeResponse = await fetch("http://168.205.92.83:8000/api/size");
+    const sizeResponse = await fetch("http://192.168.88.250:8000/api/size");
 
     // Handle the response from the external API
     if (!sizeResponse.ok) {
