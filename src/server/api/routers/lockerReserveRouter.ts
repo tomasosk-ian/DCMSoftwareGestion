@@ -39,7 +39,7 @@ export const pokemonRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const reservationResponse = await fetch(
-        `http://192.168.88.250:8000/api/token/reservar/${input.NroSerie}`,
+        `http://168.205.92.83:8000/api/token/reservar/${input.NroSerie}`,
         {
           method: "POST",
           headers: {
@@ -73,7 +73,7 @@ export const pokemonRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       console.log(JSON.stringify(input));
       const reservationResponse = await fetch(
-        `http://192.168.88.250:8000/api/token/confirmar`,
+        `http://168.205.92.83:8000/api/token/confirmar`,
         {
           method: "POST",
           headers: {

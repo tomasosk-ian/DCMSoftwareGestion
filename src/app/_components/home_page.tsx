@@ -94,7 +94,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 Confirmado: false,
                 Modo: "Por fecha",
               });
-              console.log(response);
               if (response != 0) {
                 setIdToken(response);
                 setReserva(true);
