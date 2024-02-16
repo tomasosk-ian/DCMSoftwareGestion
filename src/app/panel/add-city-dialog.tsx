@@ -25,6 +25,7 @@ export function AddCityDialog() {
 
   const [image, setImage] = useState<string>("");
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,7 @@ export function AddCityDialog() {
       await createCity({
         name,
         image,
+        description,
       });
 
       toast.success("Ciudad creada correctamente");
@@ -62,7 +64,17 @@ export function AddCityDialog() {
                 </DialogDescription> */}
           </DialogHeader>
           <div>
-            <Label htmlFor="name">Nombre de la ciudad</Label>
+            <Label htmlFor="name">Descripcion</Label>
+            <Input
+              id="name"
+              placeholder="ej: efectivo"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="name"></Label>
             <Input
               id="name"
               placeholder="ej: efectivo"

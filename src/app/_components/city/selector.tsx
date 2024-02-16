@@ -38,9 +38,12 @@ export default function CitySelector(props: {
     }
   }
   return (
-    <main className="flex justify-center p-8">
+    <main className="flex justify-center ">
       {!props.city && (
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 ">
+        <div className="container flex flex-col items-center justify-center gap-6 ">
+          <h2 className="text-3xl font-semibold">
+            ¿Dónde quieres reservar tu consigna?
+          </h2>
           <div className="grid grid-cols-4 gap-4 ">
             {props.cities.map((city) => {
               return (

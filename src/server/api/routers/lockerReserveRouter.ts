@@ -71,7 +71,6 @@ export const pokemonRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log(JSON.stringify(input));
       const reservationResponse = await fetch(
         `http://168.205.92.83:8000/api/token/confirmar`,
         {

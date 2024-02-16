@@ -12,10 +12,12 @@ import { Menubar } from "~/components/ui/menubar";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { stores } from "~/server/db/schema";
-import StartDateComponent from "./dates/startDateComponent";
-import EndDateComponent from "./dates/endDateComponent";
+import DateComponent from "./dates/dateComponent";
 import { ZodNull, nullable } from "zod";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { Title } from "~/components/title";
+import UserForm from "./user/userForm";
 
 export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [city, setCity] = useState<City | null>(null);
@@ -37,75 +39,84 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
 
   return (
     <div className="container">
-      <Menubar className="border-0 shadow-none">
-        {city && !store && !size && !startDate && !endDate && (
-          <Button onClick={() => setCity(null)}>volver</Button>
-        )}
-        {store && !size && !startDate && !endDate && (
-          <Button onClick={() => setStore(null)}>volver</Button>
-        )}
-        {size && !startDate && !endDate && (
-          <Button onClick={() => setSize(null)}>volver</Button>
-        )}
-        {startDate && !endDate && (
-          <Button onClick={() => setStartDate(undefined)}>volver</Button>
-        )}
-        {endDate && (
-          <Button onClick={() => setEndDate(undefined)}>volver</Button>
-        )}
-      </Menubar>
-      <div className="flex flex-col items-center justify-center">
+      <div className="grid grid-cols-3 justify-items-center gap-4	">
+        <Menubar className="border-0 shadow-none ">
+          {city && !store && !size && !endDate && (
+            <Button onClick={() => setCity(null)}>volver</Button>
+          )}
+          {endDate && !store && !size && (
+            <Button onClick={() => setEndDate(undefined)}>volver</Button>
+          )}
+          {store && !size && (
+            <Button onClick={() => setStore(null)}>volver</Button>
+          )}
+
+          {size && <Button onClick={() => setSize(null)}>volver</Button>}
+        </Menubar>
+        <div className="justify-center	">
+          <h2 className="text-l mb-3 font-semibold">PERÍODO DE RESERVA</h2>
+        </div>
+      </div>
+      <div className="flex flex-col items-center justify-center pt-2">
         <CitySelector
           cities={props.cities}
           city={city}
           setCity={setCity}
           setStores={setStores}
         />
+
         {city && (
-          <StoreSelector stores={stores} store={store} setStore={setStore} />
+          <div>
+            <DateComponent
+              startDate={startDate!}
+              setStartDate={setStartDate}
+              endDate={endDate!}
+              setEndDate={setEndDate}
+            />
+          </div>
         )}
 
-        {store && (
-          <StartDateComponent
-            startDate={startDate!}
-            setStartDate={setStartDate}
-          />
-        )}
-        {startDate && (
-          <EndDateComponent endDate={endDate!} setEndDate={setEndDate} />
-        )}
         {endDate && (
+          <StoreSelector stores={stores} store={store} setStore={setStore} />
+        )}
+        {store && (
           <SizeSelector sizes={props.sizes} size={size} setSize={setSize} />
         )}
         {size && !reserva && (
-          <Button
-            type="submit"
-            onClick={async () => {
-              const response = await reservarBox({
-                NroSerie: store!.serieLocker!,
-                IdLocker: null,
-                IdSize: size!.id,
-                IdBox: null,
-                Token1: null,
-                FechaCreacion: "2024-01-31T08:00:00",
-                FechaInicio: startDate!,
-                FechaFin: endDate!,
-                Contador: -1,
-                Confirmado: false,
-                Modo: "Por fecha",
-              });
-              if (response != 0) {
-                setIdToken(response);
-                setReserva(true);
-                toast.success("Reserva exitosa");
-              } else {
-                console.log("error");
-                toast.error("Reserva errónea");
-              }
-            }}
-          >
-            Reservar locker
-          </Button>
+          <div>
+            {/* <UserForm /> */}
+            <div>
+              <Button
+                type="submit"
+                onClick={async () => {
+                  const today = Date.now();
+                  const response = await reservarBox({
+                    NroSerie: store!.serieLocker!,
+                    IdLocker: null,
+                    IdSize: size!.id,
+                    IdBox: null,
+                    Token1: null,
+                    FechaCreacion: format(today, "yyyy-MM-dd'T'HH:00:00"),
+                    FechaInicio: startDate!,
+                    FechaFin: endDate!,
+                    Contador: -1,
+                    Confirmado: false,
+                    Modo: "Por fecha",
+                  });
+                  if (response != 0) {
+                    setIdToken(response);
+                    setReserva(true);
+                    toast.success("Reserva exitosa");
+                  } else {
+                    console.log("error");
+                    toast.error("Reserva errónea");
+                  }
+                }}
+              >
+                Continuar al pago
+              </Button>
+            </div>
+          </div>
         )}
         {reserva && (
           <Button

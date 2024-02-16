@@ -1,5 +1,6 @@
 import { postRouter } from "~/server/api/routers/post";
 import { cityRouter } from "~/server/api/routers/city";
+import { globalConfigRouter } from "~/server/api/routers/globalConfig";
 import { storeRouter } from "~/server/api/routers/store";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { sizeRouter } from "./routers/sizes";
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   size: sizeRouter,
   pokemon: pokemonRouter,
   locker: lockerRouter,
+  globalConfig: globalConfigRouter,
   // lockerReserve: lockerReserveRouter,
 });
 

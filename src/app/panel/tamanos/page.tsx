@@ -15,16 +15,25 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Size } from "~/server/api/routers/sizes";
+import { Title } from "~/components/title";
+import { List, ListTile } from "~/components/list";
 
 export default async function Home() {
   const sizes = await api.size.get.query();
   const session = await getServerAuthSession();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b  text-black">
-      {sizes.map((size: Size) => {
-        return <p>{size.nombre}</p>;
-      })}
-    </main>
+    <section className="space-y-2">
+      <div className="flex justify-between">
+        <Title>Tamaños</Title>
+      </div>
+      <List>
+        {sizes.map((size: Size) => {
+          return (
+            <ListTile href={`/panel/tamanos/${size.id}`} title={size.nombre} />
+          );
+        })}
+      </List>
+    </section>
   );
 }

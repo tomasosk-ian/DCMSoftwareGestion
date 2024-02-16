@@ -11,24 +11,18 @@ import { cities } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 
-export const cityRouter = createTRPCRouter({
+export const globalConfigRouter = createTRPCRouter({
   get: publicProcedure.query(({ ctx }) => {
-    const result = ctx.db.query.cities.findMany({
+    const result = ctx.db.query.globalconfig.findFirst({
       orderBy: (cities, { desc }) => [desc(cities.identifier)],
     });
     return result;
-  }),
-
-  getCity: publicProcedure.input(z.string()).query(({ ctx, input }) => {
-    return ctx.db.query.cities.findFirst({
-      where: eq(cities.identifier, input),
-    });
   }),
   create: publicProcedure
     .input(
       z.object({
         name: z.string().min(0).max(1023),
-        description: z.string().min(0).max(1023),
+        token: z.string().min(0).max(1023),
         image: z.string().min(0).max(1023),
       }),
     )
@@ -37,28 +31,16 @@ export const cityRouter = createTRPCRouter({
 
       const identifier = createId();
 
-      await db.insert(schema.cities).values({
+      await db.insert(schema.globalconfig).values({
         identifier,
         name: input.name,
-        description: input.description,
+        token: input.token,
         image: input.image,
       });
 
       return { identifier };
     }),
-  getById: publicProcedure
-    .input(
-      z.object({
-        cityId: z.string(),
-      }),
-    )
-    .query(async ({ input }) => {
-      const channel = await db.query.cities.findFirst({
-        where: eq(schema.cities.identifier, input.cityId),
-      });
 
-      return channel;
-    }),
   change: publicProcedure
     .input(
       z.object({

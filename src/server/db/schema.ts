@@ -114,6 +114,7 @@ export const cities = mysqlTable(
   {
     identifier: varchar("identifier", { length: 255 }).notNull(),
     name: varchar("name", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
     image: varchar("image", { length: 255 }),
   },
   (vt) => ({
@@ -162,5 +163,32 @@ export const lockers = mysqlTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.id),
+  }),
+);
+
+export const globalconfig = mysqlTable(
+  "globalconfig",
+  {
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    image: varchar("image", { length: 255 }),
+    token: varchar("token", { length: 255 }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const userData = mysqlTable(
+  "userdata",
+  {
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    last_name: varchar("last_name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    tel: int("tel").notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
   }),
 );

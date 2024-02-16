@@ -11,6 +11,7 @@ import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
 import {
@@ -35,23 +36,42 @@ import { useRouter } from "next/navigation";
 import { City } from "~/server/api/routers/city";
 import { toast } from "sonner";
 import { UploadButton } from "~/utils/uploadthing";
+import { Store } from "~/server/api/routers/store";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Locker } from "~/server/api/routers/lockers";
 
-export default function CityPage({ city }: { city: City }) {
-  const [name, setName] = useState(city!.name);
-  const [descripcion, setDescripcion] = useState(city!.name);
+export default function StorePage(props: {
+  store: Store;
+  cities: City[];
+  lockers: Locker[];
+}) {
+  const [name, setName] = useState(props.store.name);
+  const [cityId, setCity] = useState(props.store.cityId!);
+  const [serieLocker, setSerieLocker] = useState(props.store.serieLocker);
   const [loading, setLoading] = useState(false);
-  const { mutateAsync: renameCity, isLoading } = api.city.change.useMutation();
+  const { mutateAsync: renameStore, isLoading } =
+    api.store.change.useMutation();
   const [image, setImage] = useState<string>("");
   const router = useRouter();
 
   async function handleChange() {
     try {
-      await renameCity({
-        identifier: city!.identifier,
+      await renameStore({
+        identifier: props.store!.identifier,
         name,
         image,
+        cityId,
+        serieLocker,
       });
-      toast.success("Se ha modificado la ciudad.");
+      toast.success("Se ha modificado el local.");
       router.refresh();
     } catch {
       toast.error("Error");
@@ -62,7 +82,7 @@ export default function CityPage({ city }: { city: City }) {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Modificar ciudad</Title>
+          <Title>Modificar local</Title>
           <Button disabled={isLoading} onClick={handleChange}>
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
@@ -76,7 +96,7 @@ export default function CityPage({ city }: { city: City }) {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-2">
             <AccordionTrigger>
-              <h2 className="text-md">Info. de la ciudad</h2>
+              <h2 className="text-md">Info. del local</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
@@ -90,20 +110,63 @@ export default function CityPage({ city }: { city: City }) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="name">Descripción</Label>
-                    <Input
-                      id="name"
-                      value={descripcion}
-                      onChange={(e) => setDescripcion(e.target.value)}
-                    />
+                    <Label className="text-right">Ciudad</Label>
+                    <Select
+                      onValueChange={(value: string) => {
+                        setCity(value);
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder={props.store.city?.name} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Ciudades</SelectLabel>
+                          {props.cities.map((e) => {
+                            return (
+                              <SelectItem
+                                key={e.identifier}
+                                value={e.identifier}
+                              >
+                                {e.name}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-right">Locker</Label>
+                    <Select
+                      onValueChange={(value: string) => {
+                        setSerieLocker(value);
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder={props.store.serieLocker} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Lockers</SelectLabel>
+                          {props.lockers.map((e) => {
+                            return (
+                              <SelectItem key={e.id} value={e.nroSerieLocker}>
+                                {e.nroSerieLocker}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="col-span-2">
                     <Label htmlFor="description">Imagen</Label>
                     <UploadButton
                       appearance={{
-                        button: "btn btn-success w-full",
+                        button: "btn btn-success ",
                         container:
-                          "w-max flex-row rounded-md border-cyan-200 px-3 bg-slate-800 text-xs",
+                          "w-max flex-row rounded-md border-cyan-300 px-3 bg-slate-800 text-xs",
                         allowedContent: "text-white text-xs",
                       }}
                       endpoint="imageUploader"
@@ -111,8 +174,11 @@ export default function CityPage({ city }: { city: City }) {
                         setLoading(true);
                       }}
                       onClientUploadComplete={(res) => {
+                        // Do something with the response
+                        console.log("Files: ", res[0]?.url);
+                        // setImage(res.keys.arguments);
                         setLoading(false);
-                        setImage(res[0]?.url!);
+                        setImage(res[0]!.url);
                         toast.success("Imagen cargada con éxito.");
                       }}
                       onUploadError={(error: Error) => {
@@ -128,11 +194,11 @@ export default function CityPage({ city }: { city: City }) {
 
           <AccordionItem value="item-4" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar ciudad</h2>
+              <h2 className="text-md">Eliminar local</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
-                <DeleteChannel cityId={city.identifier} />
+                <DeleteStore storeId={props.store.identifier} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -142,33 +208,38 @@ export default function CityPage({ city }: { city: City }) {
   );
 }
 
-function DeleteChannel(props: { cityId: string }) {
+function DeleteStore(props: { storeId: string }) {
   const { mutateAsync: deleteChannel, isLoading } =
-    api.city.delete.useMutation();
+    api.store.delete.useMutation();
 
   const router = useRouter();
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
-    deleteChannel({ id: props.cityId }).then(() => {
-      toast.success("Se ha eliminado la ciudad");
-      router.push("../");
-    });
+    deleteChannel({ id: props.storeId })
+      .then(() => {
+        toast.success("Se ha eliminado la ciudad");
+        router.push("../");
+      })
+      .catch((e) => {
+        const error = asTRPCError(e)!;
+        toast.error(error.message);
+      });
   };
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-[160px]">
-          Eliminar ciudad
+          Eliminar local
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar la ciudad?
+            ¿Estás seguro que querés eliminar el local?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Eliminar ciudad permanentemente.
+            Eliminar local permanentemente.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
