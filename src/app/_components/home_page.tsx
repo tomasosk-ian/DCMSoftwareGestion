@@ -34,8 +34,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const { mutateAsync: reservarBox } = api.pokemon.reserveBox.useMutation();
   const { mutateAsync: confirmarBox } = api.pokemon.confirmBox.useMutation();
   const storess = api.store.get.useQuery();
-
-  if (props.cities.length > 0) {
+  if (props.cities.length !== 0) {
     return (
       <div className="container">
         <div className="grid grid-cols-3 justify-items-center gap-4	">
@@ -65,6 +64,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           />
 
           {city && (
+            <StoreSelector stores={stores} store={store} setStore={setStore} />
+          )}
+
+          {store && (
             <div>
               <DateComponent
                 startDate={startDate!}
@@ -74,11 +77,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               />
             </div>
           )}
-
           {endDate && (
-            <StoreSelector stores={stores} store={store} setStore={setStore} />
-          )}
-          {store && (
             <SizeSelector sizes={props.sizes} size={size} setSize={setSize} />
           )}
           {size && !reserva && (
@@ -107,7 +106,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                       setReserva(true);
                       toast.success("Reserva exitosa");
                     } else {
-                      console.log("error");
                       toast.error("Reserva errónea");
                     }
                   }}
@@ -124,10 +122,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 const response = await confirmarBox({ idToken });
                 if (response.ok) {
                   const jsonResponse = await response.json();
-                  console.log(response);
                   toast.success("Confirmación exitosa");
                 } else {
-                  console.log(response);
                   toast.error("Confirmación errónea");
                 }
                 setCity(null);
@@ -179,7 +175,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               />
             </div>
           )}
-          {store && (
+          {endDate && (
             <SizeSelector sizes={props.sizes} size={size} setSize={setSize} />
           )}
           {size && !reserva && (
@@ -208,7 +204,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                       setReserva(true);
                       toast.success("Reserva exitosa");
                     } else {
-                      console.log("error");
                       toast.error("Reserva errónea");
                     }
                   }}
@@ -225,10 +220,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 const response = await confirmarBox({ idToken });
                 if (response.ok) {
                   const jsonResponse = await response.json();
-                  console.log(response);
                   toast.success("Confirmación exitosa");
                 } else {
-                  console.log(response);
                   toast.error("Confirmación errónea");
                 }
                 setCity(null);
