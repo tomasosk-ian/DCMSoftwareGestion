@@ -36,6 +36,7 @@ export default function DateComponent(props: {
                 selected={range}
                 onSelect={setRange}
                 numberOfMonths={2}
+                disabled={(date) => date < new Date(Date.now())}
                 initialFocus
               />
             </div>
