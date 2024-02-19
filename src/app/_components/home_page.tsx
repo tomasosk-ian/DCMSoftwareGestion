@@ -149,7 +149,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             {store && !endDate && !size && (
               <Button onClick={() => setStore(null)}>volver</Button>
             )}
-            {store && !size && (
+            {endDate && !size && (
               <Button onClick={() => setEndDate(undefined)}>volver</Button>
             )}
 
