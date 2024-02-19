@@ -117,7 +117,7 @@ export default function StorePage(props: {
                       }}
                     >
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder={props.store.city?.name} />
+                        <SelectValue placeholder={props.store.city?.name?} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
