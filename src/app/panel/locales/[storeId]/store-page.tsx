@@ -83,7 +83,7 @@ export default function StorePage(props: {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Modificar local</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
+          <Button disabled={loading} onClick={handleChange}>
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
