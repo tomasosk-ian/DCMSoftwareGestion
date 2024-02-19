@@ -14,13 +14,13 @@ export default function DateComponent(props: {
   const [range, setRange] = useState<DateRange | undefined>();
 
   function handleClick() {
-    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'HH:00:00"));
-    props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'HH:23:59"));
+    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
+    props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
   }
   function onlyToday() {
     const today = Date.now();
-    props.setStartDate(format(today, "yyyy-MM-dd'T'HH:00:00"));
-    props.setEndDate(format(today, "yyyy-MM-dd'T'HH:23:59"));
+    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
+    props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
   }
   return (
     <div>
