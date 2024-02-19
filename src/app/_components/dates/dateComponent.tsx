@@ -14,7 +14,9 @@ export default function DateComponent(props: {
   const [range, setRange] = useState<DateRange | undefined>();
 
   function handleClick() {
-    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
+    const today = Date.now();
+    // props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
+    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
   }
   function onlyToday() {
@@ -36,7 +38,7 @@ export default function DateComponent(props: {
                 selected={range}
                 onSelect={setRange}
                 numberOfMonths={2}
-                disabled={(date) => date < new Date(Date.now())}
+                disabled={(date) => date <= new Date(Date.now())}
                 initialFocus
               />
             </div>

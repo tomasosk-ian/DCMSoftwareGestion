@@ -43,7 +43,7 @@ export default function storeSelector(props: {
                     </CardHeader>
                     <img
                       className="aspect-video object-cover"
-                      src="/placeholder.svg"
+                      src={store.image ? store.image : "/placeholder.svg"}
                     ></img>
                   </Card>
                 );

@@ -65,7 +65,8 @@ export const storeRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const identifier = createId();
-
+      console.log("asd");
+      console.log(input.image);
       await ctx.db.insert(schema.stores).values({
         identifier,
         name: input.name,
