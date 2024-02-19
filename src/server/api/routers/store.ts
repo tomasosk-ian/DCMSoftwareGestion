@@ -13,11 +13,7 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const storeRouter = createTRPCRouter({
   get: publicProcedure.query(({ ctx }) => {
-    const stores = ctx.db.query.stores.findMany({
-      with: {
-        city: true,
-      },
-    });
+    const stores = ctx.db.query.stores.findMany({});
     return stores;
   }),
 

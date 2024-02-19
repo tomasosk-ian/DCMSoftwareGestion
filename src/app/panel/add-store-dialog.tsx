@@ -161,7 +161,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
             />
           </div>
           <DialogFooter>
-            <Button disabled={isLoading} onClick={handleCreate}>
+            <Button disabled={loading} onClick={handleCreate}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}

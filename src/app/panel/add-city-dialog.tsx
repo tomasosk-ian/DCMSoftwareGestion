@@ -63,23 +63,22 @@ export function AddCityDialog() {
                     
                 </DialogDescription> */}
           </DialogHeader>
+
           <div>
-            <Label htmlFor="name">Descripcion</Label>
             <Input
               id="name"
-              placeholder="ej: efectivo"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div>
-            <Label htmlFor="name"></Label>
             <Input
               id="name"
-              placeholder="ej: efectivo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Descripción"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
@@ -111,7 +110,7 @@ export function AddCityDialog() {
             />
           </div>
           <DialogFooter>
-            <Button disabled={isLoading} onClick={handleCreate}>
+            <Button disabled={loading} onClick={handleCreate}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
