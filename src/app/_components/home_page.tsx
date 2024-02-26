@@ -103,29 +103,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 <Button
                   type="submit"
                   onClick={async () => {
-                    //   const today = Date.now();
-                    //   const response = await reservarBox({
-                    //     NroSerie: store!.serieLocker!,
-                    //     IdLocker: null,
-                    //     IdSize: size!.id,
-                    //     IdBox: null,
-                    //     Token1: null,
-                    //     FechaCreacion: format(today, "yyyy-MM-dd'T'HH:00:00"),
-                    //     FechaInicio: startDate!,
-                    //     FechaFin: endDate!,
-                    //     Contador: -1,
-                    //     Confirmado: false,
-                    //     Modo: "Por fecha",
-                    //   });
-                    //   if (response != 0) {
-                    //     setIdToken(response);
-                    //     setReserva(true);
-                    //     toast.success("Reserva exitosa");
-                    //   } else {
-                    //     toast.error("Reserva errónea");
-                    //   }
-                    // }}
-                    reserves.map((reserve) => console.log(reserve.Cantidad));
+                    reserves.map(async (reserve) => {
+                      const response = await reservarBox(reserve);
+                      setIdToken(response);
+                      setReserva(true);
+                    });
                   }}
                 >
                   Continuar al pago
@@ -219,31 +201,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 <Button
                   type="submit"
                   onClick={async () => {
-                    // const today = Date.now();
-                    // const response = await reservarBox({
-                    //   NroSerie: store!.serieLocker!,
-                    //   IdLocker: null,
-                    //   IdSize: size!.id,
-                    //   IdBox: null,
-                    //   Token1: null,
-                    //   FechaCreacion: format(today, "yyyy-MM-dd'T'HH:00:00"),
-                    //   FechaInicio: startDate!,
-                    //   FechaFin: endDate!,
-                    //   Contador: -1,
-                    //   Confirmado: false,
-                    //   Modo: "Por fecha",
-                    // });
-                    // if (response != 0) {
-                    //   setIdToken(response);
-                    //   setReserva(true);
-                    //   toast.success("Reserva exitosa");
-                    // } else {
-                    //   toast.error("Reserva errónea");
-                    // }
                     reserves.map(async (reserve) => {
-                      console.log(reserve.Cantidad);
                       const response = await reservarBox(reserve);
+                      setIdToken(response);
                     });
+                    setReserva(true);
                   }}
                 >
                   Continuar al pago
@@ -263,11 +225,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   toast.error("Confirmación errónea");
                 }
                 setCity(null);
-                setSize(null);
-                setStore(null);
-                setStartDate(undefined);
                 setEndDate(undefined);
-                setStores(undefined);
+                setStore(null);
+                setsizeSelected(false);
                 setReserva(false);
               }}
             >

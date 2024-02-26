@@ -75,7 +75,7 @@ export default function SizeSelector(props: {
           <h2 className="text-3xl font-semibold">
             Selecciona tamaño de tu taquilla.
           </h2>
-          <div className="grid grid-cols-4 gap-4 ">
+          <div className="grid grid-cols-3 gap-4 ">
             {isLoading && <div>Cargando...</div>}
             {!isLoading && sizes?.length == 0 && <div>No hay tamaños.</div>}
             {!isLoading &&
@@ -134,10 +134,12 @@ export default function SizeSelector(props: {
                         </div>
                       </CardFooter>
                     </Card>
-                    <Button onClick={() => applyReserve()}>APLICAR</Button>
                   </div>
                 );
               })}
+            {!isLoading && (
+              <Button onClick={() => applyReserve()}>APLICAR</Button>
+            )}
           </div>
         </div>
       )}

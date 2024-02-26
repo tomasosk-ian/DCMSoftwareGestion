@@ -30,7 +30,7 @@ export const sizeRouter = createTRPCRouter({
   getAvailability: publicProcedure
     .input(
       z.object({
-        nroSerieLocker: z.string(),
+        nroSerieLocker: z.string().nullable(),
         inicio: z.string().nullable(),
         fin: z.string().nullable(),
       }),
