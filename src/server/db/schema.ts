@@ -1,6 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
+  decimal,
+  float,
   index,
   int,
   mysqlTableCreator,
@@ -187,6 +189,38 @@ export const userData = mysqlTable(
     last_name: varchar("last_name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull(),
     tel: int("tel").notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const feeData = mysqlTable(
+  "feedata",
+  {
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }),
+    coin: varchar("coin", { length: 255 }),
+    size: int("size"),
+    value: float("value"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const feeRelations = relations(feeData, ({ one }) => ({
+  coin: one(coinData, {
+    fields: [feeData.coin],
+    references: [coinData.identifier],
+  }),
+}));
+export const coinData = mysqlTable(
+  "coindate",
+  {
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }),
+    value: float("value"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),

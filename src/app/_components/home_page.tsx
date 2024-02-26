@@ -24,16 +24,19 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [store, setStore] = useState<Store | null>(null);
   const [stores, setStores] = useState<Store[] | undefined>();
   const [size, setSize] = useState<Size | null>(null);
+  const [sizeSelected, setsizeSelected] = useState(false);
   const [creationDate, setCreationDate] = useState<string>("");
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
   const [idLocker, setIdLocker] = useState<number>(0);
   const [reserva, setReserva] = useState<boolean>(false);
   const [idToken, setIdToken] = useState<number>(0);
-
+  const [days, setDays] = useState<number>(0);
   const { mutateAsync: reservarBox } = api.pokemon.reserveBox.useMutation();
   const { mutateAsync: confirmarBox } = api.pokemon.confirmBox.useMutation();
   const storess = api.store.get.useQuery();
+  const [reserves, setReserves] = useState<Reserve[]>([]);
+
   if (props.cities.length !== 0) {
     return (
       <div className="container">
@@ -49,11 +52,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               <Button onClick={() => setStore(null)}>volver</Button>
             )}
 
-            {size && <Button onClick={() => setSize(null)}>volver</Button>}
+            {size && (
+              <Button onClick={() => setsizeSelected(false)}>volver</Button>
+            )}
           </Menubar>
-          <div className="justify-center	">
-            <h2 className="text-l mb-3 font-semibold">PERÍODO DE RESERVA</h2>
-          </div>
         </div>
         <div className="flex flex-col items-center justify-center pt-2">
           <CitySelector
@@ -74,40 +76,56 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 setStartDate={setStartDate}
                 endDate={endDate!}
                 setEndDate={setEndDate}
+                days={days}
+                setDays={setDays}
               />
             </div>
           )}
           {endDate && (
-            <SizeSelector sizes={props.sizes} size={size} setSize={setSize} />
+            <SizeSelector
+              nroSerieLocker={store?.serieLocker!}
+              inicio={startDate}
+              fin={endDate!}
+              size={size}
+              setSize={setSize}
+              sizeSelected={sizeSelected}
+              setSizeSelected={setsizeSelected}
+              reserves={reserves}
+              setReserves={setReserves}
+              startDate={startDate!}
+              endDate={endDate!}
+            />
           )}
-          {size && !reserva && (
+          {sizeSelected && !reserva && (
             <div>
               {/* <UserForm /> */}
               <div>
                 <Button
                   type="submit"
                   onClick={async () => {
-                    const today = Date.now();
-                    const response = await reservarBox({
-                      NroSerie: store!.serieLocker!,
-                      IdLocker: null,
-                      IdSize: size!.id,
-                      IdBox: null,
-                      Token1: null,
-                      FechaCreacion: format(today, "yyyy-MM-dd'T'HH:00:00"),
-                      FechaInicio: startDate!,
-                      FechaFin: endDate!,
-                      Contador: -1,
-                      Confirmado: false,
-                      Modo: "Por fecha",
-                    });
-                    if (response != 0) {
-                      setIdToken(response);
-                      setReserva(true);
-                      toast.success("Reserva exitosa");
-                    } else {
-                      toast.error("Reserva errónea");
-                    }
+                    //   const today = Date.now();
+                    //   const response = await reservarBox({
+                    //     NroSerie: store!.serieLocker!,
+                    //     IdLocker: null,
+                    //     IdSize: size!.id,
+                    //     IdBox: null,
+                    //     Token1: null,
+                    //     FechaCreacion: format(today, "yyyy-MM-dd'T'HH:00:00"),
+                    //     FechaInicio: startDate!,
+                    //     FechaFin: endDate!,
+                    //     Contador: -1,
+                    //     Confirmado: false,
+                    //     Modo: "Por fecha",
+                    //   });
+                    //   if (response != 0) {
+                    //     setIdToken(response);
+                    //     setReserva(true);
+                    //     toast.success("Reserva exitosa");
+                    //   } else {
+                    //     toast.error("Reserva errónea");
+                    //   }
+                    // }}
+                    reserves.map((reserve) => console.log(reserve.Cantidad));
                   }}
                 >
                   Continuar al pago
@@ -146,18 +164,20 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       <div className="container">
         <div className="grid grid-cols-3 justify-items-center gap-4	">
           <Menubar className="border-0 shadow-none ">
-            {store && !endDate && !size && (
+            {store && !endDate && !sizeSelected && !reserva && (
               <Button onClick={() => setStore(null)}>volver</Button>
             )}
-            {endDate && !size && (
+            {endDate && !sizeSelected && !reserva && (
               <Button onClick={() => setEndDate(undefined)}>volver</Button>
             )}
 
-            {size && <Button onClick={() => setSize(null)}>volver</Button>}
+            {sizeSelected && !reserva && (
+              <Button onClick={() => setsizeSelected(false)}>volver</Button>
+            )}
+            {reserva && (
+              <Button onClick={() => setReserva(false)}>volver</Button>
+            )}
           </Menubar>
-          <div className="justify-center	">
-            <h2 className="text-l mb-3 font-semibold">PERÍODO DE RESERVA</h2>
-          </div>
         </div>
         <div className="flex flex-col items-center justify-center pt-2">
           <StoreSelector
@@ -172,40 +192,58 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 setStartDate={setStartDate}
                 endDate={endDate!}
                 setEndDate={setEndDate}
+                days={days}
+                setDays={setDays}
               />
             </div>
           )}
           {endDate && (
-            <SizeSelector sizes={props.sizes} size={size} setSize={setSize} />
+            <SizeSelector
+              nroSerieLocker={store?.serieLocker!}
+              inicio={startDate}
+              fin={endDate!}
+              size={size}
+              setSize={setSize}
+              sizeSelected={sizeSelected}
+              setSizeSelected={setsizeSelected}
+              reserves={reserves}
+              setReserves={setReserves}
+              startDate={startDate!}
+              endDate={endDate!}
+            />
           )}
-          {size && !reserva && (
+          {sizeSelected && !reserva && (
             <div>
-              {/* <UserForm /> */}
+              <UserForm />
               <div>
                 <Button
                   type="submit"
                   onClick={async () => {
-                    const today = Date.now();
-                    const response = await reservarBox({
-                      NroSerie: store!.serieLocker!,
-                      IdLocker: null,
-                      IdSize: size!.id,
-                      IdBox: null,
-                      Token1: null,
-                      FechaCreacion: format(today, "yyyy-MM-dd'T'HH:00:00"),
-                      FechaInicio: startDate!,
-                      FechaFin: endDate!,
-                      Contador: -1,
-                      Confirmado: false,
-                      Modo: "Por fecha",
+                    // const today = Date.now();
+                    // const response = await reservarBox({
+                    //   NroSerie: store!.serieLocker!,
+                    //   IdLocker: null,
+                    //   IdSize: size!.id,
+                    //   IdBox: null,
+                    //   Token1: null,
+                    //   FechaCreacion: format(today, "yyyy-MM-dd'T'HH:00:00"),
+                    //   FechaInicio: startDate!,
+                    //   FechaFin: endDate!,
+                    //   Contador: -1,
+                    //   Confirmado: false,
+                    //   Modo: "Por fecha",
+                    // });
+                    // if (response != 0) {
+                    //   setIdToken(response);
+                    //   setReserva(true);
+                    //   toast.success("Reserva exitosa");
+                    // } else {
+                    //   toast.error("Reserva errónea");
+                    // }
+                    reserves.map(async (reserve) => {
+                      console.log(reserve.Cantidad);
+                      const response = await reservarBox(reserve);
                     });
-                    if (response != 0) {
-                      setIdToken(response);
-                      setReserva(true);
-                      toast.success("Reserva exitosa");
-                    } else {
-                      toast.error("Reserva errónea");
-                    }
                   }}
                 >
                   Continuar al pago

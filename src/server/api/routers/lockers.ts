@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { env } from "~/env";
 
 import {
   createTRPCRouter,
@@ -9,7 +10,7 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const lockerRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    const sizeResponse = await fetch("http://168.205.92.83:8000/api/locker");
+    const sizeResponse = await fetch(`${env.SERVER_URL}/api/locker`);
 
     // Handle the response from the external API
     if (!sizeResponse.ok) {

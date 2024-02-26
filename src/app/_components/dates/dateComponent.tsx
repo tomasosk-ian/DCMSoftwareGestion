@@ -10,19 +10,32 @@ export default function DateComponent(props: {
   setStartDate: (startDate: string) => void;
   endDate: string;
   setEndDate: (endDate: string) => void;
+  days: number;
+  setDays: (days: number) => void;
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
 
+  function getDays() {
+    if (range) {
+      const fromDate = range.from!;
+      const toDate = range.to!;
+      const differenceInTime = toDate?.getTime() - fromDate?.getTime();
+      const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+      props.setDays(differenceInDays);
+    }
+  }
   function handleClick() {
     const today = Date.now();
     // props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
     props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
+    getDays();
   }
   function onlyToday() {
     const today = Date.now();
     props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
+    getDays();
   }
   return (
     <div>
@@ -36,7 +49,17 @@ export default function DateComponent(props: {
               <Calendar
                 mode="range"
                 selected={range}
-                onSelect={setRange}
+                onSelect={(e) => {
+                  e?.from?.setDate(Date.now());
+                  const fromDate = e?.from!;
+                  const toDate = e?.to!;
+                  const differenceInTime =
+                    toDate?.getTime() - fromDate?.getTime();
+                  const differenceInDays =
+                    differenceInTime / (1000 * 3600 * 24);
+                  props.setDays(differenceInDays);
+                  setRange(e);
+                }}
                 numberOfMonths={2}
                 disabled={(date) =>
                   date < new Date(new Date().setHours(0, 0, 0, 0))
@@ -51,7 +74,7 @@ export default function DateComponent(props: {
                   onClick={handleClick}
                   disabled={range?.to == undefined}
                 >
-                  Confirmar
+                  APLICAR {props.days} DÍAS
                 </Button>
               </div>
               <div className="px-1">

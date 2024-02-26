@@ -13,7 +13,7 @@ export default async function Home() {
   const cities = await api.city.get.query();
   const stores = await api.store.get.query();
   const lockers = await api.locker.get.query();
-  const sizes = await api.size.get.query();
+  // const sizes = await api.size.get.query();
   return (
     <section className="space-y-2">
       <Title>Bienvenido.</Title>

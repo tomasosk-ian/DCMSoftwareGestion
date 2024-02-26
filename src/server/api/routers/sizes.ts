@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { env } from "~/env";
 
 import {
   createTRPCRouter,
@@ -10,7 +11,7 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const sizeRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    const sizeResponse = await fetch("http://168.205.92.83:8000/api/size");
+    const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
     // Handle the response from the external API
     if (!sizeResponse.ok) {
@@ -23,9 +24,39 @@ export const sizeRouter = createTRPCRouter({
     const reservedBoxData = await sizeResponse.json();
 
     const validatedData = responseValidator.parse(reservedBoxData);
-
+    console.log(validatedData);
     return validatedData;
   }),
+  getAvailability: publicProcedure
+    .input(
+      z.object({
+        nroSerieLocker: z.string(),
+        inicio: z.string().nullable(),
+        fin: z.string().nullable(),
+      }),
+    )
+    .query(async ({ input }) => {
+      console.log(
+        `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
+      );
+      const sizeResponse = await fetch(
+        `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
+      );
+
+      // Handle the response from the external API
+      if (!sizeResponse.ok) {
+        // Extract the error message from the response
+        const errorResponse = await sizeResponse.json();
+        // Throw an error or return the error message
+        return errorResponse.message || "Unknown error";
+      }
+
+      const reservedBoxData = await sizeResponse.json();
+
+      const validatedData = responseValidator.parse(reservedBoxData);
+      console.log(validatedData);
+      return validatedData;
+    }),
 
   getById: publicProcedure
     .input(
@@ -34,7 +65,7 @@ export const sizeRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const sizeResponse = await fetch("http://168.205.92.83:8000/api/size");
+      const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
       // Handle the response from the external API
       if (!sizeResponse.ok) {
@@ -66,6 +97,8 @@ const sizeValidator = z.object({
   ancho: z.number().nullable(),
   profundidad: z.number().nullable(),
   nombre: z.string().nullable(),
+  cantidad: z.number().nullable().optional(),
+  cantidadSeleccionada: z.number().optional().default(0),
 });
 export type Size = z.infer<typeof sizeValidator>;
 

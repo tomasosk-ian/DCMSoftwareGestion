@@ -32,6 +32,7 @@ export const env = createEnv({
     AZURE_CLIENT_ID: z.string(),
     AZURE_CLIENT_SECRET: z.string(),
     AZURE_TENANT_ID: z.string(),
+    SERVER_URL: z.string().url(),
   },
 
   /**
@@ -55,6 +56,7 @@ export const env = createEnv({
     AZURE_CLIENT_ID: process.env.AZURE_CLIENT_ID,
     AZURE_CLIENT_SECRET: process.env.AZURE_CLIENT_SECRET,
     AZURE_TENANT_ID: process.env.AZURE_TENANT_ID,
+    SERVER_URL: process.env.SERVER_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

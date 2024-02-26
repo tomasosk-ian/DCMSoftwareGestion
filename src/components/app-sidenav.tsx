@@ -2,10 +2,13 @@ import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import {
   ActivityIcon,
   ActivitySquareIcon,
+  AlignStartVerticalIcon,
   BanknoteIcon,
+  CloudIcon,
   DollarSignIcon,
   FileUpIcon,
   FingerprintIcon,
+  GroupIcon,
   LayoutDashboardIcon,
   MessageCircleQuestionIcon,
   MessageSquareReplyIcon,
@@ -20,23 +23,26 @@ export default function AppSidenav() {
       <SidenavItem icon={<Settings2Icon />} href="/panel">
         Global
       </SidenavItem>
-      <SidenavItem icon={<UsersIcon />} href="/panel/ciudades">
+      <SidenavItem icon={<CloudIcon />} href="/panel/ciudades">
         Ciudades
       </SidenavItem>
-      <SidenavItem icon={<FingerprintIcon />} href="/panel/locales">
+      <SidenavItem icon={<AlignStartVerticalIcon />} href="/panel/locales">
         Locales
       </SidenavItem>
-      <SidenavItem icon={<DollarSignIcon />} href="/panel/tamanos">
+      <SidenavItem icon={<GroupIcon />} href="/panel/tamanos">
         Tamaños
       </SidenavItem>
+      <SidenavItem icon={<DollarSignIcon />} href="/panel/tarifas">
+        Tarifas
+      </SidenavItem>
 
-      <SidenavSeparator>Separador</SidenavSeparator>
+      {/* <SidenavSeparator>Separador</SidenavSeparator>
       <SidenavItem icon={<FingerprintIcon />} href="/panel/locales">
         Item 1
       </SidenavItem>
       <SidenavItem icon={<DollarSignIcon />} href="/panel/tamanos">
         Item 2
-      </SidenavItem>
+      </SidenavItem> */}
     </Sidenav>
   );
 }
