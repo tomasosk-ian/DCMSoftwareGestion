@@ -30,7 +30,6 @@ export default function storeSelector(props: {
                   <Card
                     className="grid w-[35vh] overflow-hidden shadow-xl"
                     onClick={() => {
-                      console.log(store.serieLocker);
                       props.setStore(store);
                     }}
                     key={store.identifier}

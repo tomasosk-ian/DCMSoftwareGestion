@@ -97,7 +97,6 @@ export function AddCityDialog() {
               }}
               onClientUploadComplete={(res) => {
                 // Do something with the response
-                console.log("Files: ", res[0]?.url);
                 // setImage(res.keys.arguments);
                 setLoading(false);
                 setImage(res[0]!.url);

@@ -1,6 +1,6 @@
 import { Title } from "~/components/title";
 import { Calendar } from "~/components/ui/calendar";
-import { format, parseISO } from "date-fns";
+import { differenceInDays, format, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -51,13 +51,15 @@ export default function DateComponent(props: {
                 selected={range}
                 onSelect={(e) => {
                   e?.from?.setDate(Date.now());
-                  const fromDate = e?.from!;
+
+                  const currentDate = new Date(); // Obtener la fecha actual
+                  currentDate.setHours(0, 0, 0, 0); // Establecer las horas, minutos, segundos y milisegundos en cero
+
+                  const fromDate = currentDate; // Utilizar la fecha actual a las 00:00
                   const toDate = e?.to!;
-                  const differenceInTime =
-                    toDate?.getTime() - fromDate?.getTime();
-                  const differenceInDays =
-                    differenceInTime / (1000 * 3600 * 24);
-                  props.setDays(differenceInDays);
+                  const days = differenceInDays(toDate, fromDate);
+
+                  props.setDays(days + 1);
                   setRange(e);
                 }}
                 numberOfMonths={2}

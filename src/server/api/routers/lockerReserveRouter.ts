@@ -10,15 +10,6 @@ export const pokemonRouter = createTRPCRouter({
     const abilityData = await pokeRes.json();
     const pokemonList = abilityData.results;
 
-    // // Imprimir la lista de Pokémon en la consola
-    // console.log("Lista de Pokémon asociados a la habilidad:");
-    // console.log(pokemonList);
-    // shold prob validate the shape with Zod
-    // const pokemonList = abilityData.results.map((pokemon: Pokemon) => {
-    //   console.log("HOLA");
-    //   // console.log(pokemon.name);
-    //   console.log(validated);
-    // });
     const validated = responseValidator.parse(pokemonList);
     return validated;
   }),
@@ -37,6 +28,7 @@ export const pokemonRouter = createTRPCRouter({
         Confirmado: z.boolean().nullable(),
         Modo: z.string().nullable(),
         Cantidad: z.number().optional(),
+        IdTransaction: z.number().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -95,7 +87,6 @@ export const pokemonRouter = createTRPCRouter({
       }
 
       const reservedBoxData = await reservationResponse.json();
-      console.log(reservedBoxData);
 
       return reservationResponse;
     }),
@@ -114,6 +105,7 @@ const reserveValidator = z.object({
   Confirmado: z.boolean().nullable(),
   Modo: z.string().nullable(),
   Cantidad: z.number().optional(),
+  IdTransaction: z.number().optional(),
 });
 export type Reserve = z.infer<typeof reserveValidator>;
 

@@ -24,7 +24,6 @@ export const sizeRouter = createTRPCRouter({
     const reservedBoxData = await sizeResponse.json();
 
     const validatedData = responseValidator.parse(reservedBoxData);
-    console.log(validatedData);
     return validatedData;
   }),
   getAvailability: publicProcedure
@@ -36,9 +35,6 @@ export const sizeRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      console.log(
-        `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
-      );
       const sizeResponse = await fetch(
         `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
       );
@@ -54,7 +50,6 @@ export const sizeRouter = createTRPCRouter({
       const reservedBoxData = await sizeResponse.json();
 
       const validatedData = responseValidator.parse(reservedBoxData);
-      console.log(validatedData);
       return validatedData;
     }),
 

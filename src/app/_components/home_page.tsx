@@ -36,6 +36,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const { mutateAsync: confirmarBox } = api.pokemon.confirmBox.useMutation();
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
+  const [reserves1, setReserves1] = useState<Reserve[]>([]);
 
   if (props.cities.length !== 0) {
     return (
@@ -53,7 +54,14 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             )}
 
             {size && (
-              <Button onClick={() => setsizeSelected(false)}>volver</Button>
+              <Button
+                onClick={() => {
+                  setsizeSelected(false);
+                  setReserves([]);
+                }}
+              >
+                volver
+              </Button>
             )}
           </Menubar>
         </div>
@@ -204,10 +212,16 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                     reserves.map(async (reserve) => {
                       for (var i = 0; i < reserve.Cantidad!; i++) {
                         const response = await reservarBox(reserve);
-                        setIdToken(response);
+                        const updatedReserve = {
+                          ...reserve,
+                          IdTransaction: response,
+                        };
+
+                        setReserves1((prevReserves) => [
+                          ...prevReserves,
+                          updatedReserve,
+                        ]);
                       }
-                      // const response = await reservarBox(reserve);
-                      // setIdToken(response);
                     });
                     setReserva(true);
                   }}
@@ -222,22 +236,24 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               <Button
                 type="submit"
                 onClick={async () => {
-                  const response = await confirmarBox({ idToken });
-                  if (response.ok) {
-                    const jsonResponse = await response.json();
-                    toast.success("Confirmación exitosa");
-                  } else {
-                    toast.error("Confirmación errónea");
-                  }
+                  reserves1.map(async (reserve) => {
+                    if (reserve.IdTransaction) {
+                      const response = await confirmarBox({
+                        idToken: reserve.IdTransaction!,
+                      });
+                    }
+                  });
+
                   setCity(null);
                   setEndDate(undefined);
                   setStore(null);
                   setsizeSelected(false);
                   setReserva(false);
+                  setReserves([]);
                 }}
               >
                 Confirmar locker
-              </Button>{" "}
+              </Button>
             </div>
           )}
         </div>
