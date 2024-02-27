@@ -115,7 +115,9 @@ export default function SizeSelector(props: {
                             <Input
                               className="flex w-10 rounded-l rounded-r bg-gray-300 text-black"
                               disabled={true}
-                              value={`${values[size.id || 0]}`}
+                              value={`${
+                                values[size.id || 0] ? values[size.id || 0] : 0
+                              }`}
                             ></Input>
                             <button
                               disabled={(values[size.id] || 0) == size.cantidad}
@@ -137,7 +139,9 @@ export default function SizeSelector(props: {
                   </div>
                 );
               })}
-            {!isLoading && (
+          </div>
+          <div className="">
+            {!isLoading && sizes?.length != 0 && (
               <Button onClick={() => applyReserve()}>APLICAR</Button>
             )}
           </div>

@@ -197,13 +197,17 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           {sizeSelected && !reserva && (
             <div>
               <UserForm />
-              <div>
+              <div className="flex flex-row-reverse px-8">
                 <Button
                   type="submit"
                   onClick={async () => {
                     reserves.map(async (reserve) => {
-                      const response = await reservarBox(reserve);
-                      setIdToken(response);
+                      for (var i = 0; i < reserve.Cantidad!; i++) {
+                        const response = await reservarBox(reserve);
+                        setIdToken(response);
+                      }
+                      // const response = await reservarBox(reserve);
+                      // setIdToken(response);
                     });
                     setReserva(true);
                   }}
@@ -214,25 +218,27 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             </div>
           )}
           {reserva && (
-            <Button
-              type="submit"
-              onClick={async () => {
-                const response = await confirmarBox({ idToken });
-                if (response.ok) {
-                  const jsonResponse = await response.json();
-                  toast.success("Confirmación exitosa");
-                } else {
-                  toast.error("Confirmación errónea");
-                }
-                setCity(null);
-                setEndDate(undefined);
-                setStore(null);
-                setsizeSelected(false);
-                setReserva(false);
-              }}
-            >
-              Confirmar locker
-            </Button>
+            <div className="flex flex-row-reverse">
+              <Button
+                type="submit"
+                onClick={async () => {
+                  const response = await confirmarBox({ idToken });
+                  if (response.ok) {
+                    const jsonResponse = await response.json();
+                    toast.success("Confirmación exitosa");
+                  } else {
+                    toast.error("Confirmación errónea");
+                  }
+                  setCity(null);
+                  setEndDate(undefined);
+                  setStore(null);
+                  setsizeSelected(false);
+                  setReserva(false);
+                }}
+              >
+                Confirmar locker
+              </Button>{" "}
+            </div>
           )}
         </div>
       </div>
