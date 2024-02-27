@@ -250,6 +250,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   setsizeSelected(false);
                   setReserva(false);
                   setReserves([]);
+                  setReserves1([]);
                 }}
               >
                 Confirmar locker
