@@ -52,7 +52,7 @@ export default function SizeSelector(props: {
             Contador: -1,
             Confirmado: false,
             Modo: "Por fecha",
-            Cantidad: cantidad - 1,
+            Cantidad: cantidad,
           }),
         );
 
@@ -115,13 +115,13 @@ export default function SizeSelector(props: {
                               className="flex w-10 rounded-l rounded-r bg-gray-300 text-black"
                               disabled={true}
                               value={`${
-                                values[size.id || 0]
-                                  ? values[size.id || 0]! - 1
-                                  : 0
+                                values[size.id || 0] ? values[size.id]! : 0
                               }`}
                             ></Input>
                             <button
-                              disabled={(values[size.id] || 0) == size.cantidad}
+                              disabled={
+                                (values[size.id] || 0) == size.cantidad! - 1
+                              }
                               onClick={() =>
                                 setValues({
                                   ...values,
