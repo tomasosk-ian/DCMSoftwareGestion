@@ -14,6 +14,7 @@ export default function DateComponent(props: {
   setDays: (days: number) => void;
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
+  const [date, setDate] = useState<Date>();
 
   function getDays() {
     if (range) {
@@ -50,15 +51,12 @@ export default function DateComponent(props: {
                 mode="range"
                 selected={range}
                 onSelect={(e) => {
-                  e?.from?.setDate(Date.now());
-
+                  // e?.from?.setDate(Date.now());
                   const currentDate = new Date(); // Obtener la fecha actual
                   currentDate.setHours(0, 0, 0, 0); // Establecer las horas, minutos, segundos y milisegundos en cero
-
                   const fromDate = currentDate; // Utilizar la fecha actual a las 00:00
                   const toDate = e?.to!;
                   const days = differenceInDays(toDate, fromDate);
-
                   props.setDays(days + 1);
                   setRange(e);
                 }}
