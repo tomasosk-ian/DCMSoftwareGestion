@@ -38,7 +38,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
-
   if (props.cities.length !== 0) {
     return (
       <div className="container">
@@ -252,12 +251,18 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                       });
                     }
                   });
-
                   setCity(null);
-                  setEndDate(undefined);
                   setStore(null);
+                  setStores(undefined);
+                  setSize(null);
                   setsizeSelected(false);
+                  setCreationDate("");
+                  setStartDate("");
+                  setEndDate("");
+                  setIdLocker(0);
                   setReserva(false);
+                  setIdToken(0);
+                  setDays(0);
                   setReserves([]);
                   setReserves1([]);
                 }}

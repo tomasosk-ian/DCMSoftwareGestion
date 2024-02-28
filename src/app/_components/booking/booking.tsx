@@ -108,7 +108,7 @@ export default function Booking(props: {
                     <Label>Entrega desde </Label>
                   </div>
                   <div className="grid-cols-6">
-                    <Label>Entrega hasta </Label>
+                    <Label>Recogida hasta </Label>
                   </div>
                 </div>
                 <div className="grid-cols-6  items-end">
@@ -167,6 +167,9 @@ export default function Booking(props: {
             </div>
           </div>
         </div>
+      </div>
+      <div className="relative">
+        <div className="h-4 border-b-2 border-gray-400 bg-gray-300"></div>
       </div>
     </div>
   );
