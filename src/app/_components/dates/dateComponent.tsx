@@ -59,6 +59,8 @@ export default function DateComponent(props: {
                   const days = differenceInDays(toDate, fromDate);
                   props.setDays(days + 1);
                   setRange(e);
+                  e?.from?.setDate(Date.now());
+                  setRange(e);
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>

@@ -120,7 +120,7 @@ export default function SizeSelector(props: {
                             ></Input>
                             <button
                               disabled={
-                                (values[size.id] || 0) == size.cantidad! - 1
+                                (values[size.id] || 0) == size.cantidad!
                               }
                               onClick={() =>
                                 setValues({
