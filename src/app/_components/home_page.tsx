@@ -19,6 +19,17 @@ import { format } from "date-fns";
 import { Title } from "~/components/title";
 import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 
 export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [city, setCity] = useState<City | null>(null);
@@ -241,34 +252,53 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           )}
           {reserva && (
             <div className="flex flex-row-reverse">
-              <Button
-                type="submit"
-                onClick={async () => {
-                  reserves1.map(async (reserve) => {
-                    if (reserve.IdTransaction) {
-                      const response = await confirmarBox({
-                        idToken: reserve.IdTransaction!,
-                      });
-                    }
-                  });
-                  setCity(null);
-                  setStore(null);
-                  setStores(undefined);
-                  setSize(null);
-                  setsizeSelected(false);
-                  setCreationDate("");
-                  setStartDate("");
-                  setEndDate("");
-                  setIdLocker(0);
-                  setReserva(false);
-                  setIdToken(0);
-                  setDays(0);
-                  setReserves([]);
-                  setReserves1([]);
-                }}
-              >
-                Confirmar locker
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <Button>Confirmar pago</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Va a confirmar el pago de la reserva.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction>
+                      {" "}
+                      <Button
+                        type="submit"
+                        onClick={async () => {
+                          reserves1.map(async (reserve) => {
+                            if (reserve.IdTransaction) {
+                              const response = await confirmarBox({
+                                idToken: reserve.IdTransaction!,
+                              });
+                            }
+                          });
+                          setCity(null);
+                          setStore(null);
+                          setStores(undefined);
+                          setSize(null);
+                          setsizeSelected(false);
+                          setCreationDate("");
+                          setStartDate("");
+                          setEndDate("");
+                          setIdLocker(0);
+                          setReserva(false);
+                          setIdToken(0);
+                          setDays(0);
+                          setReserves([]);
+                          setReserves1([]);
+                        }}
+                      >
+                        Confirmar
+                      </Button>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </div>
