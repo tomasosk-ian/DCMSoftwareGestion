@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Title } from "~/components/title";
 import UserForm from "./user/userForm";
+import Booking from "./booking/booking";
 
 export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [city, setCity] = useState<City | null>(null);
@@ -204,7 +205,15 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           )}
           {sizeSelected && !reserva && (
             <div>
-              <UserForm />
+              <div className="grid grid-cols-2 gap-8 p-8">
+                <UserForm />
+                <Booking
+                  store={store!}
+                  startDate={startDate!}
+                  endDate={endDate!}
+                  reserves={reserves!}
+                />
+              </div>
               <div className="flex flex-row-reverse px-8">
                 <Button
                   type="submit"

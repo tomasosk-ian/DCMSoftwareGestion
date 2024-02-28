@@ -51,16 +51,13 @@ export default function DateComponent(props: {
                 mode="range"
                 selected={range}
                 onSelect={(e) => {
-                  // e?.from?.setDate(Date.now());
-                  const currentDate = new Date(); // Obtener la fecha actual
-                  currentDate.setHours(0, 0, 0, 0); // Establecer las horas, minutos, segundos y milisegundos en cero
-                  const fromDate = currentDate; // Utilizar la fecha actual a las 00:00
+                  const currentDate = new Date();
+                  currentDate.setHours(0, 0, 0, 0);
+                  const fromDate = currentDate;
                   const toDate = e?.to!;
                   const days = differenceInDays(toDate, fromDate);
                   props.setDays(days + 1);
                   setRange(e);
-                  // e?.from?.setDate(Date.now());
-                  // setRange(e);
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>
