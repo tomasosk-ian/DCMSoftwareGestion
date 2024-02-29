@@ -30,6 +30,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
+
+export const Icons = {
+  spinner: Loader2,
+};
 
 export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [city, setCity] = useState<City | null>(null);
@@ -49,6 +54,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
+  const [loadingPay, setLoadingPay] = useState<boolean>(false);
   if (props.cities.length !== 0) {
     return (
       <div className="container">
@@ -269,52 +275,60 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           )}
           {reserva && (
             <div className="flex flex-row-reverse">
-              <AlertDialog>
-                <AlertDialogTrigger>
-                  <Button>Confirmar pago</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Va a confirmar el pago de la reserva.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction>
-                      <Button
-                        type="submit"
-                        onClick={async () => {
-                          reserves1.map(async (reserve) => {
-                            if (reserve.IdTransaction) {
-                              const response = await confirmarBox({
-                                idToken: reserve.IdTransaction!,
-                              });
-                            }
-                          });
-                          setCity(null);
-                          setStore(null);
-                          setStores(undefined);
-                          setSize(null);
-                          setsizeSelected(false);
-                          setCreationDate("");
-                          setStartDate("");
-                          setEndDate("");
-                          setIdLocker(0);
-                          setReserva(false);
-                          setIdToken(0);
-                          setDays(0);
-                          setReserves([]);
-                          setReserves1([]);
-                        }}
-                      >
-                        Confirmar
-                      </Button>
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
+              {!loadingPay && (
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <Button>Confirmar pago</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Va a confirmar el pago de la reserva.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction>
+                        <Button
+                          type="submit"
+                          onClick={async () => {
+                            setLoadingPay(true); // Activar la carga
+                            await new Promise((f) => setTimeout(f, 5000));
+
+                            reserves1.map(async (reserve) => {
+                              if (reserve.IdTransaction) {
+                                const response = await confirmarBox({
+                                  idToken: reserve.IdTransaction!,
+                                });
+                              }
+                            });
+
+                            setCity(null);
+                            setStore(null);
+                            setStores(undefined);
+                            setSize(null);
+                            setsizeSelected(false);
+                            setCreationDate("");
+                            setStartDate("");
+                            setEndDate("");
+                            setIdLocker(0);
+                            setReserva(false);
+                            setIdToken(0);
+                            setDays(0);
+                            setReserves([]);
+                            setReserves1([]);
+                            setLoadingPay(false);
+                          }}
+                        >
+                          Confirmar pago
+                        </Button>
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
           )}
         </div>
