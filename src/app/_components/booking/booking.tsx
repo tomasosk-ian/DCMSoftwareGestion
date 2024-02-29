@@ -30,8 +30,21 @@ export default function Booking(props: {
   const [reserveGroupBySize, setReserveGroupBySize] = useState<
     Record<number, Reserve>
   >({});
+  console.log(props.reserves);
 
-  // Lógica para inicializar reserveGroupBySize
+  const [count, setCount] = useState<Record<number, number>>({});
+  useEffect(() => {
+    const counts: Record<number, number> = {};
+
+    props.reserves.forEach((reserve) => {
+      if (reserve.IdSize !== undefined) {
+        counts[reserve.IdSize!] = (counts[reserve.IdSize!] || 0) + 1;
+      }
+    });
+
+    setCount(counts);
+  }, [props.reserves]);
+  console.log(count);
   useEffect(() => {
     const groupedReserves: Record<number, Reserve> = {};
     props.reserves.forEach((reserve) => {
@@ -102,7 +115,7 @@ export default function Booking(props: {
           <CardHeader className="">
             <CardTitle className="text-2xl"> {props.store.name}</CardTitle>
             <CardDescription>
-              <div className=" flex justify-between pt-2">
+              <div className=" flex justify-between pb-3 pt-2">
                 <div className="right-64 grid-cols-6">
                   <div className="grid-cols-6">
                     <Label>Entrega desde </Label>
@@ -119,6 +132,31 @@ export default function Booking(props: {
                     <Label>{formatDateToTextDate(props.endDate)}</Label>
                   </div>
                 </div>
+              </div>
+              <hr className=" h-1 w-full rounded border-0 bg-gray-400 dark:bg-gray-700 md:my-1" />
+              <div>
+                {sizes?.map((size: Size) => {
+                  if (getSizeNameById(size.id!)) {
+                    return (
+                      <div className="flex justify-between gap-10 pr-28 ">
+                        <div className=" pt-2">
+                          <Title className=" font-bold">
+                            Taquilla {getSizeNameById(size.id!)}
+                          </Title>
+                        </div>
+                        <div className="flex-col pt-2">
+                          {props.reserves.find(
+                            (reserve) => reserve.IdSize === size.id,
+                          )?.Cantidad == 1
+                            ? "1 unidad"
+                            : `${props.reserves.find(
+                                (reserve) => reserve.IdSize === size.id,
+                              )?.Cantidad} unidades`}
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
               </div>
             </CardDescription>
           </CardHeader>

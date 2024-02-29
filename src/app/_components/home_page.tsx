@@ -173,10 +173,24 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             )}
 
             {sizeSelected && !reserva && (
-              <Button onClick={() => setsizeSelected(false)}>volver</Button>
+              <Button
+                onClick={() => {
+                  setsizeSelected(false);
+                  setReserves([]);
+                  setReserves1([]);
+                }}
+              >
+                volver
+              </Button>
             )}
             {reserva && (
-              <Button onClick={() => setReserva(false)}>volver</Button>
+              <Button
+                onClick={() => {
+                  setReserva(false);
+                }}
+              >
+                volver
+              </Button>
             )}
           </Menubar>
         </div>
@@ -228,6 +242,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 <Button
                   type="submit"
                   onClick={async () => {
+                    setReserves1([]);
+                    setReserves([]);
+
                     reserves.map(async (reserve) => {
                       for (var i = 0; i < reserve.Cantidad!; i++) {
                         const response = await reservarBox(reserve);
@@ -266,7 +283,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction>
-                      {" "}
                       <Button
                         type="submit"
                         onClick={async () => {
