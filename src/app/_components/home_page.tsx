@@ -16,7 +16,7 @@ import DateComponent from "./dates/dateComponent";
 import { ZodNull, nullable } from "zod";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Title } from "~/components/title";
+import { Title } from "@radix-ui/react-toast";
 import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
 import {
@@ -31,6 +31,8 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
+import { Label } from "~/components/ui/label";
+import Success from "./success/success";
 
 export const Icons = {
   spinner: Loader2,
@@ -47,6 +49,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [endDate, setEndDate] = useState<string>();
   const [idLocker, setIdLocker] = useState<number>(0);
   const [reserva, setReserva] = useState<boolean>(false);
+  const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [idToken, setIdToken] = useState<number>(0);
   const [days, setDays] = useState<number>(0);
   const { mutateAsync: reservarBox } = api.pokemon.reserveBox.useMutation();
@@ -55,6 +58,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
+
   if (props.cities.length !== 0) {
     return (
       <div className="container">
@@ -233,7 +237,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               endDate={endDate!}
             />
           )}
-          {sizeSelected && !reserva && (
+          {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
+
+          {sizeSelected && !reserva && !loadingPay && (
             <div>
               <div className="grid grid-cols-2 gap-8 p-8">
                 <UserForm />
@@ -265,6 +271,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                         ]);
                       }
                     });
+                    setLoadingPay(true);
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+                    setLoadingPay(false);
+
                     setReserva(true);
                   }}
                 >
@@ -273,9 +283,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               </div>
             </div>
           )}
-          {reserva && (
+          {reserva && !pagoOk && !loadingPay && (
             <div className="flex flex-row-reverse">
-              {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
               {!loadingPay && (
                 <AlertDialog>
                   <AlertDialogTrigger>
@@ -294,32 +303,26 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                         <Button
                           type="submit"
                           onClick={async () => {
-                            setLoadingPay(true); // Activar la carga
-                            await new Promise((f) => setTimeout(f, 5000));
-
-                            reserves1.map(async (reserve) => {
-                              if (reserve.IdTransaction) {
-                                const response = await confirmarBox({
-                                  idToken: reserve.IdTransaction!,
-                                });
-                              }
-                            });
-
-                            setCity(null);
-                            setStore(null);
-                            setStores(undefined);
-                            setSize(null);
-                            setsizeSelected(false);
-                            setCreationDate("");
-                            setStartDate("");
-                            setEndDate("");
-                            setIdLocker(0);
-                            setReserva(false);
-                            setIdToken(0);
-                            setDays(0);
-                            setReserves([]);
-                            setReserves1([]);
+                            setLoadingPay(true);
+                            console.log(reserves1);
+                            const updatedReserves1 = await Promise.all(
+                              reserves1.map(async (reserve) => {
+                                if (reserve.IdTransaction) {
+                                  console.log(reserve.IdTransaction);
+                                  const response = await confirmarBox({
+                                    idToken: reserve.IdTransaction!,
+                                  });
+                                  return {
+                                    ...reserve,
+                                    Token1: response, // Asignar el token devuelto por la API
+                                  };
+                                }
+                                return reserve;
+                              }),
+                            );
+                            setReserves1(updatedReserves1);
                             setLoadingPay(false);
+                            setPagoOk(true);
                           }}
                         >
                           Confirmar pago
@@ -329,6 +332,34 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   </AlertDialogContent>
                 </AlertDialog>
               )}
+            </div>
+          )}
+          {pagoOk && (
+            <div>
+              <Success reserves={reserves1} />
+
+              <Button
+                onClick={async () => {
+                  setCity(null);
+                  setStore(null);
+                  setStores(undefined);
+                  setSize(null);
+                  setsizeSelected(false);
+                  setCreationDate("");
+                  setStartDate("");
+                  setEndDate("");
+                  setIdLocker(0);
+                  setReserva(false);
+                  setIdToken(0);
+                  setDays(0);
+                  setReserves([]);
+                  setReserves1([]);
+                  setLoadingPay(false);
+                  setPagoOk(false);
+                }}
+              >
+                Cerrar
+              </Button>
             </div>
           )}
         </div>

@@ -85,10 +85,8 @@ export const pokemonRouter = createTRPCRouter({
         // Throw an error or return the error message
         return errorResponse.message || "Unknown error";
       }
-
       const reservedBoxData = await reservationResponse.json();
-
-      return reservationResponse;
+      return reservedBoxData;
     }),
 });
 
