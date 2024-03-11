@@ -19,6 +19,7 @@ import { Size } from "~/server/api/routers/sizes";
 import { api } from "~/trpc/react";
 import { number } from "zod";
 import { useEffect, useState } from "react";
+import { Fee } from "~/server/api/routers/fee";
 
 export default function Booking(props: {
   store: Store;
@@ -27,11 +28,13 @@ export default function Booking(props: {
   reserves: Reserve[];
 }) {
   const { data: sizes, isLoading } = api.size.get.useQuery();
+  const { data: fees } = api.fee.get.useQuery();
+  const [total, setTotal] = useState<number>();
+  const [subTotal, setSubTotal] = useState<number>(0);
   const [reserveGroupBySize, setReserveGroupBySize] = useState<
     Record<number, Reserve>
   >({});
-  console.log(props.reserves);
-
+  const [prices, setPrices] = useState<Record<number, number>>({});
   const [count, setCount] = useState<Record<number, number>>({});
   useEffect(() => {
     const counts: Record<number, number> = {};
@@ -44,7 +47,6 @@ export default function Booking(props: {
 
     setCount(counts);
   }, [props.reserves]);
-  console.log(count);
   useEffect(() => {
     const groupedReserves: Record<number, Reserve> = {};
     props.reserves.forEach((reserve) => {
@@ -53,12 +55,32 @@ export default function Booking(props: {
     setReserveGroupBySize(groupedReserves);
   }, [props.reserves]);
 
+  useEffect(() => {
+    if (fees) {
+      let totalPrice = 0; // Variable local para llevar un seguimiento de la suma total
+
+      const prices: Record<number, number> = {};
+      props.reserves.forEach((reserve) => {
+        const days = differenceInDays(
+          reserve?.FechaFin!,
+          reserve?.FechaCreacion!,
+        );
+
+        const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
+        prices[reserve.IdSize!] = price;
+
+        totalPrice += price + price * reserve.Cantidad! * days * 0.43; // Sumar al total local
+      });
+
+      setTotal(totalPrice);
+      setSubTotal(totalPrice);
+
+      setPrices(prices);
+    }
+  }, [fees]);
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
-
-    // Formatear la fecha como "ddd DD MMMM"
     const formattedDate = format(date, "eee dd MMMM", { locale: es });
-
     return formattedDate;
   }
 
@@ -77,7 +99,6 @@ export default function Booking(props: {
       (reserve) => reserve.IdSize === size.id,
     );
     const days = differenceInDays(reserve?.FechaFin!, reserve?.FechaCreacion!);
-    console.log(reserve?.FechaCreacion!);
     return (
       <>
         <div className="flex justify-between">
@@ -95,11 +116,11 @@ export default function Booking(props: {
           </div>
           <div className="grid-cols-6 ">
             <div className="grid-cols-6">
-              <Label>5 pesos</Label>
+              <Label>{prices[size.id]!} pesos</Label>
             </div>
             {days > 1 && (
               <div className="grid-cols-6">
-                <Label>6 pesos</Label>
+                <Label>{prices[size.id]! * days * 0.43} pesos</Label>
               </div>
             )}
           </div>
@@ -185,7 +206,7 @@ export default function Booking(props: {
             </div>
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
-                <Label>11 pesos</Label>
+                <Label>{subTotal} pesos</Label>
               </div>
             </div>
           </div>
@@ -200,7 +221,7 @@ export default function Booking(props: {
             </div>
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
-                <Label>11 pesos</Label>
+                <Label>{total} pesos</Label>
               </div>
             </div>
           </div>

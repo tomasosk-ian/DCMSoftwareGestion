@@ -87,13 +87,10 @@ export default function SizeSelector(props: {
                     >
                       <CardHeader>
                         <CardTitle> {size.nombre}</CardTitle>
-                        <CardDescription>
-                          Seleccione el tamaño de su locker.
-                        </CardDescription>
                       </CardHeader>
                       <img
-                        className="aspect-video object-cover"
-                        src="/placeholder.svg"
+                        className="aspect-auto object-cover"
+                        src={size.image ? size.image! : "/placeholder.svg"}
                       ></img>
                       <CardFooter className="bg-green-100 backdrop-blur-sm">
                         <div className="flex pt-5">

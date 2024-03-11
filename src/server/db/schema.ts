@@ -1,3 +1,4 @@
+import { SizeIcon } from "@radix-ui/react-icons";
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -215,6 +216,7 @@ export const feeRelations = relations(feeData, ({ one }) => ({
     references: [coinData.identifier],
   }),
 }));
+
 export const coinData = mysqlTable(
   "coindate",
   {
@@ -224,5 +226,23 @@ export const coinData = mysqlTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const sizes = mysqlTable(
+  "sizes",
+  {
+    id: int("id"),
+    ancho: int("ancho"),
+    alto: int("alto"),
+    cantidad: int("cantidad"),
+    cantidadSeleccionada: int("cantidadSeleccionada"),
+    profundidad: int("profundidad"),
+    nombre: varchar("nombre", { length: 255 }),
+    tarifa: varchar("tarifa", { length: 255 }),
+    image: varchar("imagen", { length: 255 }),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.id),
   }),
 );

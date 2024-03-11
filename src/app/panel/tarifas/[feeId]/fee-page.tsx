@@ -2,18 +2,13 @@
 
 import { CheckIcon, Loader2 } from "lucide-react";
 import { MouseEventHandler, useState } from "react";
-import AppSidenav from "~/components/app-sidenav";
-import AppLayout from "~/components/applayout";
 import LayoutContainer from "~/components/layout-container";
-import { List, ListTile } from "~/components/list";
-import { NavUserData } from "~/components/nav-user-section";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
-import { RouterOutputs } from "~/trpc/shared";
 import {
   Accordion,
   AccordionContent,
@@ -33,10 +28,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import { City } from "~/server/api/routers/city";
 import { toast } from "sonner";
-import { UploadButton } from "~/utils/uploadthing";
-import { Store } from "~/server/api/routers/store";
 import {
   Select,
   SelectContent,
@@ -46,21 +38,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Locker } from "~/server/api/routers/lockers";
 import { Fee } from "~/server/api/routers/fee";
 import { Size } from "~/server/api/routers/sizes";
 
 export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
-  const [loading, setLoading] = useState(false);
-  const { mutateAsync: renameCoin, isLoading } = api.fee.change.useMutation();
-  const [image, setImage] = useState<string>("");
+  const { mutateAsync: renameCoin } = api.fee.change.useMutation();
   const router = useRouter();
 
   const [description, setDescription] = useState(props.fee.description!);
   const [coin, setCoin] = useState(props.fee.coin!);
   const [size, setSize] = useState(props.fee.size!);
   const [value, setValue] = useState<number>(props.fee.value!);
-  const selectedSize = await api.size.getById.useQuery({
+  const selectedSize = api.size.getById.useQuery({
     sizeId: props.fee.size!,
   });
   async function handleChange() {
@@ -84,12 +73,8 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Modificar tarifa</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
-            {isLoading ? (
-              <Loader2 className="mr-2 animate-spin" />
-            ) : (
-              <CheckIcon className="mr-2" />
-            )}
+          <Button onClick={handleChange}>
+            <CheckIcon className="mr-2" />
             Aplicar
           </Button>
         </div>
@@ -133,7 +118,7 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
                       }}
                     >
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder={selectedSize.data.nombre} />
+                        <SelectValue placeholder={selectedSize?.data?.nombre} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -141,7 +126,11 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
 
                           {props.sizes.map((e) => {
                             return (
-                              <SelectItem key={e.id} value={`${e.id}`}>
+                              <SelectItem
+                                disabled={e.tarifa != null}
+                                key={e.id}
+                                value={`${e.id}`}
+                              >
                                 {e.nombre}
                               </SelectItem>
                             );

@@ -336,7 +336,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           )}
           {pagoOk && (
             <div>
-              <Success reserves={reserves1} />
+              <Success reserves={reserves1} store={store!} />
 
               <Button
                 onClick={async () => {

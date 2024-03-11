@@ -1,12 +1,15 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { env } from "~/env";
+import { createId } from "~/lib/utils";
 
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { db, schema } from "~/server/db";
+import { sizes } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 
 export const sizeRouter = createTRPCRouter({
@@ -24,6 +27,35 @@ export const sizeRouter = createTRPCRouter({
     const reservedBoxData = await sizeResponse.json();
 
     const validatedData = responseValidator.parse(reservedBoxData);
+    await Promise.all(
+      validatedData.map(async (v) => {
+        const fee = await db.query.feeData.findFirst({
+          where: eq(schema.feeData.size, v.id),
+        });
+        v.tarifa = fee?.identifier;
+
+        const existingSize = await db.query.sizes.findFirst({
+          where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
+        });
+
+        if (existingSize) {
+          // Si el tamaño ya existe, actualiza los datos
+          await db
+            .update(schema.sizes)
+            .set({
+              ...v,
+            })
+            .where(eq(schema.sizes.id, v.id));
+        } else {
+          // Si el tamaño no existe, insértalo
+          await db.insert(schema.sizes).values({
+            ...v,
+          });
+        }
+      }),
+    );
+
+    // });
     return validatedData;
   }),
   getAvailability: publicProcedure
@@ -50,6 +82,34 @@ export const sizeRouter = createTRPCRouter({
       const reservedBoxData = await sizeResponse.json();
 
       const validatedData = responseValidator.parse(reservedBoxData);
+      await Promise.all(
+        validatedData.map(async (v) => {
+          const fee = await db.query.feeData.findFirst({
+            where: eq(schema.feeData.size, v.id),
+          });
+          v.tarifa = fee?.identifier;
+
+          const existingSize = await db.query.sizes.findFirst({
+            where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
+          });
+
+          if (existingSize) {
+            // Si el tamaño ya existe, actualiza los datos
+            await db
+              .update(schema.sizes)
+              .set({
+                ...v,
+              })
+              .where(eq(schema.sizes.id, v.id));
+            v.image = existingSize.image;
+          } else {
+            // Si el tamaño no existe, insértalo
+            await db.insert(schema.sizes).values({
+              ...v,
+            });
+          }
+        }),
+      );
       return validatedData;
     }),
 
@@ -84,6 +144,20 @@ export const sizeRouter = createTRPCRouter({
 
       return size;
     }),
+
+  changeImage: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        image: z.string().nullable(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.db
+        .update(sizes)
+        .set({ image: input.image })
+        .where(eq(sizes.id, input.id));
+    }),
 });
 
 const sizeValidator = z.object({
@@ -94,6 +168,8 @@ const sizeValidator = z.object({
   nombre: z.string().nullable(),
   cantidad: z.number().nullable().optional(),
   cantidadSeleccionada: z.number().optional().default(0),
+  tarifa: z.string().nullable().optional(),
+  image: z.string().nullable().optional(),
 });
 export type Size = z.infer<typeof sizeValidator>;
 

@@ -1,6 +1,6 @@
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
-import StorePage from "./store-page";
+import SizePage from "./size-page";
 
 export default async function Channel(props: { params: { sizeId: string } }) {
   const size = await api.size.getById.query({
@@ -11,7 +11,6 @@ export default async function Channel(props: { params: { sizeId: string } }) {
   if (!size) {
     return <Title>No se encontró el tamaño</Title>;
   }
-  return <Title>{size.nombre}</Title>;
 
-  //   return <StorePage store={store} cities={cities} lockers={lockers} />;
+  return <SizePage size={size} />;
 }

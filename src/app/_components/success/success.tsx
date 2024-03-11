@@ -16,9 +16,16 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
+import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
+import { api } from "~/trpc/react";
 
-export default function Success(props: { reserves: Reserve[] }) {
+export default function Success(props: { reserves: Reserve[]; store: Store }) {
+  const { data: sizes, isLoading } = api.size.get.useQuery();
+  function getSize(idSize: number) {
+    const size = sizes.find((s: Size) => s.id === idSize);
+    return size.nombre;
+  }
   return (
     <main className="flex justify-center pb-5">
       {props.reserves && (
@@ -30,6 +37,10 @@ export default function Success(props: { reserves: Reserve[] }) {
           </div>
           <div className="max-w-lg rounded-b-lg border border-black py-2">
             <div className="gap-4">
+              <div className="flex justify-between gap-4 px-5 py-2">
+                <div className="font-bold">Local</div>
+                <div className="font-bold">{props.store.name}</div>
+              </div>
               <div className="flex justify-between gap-4 px-5 py-2">
                 <div className="font-bold">Número de orden</div>
                 <div className="font-bold">123456</div>
@@ -47,7 +58,7 @@ export default function Success(props: { reserves: Reserve[] }) {
                   key={index}
                   className="flex justify-between gap-4 px-5 py-2"
                 >
-                  <div className="">Token</div>
+                  <div className="">Token ({getSize(r.IdSize!)})</div>
                   <div className="">{r.Token1}</div>
                 </div>
               ))}

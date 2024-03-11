@@ -31,6 +31,19 @@ export const feeRouter = createTRPCRouter({
 
       return channel;
     }),
+  getBySize: publicProcedure
+    .input(
+      z.object({
+        idSize: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const channel = await db.query.feeData.findFirst({
+        where: eq(schema.feeData.size, input.idSize),
+      });
+
+      return channel;
+    }),
   create: publicProcedure
     .input(
       z.object({
@@ -38,6 +51,7 @@ export const feeRouter = createTRPCRouter({
         value: z.number().nullable(),
         coin: z.string().nullable(),
         size: z.number().nullable(),
+        fee: z.string().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
