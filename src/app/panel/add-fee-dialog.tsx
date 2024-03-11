@@ -85,6 +85,14 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
             />
           </div>
           <div>
+            <Input
+              id="name"
+              placeholder="Valor"
+              value={value}
+              onChange={(e) => setValue(parseInt(e.target.value))}
+            />
+          </div>
+          <div>
             <Label className="text-right">Moneda</Label>
             <Select
               onValueChange={(value: string) => {

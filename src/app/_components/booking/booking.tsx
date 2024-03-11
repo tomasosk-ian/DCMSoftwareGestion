@@ -20,6 +20,7 @@ import { api } from "~/trpc/react";
 import { number } from "zod";
 import { useEffect, useState } from "react";
 import { Fee } from "~/server/api/routers/fee";
+import { Coin } from "~/server/api/routers/coin";
 
 export default function Booking(props: {
   store: Store;
@@ -31,11 +32,13 @@ export default function Booking(props: {
   const { data: fees } = api.fee.get.useQuery();
   const [total, setTotal] = useState<number>();
   const [subTotal, setSubTotal] = useState<number>(0);
+  const [coin, setCoin] = useState<string>("");
   const [reserveGroupBySize, setReserveGroupBySize] = useState<
     Record<number, Reserve>
   >({});
   const [prices, setPrices] = useState<Record<number, number>>({});
   const [count, setCount] = useState<Record<number, number>>({});
+  const coins = api.coin.get.useQuery();
   useEffect(() => {
     const counts: Record<number, number> = {};
 
@@ -67,6 +70,12 @@ export default function Booking(props: {
         );
 
         const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
+        const coinId = fees?.find((s: Fee) => s.size === reserve.IdSize)?.coin!;
+        if (coins)
+          setCoin(
+            coins?.data?.find((s: Coin) => s.identifier === coinId)
+              ?.description!,
+          );
         prices[reserve.IdSize!] = price;
 
         totalPrice += price + price * reserve.Cantidad! * days * 0.43; // Sumar al total local
@@ -116,11 +125,15 @@ export default function Booking(props: {
           </div>
           <div className="grid-cols-6 ">
             <div className="grid-cols-6">
-              <Label>{prices[size.id]!} pesos</Label>
+              <Label>
+                {prices[size.id]!} {coin}
+              </Label>
             </div>
             {days > 1 && (
               <div className="grid-cols-6">
-                <Label>{prices[size.id]! * days * 0.43} pesos</Label>
+                <Label>
+                  {prices[size.id]! * days * 0.43} {coin}
+                </Label>
               </div>
             )}
           </div>
@@ -206,7 +219,9 @@ export default function Booking(props: {
             </div>
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
-                <Label>{subTotal} pesos</Label>
+                <Label>
+                  {subTotal} {coin}
+                </Label>
               </div>
             </div>
           </div>
@@ -221,7 +236,9 @@ export default function Booking(props: {
             </div>
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
-                <Label>{total} pesos</Label>
+                <Label>
+                  {total} {coin}
+                </Label>
               </div>
             </div>
           </div>

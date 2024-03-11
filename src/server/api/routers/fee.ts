@@ -51,7 +51,7 @@ export const feeRouter = createTRPCRouter({
         value: z.number().nullable(),
         coin: z.string().nullable(),
         size: z.number().nullable(),
-        fee: z.string().nullable(),
+        fee: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
