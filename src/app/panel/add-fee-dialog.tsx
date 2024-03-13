@@ -39,8 +39,9 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [coin, setCoin] = useState("");
-  const [size, setSize] = useState<number>(0);
-  const [value, setValue] = useState<number>(0);
+  const [size, setSize] = useState<number>();
+  const [value, setValue] = useState<number>();
+  const [discount, setDiscount] = useState<number>();
 
   const router = useRouter();
 
@@ -51,6 +52,7 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
         coin,
         value,
         size,
+        discount,
       });
 
       toast.success("Local creado correctamente");
@@ -80,7 +82,6 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
             <Input
               id="name"
               placeholder="Descripción"
-              value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
@@ -88,8 +89,18 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
             <Input
               id="name"
               placeholder="Valor"
-              value={value}
               onChange={(e) => setValue(parseInt(e.target.value))}
+            />
+          </div>
+          <div>
+            <Input
+              id="discount"
+              placeholder="Descuento"
+              type="number"
+              onChange={(e) => {
+                const intValue = parseInt(e.target.value);
+                setDiscount(intValue);
+              }}
             />
           </div>
           <div>
@@ -133,7 +144,11 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
                   <SelectLabel>Seleccione un tamaño</SelectLabel>
                   {props.sizes.map((e) => {
                     return (
-                      <SelectItem key={e.id} value={`${e.id}`}>
+                      <SelectItem
+                        disabled={e.tarifa != null}
+                        key={e.id}
+                        value={`${e.id}`}
+                      >
                         {e.nombre}
                       </SelectItem>
                     );

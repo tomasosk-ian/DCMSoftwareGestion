@@ -1,4 +1,3 @@
-import { SizeIcon } from "@radix-ui/react-icons";
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -204,6 +203,7 @@ export const feeData = mysqlTable(
     coin: varchar("coin", { length: 255 }),
     size: int("size"),
     value: float("value"),
+    discount: float("discount"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
@@ -216,7 +216,6 @@ export const feeRelations = relations(feeData, ({ one }) => ({
     references: [coinData.identifier],
   }),
 }));
-
 export const coinData = mysqlTable(
   "coindate",
   {
@@ -229,18 +228,33 @@ export const coinData = mysqlTable(
   }),
 );
 
+export const clients = mysqlTable(
+  "clients",
+  {
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }),
+    surname: varchar("surname", { length: 255 }),
+    email: varchar("email", { length: 255 }),
+    prefijo: int("prefijo"),
+    telefono: int("telefono"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
 export const sizes = mysqlTable(
   "sizes",
   {
-    id: int("id"),
-    ancho: int("ancho"),
+    id: int("id").notNull(),
     alto: int("alto"),
-    cantidad: int("cantidad"),
-    cantidadSeleccionada: int("cantidadSeleccionada"),
+    ancho: int("ancho"),
     profundidad: int("profundidad"),
     nombre: varchar("nombre", { length: 255 }),
+    cantidad: int("cantidad"),
+    cantidadSeleccionada: int("cantidadSeleccionada"),
     tarifa: varchar("tarifa", { length: 255 }),
-    image: varchar("imagen", { length: 255 }),
+    image: varchar("image", { length: 255 }),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.id),

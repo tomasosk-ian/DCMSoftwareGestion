@@ -38,6 +38,7 @@ export default function Booking(props: {
   >({});
   const [prices, setPrices] = useState<Record<number, number>>({});
   const [count, setCount] = useState<Record<number, number>>({});
+  const [discount, setDiscount] = useState<number>();
   const coins = api.coin.get.useQuery();
   useEffect(() => {
     const counts: Record<number, number> = {};
@@ -70,6 +71,9 @@ export default function Booking(props: {
         );
 
         const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
+        setDiscount(
+          fees?.find((s: Fee) => s.size === reserve.IdSize)?.discount!,
+        );
         const coinId = fees?.find((s: Fee) => s.size === reserve.IdSize)?.coin!;
         if (coins)
           setCoin(
@@ -78,15 +82,16 @@ export default function Booking(props: {
           );
         prices[reserve.IdSize!] = price;
 
-        totalPrice += price + price * reserve.Cantidad! * days * 0.43; // Sumar al total local
+        totalPrice +=
+          price + (price * reserve.Cantidad! * days * (100 - discount!)) / 100; // Sumar al total local
+        totalPrice = parseFloat(totalPrice.toFixed(2));
       });
-
       setTotal(totalPrice);
       setSubTotal(totalPrice);
 
       setPrices(prices);
     }
-  }, [fees]);
+  }, [fees, discount]);
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM", { locale: es });
@@ -116,10 +121,10 @@ export default function Booking(props: {
               <Label>Primer día</Label>
             </div>
 
-            {days > 1 && (
+            {days >= 1 && (
               <div className="grid-cols-6 gap-8">
                 <Label className="pr-5">Días adicionales: {days}</Label>
-                <Label className="text-red-500">-67% aplicado</Label>
+                <Label className="text-red-500">-{discount}% aplicado</Label>
               </div>
             )}
           </div>
@@ -132,7 +137,13 @@ export default function Booking(props: {
             {days > 1 && (
               <div className="grid-cols-6">
                 <Label>
-                  {prices[size.id]! * days * 0.43} {coin}
+                  {parseFloat(
+                    (
+                      (prices[size.id]! * days * (100 - discount!)) /
+                      100
+                    ).toFixed(2),
+                  )}{" "}
+                  {coin}
                 </Label>
               </div>
             )}

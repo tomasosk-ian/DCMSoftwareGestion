@@ -49,6 +49,7 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
   const [coin, setCoin] = useState(props.fee.coin!);
   const [size, setSize] = useState(props.fee.size!);
   const [value, setValue] = useState<number>(props.fee.value!);
+  const [discount, setDiscount] = useState<number>(props.fee.discount!);
   const selectedSize = api.size.getById.useQuery({
     sizeId: props.fee.size!,
   });
@@ -60,6 +61,7 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
         value,
         coin,
         size,
+        discount,
       });
       toast.success("Se ha modificado el tarifa.");
       router.refresh();
@@ -108,7 +110,18 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
                       }}
                     />
                   </div>
-
+                  <div>
+                    <Input
+                      id="discount"
+                      placeholder="Descuento"
+                      value={discount}
+                      type="number"
+                      onChange={(e) => {
+                        const intValue = parseInt(e.target.value);
+                        setDiscount(intValue);
+                      }}
+                    />
+                  </div>
                   <div>
                     <Label className="text-right">Tamaño</Label>
                     <Select

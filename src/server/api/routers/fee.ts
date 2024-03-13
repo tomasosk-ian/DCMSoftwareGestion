@@ -47,11 +47,11 @@ export const feeRouter = createTRPCRouter({
   create: publicProcedure
     .input(
       z.object({
-        description: z.string().min(0).max(1023).nullable(),
-        value: z.number().nullable(),
-        coin: z.string().nullable(),
-        size: z.number().nullable(),
-        fee: z.string().nullable().optional(),
+        description: z.string().min(0).max(1023).nullable().optional(),
+        value: z.number().nullable().optional(),
+        coin: z.string().nullable().optional(),
+        size: z.number().nullable().optional(),
+        discount: z.number().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -65,6 +65,7 @@ export const feeRouter = createTRPCRouter({
         coin: input.coin,
         value: input.value,
         size: input.size,
+        discount: input.discount,
       });
 
       return { identifier };
@@ -77,6 +78,7 @@ export const feeRouter = createTRPCRouter({
         value: z.number().nullable(),
         coin: z.string().nullable(),
         size: z.number().nullable(),
+        discount: z.number().nullable(),
       }),
     )
     .mutation(({ ctx, input }) => {
@@ -87,6 +89,7 @@ export const feeRouter = createTRPCRouter({
           value: input.value,
           coin: input.coin,
           size: input.size,
+          discount: input.discount,
         })
         .where(eq(feeData.identifier, input.identifier));
     }),

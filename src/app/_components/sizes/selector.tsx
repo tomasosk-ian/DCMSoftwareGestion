@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RouterOutputs } from "~/trpc/shared";
 import {
   Card,
@@ -67,6 +67,19 @@ export default function SizeSelector(props: {
     }
   }
 
+  useEffect(() => {
+    const filteredValues: Record<string, number> = {};
+    Object.entries(values).forEach(([key, value]) => {
+      if (value !== 0) {
+        filteredValues[key] = value;
+      }
+    });
+
+    // Verificar si los valores filtrados son diferentes de los actuales antes de actualizar el estado
+    if (JSON.stringify(filteredValues) !== JSON.stringify(values)) {
+      setValues(filteredValues);
+    }
+  }, [values]);
   return (
     <main className="flex justify-center">
       {!props.sizeSelected && (
@@ -140,7 +153,12 @@ export default function SizeSelector(props: {
           </div>
           <div className="">
             {!isLoading && sizes?.length != 0 && (
-              <Button onClick={() => applyReserve()}>APLICAR</Button>
+              <Button
+                disabled={Object.keys(values).length === 0}
+                onClick={() => applyReserve()}
+              >
+                APLICAR
+              </Button>
             )}
           </div>
         </div>
