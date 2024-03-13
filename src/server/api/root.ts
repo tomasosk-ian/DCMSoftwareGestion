@@ -8,6 +8,7 @@ import { pokemonRouter } from "./routers/lockerReserveRouter";
 import { lockerRouter } from "./routers/lockers";
 import { feeRouter } from "./routers/fee";
 import { coinRouter } from "./routers/coin";
+import { clientsRouter } from "./routers/clients";
 
 /**
  * This is the primary router for your server.
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   globalConfig: globalConfigRouter,
   fee: feeRouter,
   coin: coinRouter,
+  clients: clientsRouter,
   // lockerReserve: lockerReserveRouter,
 });
 
