@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { City } from "~/server/api/routers/city";
+import { Transaction } from "~/server/api/routers/transactions";
 import { Button } from "~/components/ui/button";
 import CitySelector from "./city/selector";
 import StoreSelector from "./store/selector";
@@ -33,6 +34,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import Success from "./success/success";
+import { Client } from "~/server/api/routers/clients";
 
 export const Icons = {
   spinner: Loader2,
@@ -52,13 +54,26 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [idToken, setIdToken] = useState<number>(0);
   const [days, setDays] = useState<number>(0);
-  const { mutateAsync: reservarBox } = api.pokemon.reserveBox.useMutation();
-  const { mutateAsync: confirmarBox } = api.pokemon.confirmBox.useMutation();
+  const { mutateAsync: reservarBox } =
+    api.lockerReserve.reserveBox.useMutation();
+  const { mutateAsync: confirmarBox } =
+    api.lockerReserve.confirmBox.useMutation();
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
-
+  const [transaction, setTransaction] = useState<Transaction>();
+  const [client, setClient] = useState<Client>({
+    identifier: null,
+    name: "",
+    surname: "",
+    email: "",
+    prefijo: 0,
+    telefono: 0,
+  });
+  const { mutateAsync: createTransaction } =
+    api.transaction.create.useMutation();
+  const { mutateAsync: createClient } = api.client.create.useMutation();
   if (props.cities.length !== 0) {
     return (
       <div className="container">
@@ -133,6 +148,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   type="submit"
                   onClick={async () => {
                     reserves.map(async (reserve) => {
+                      console.log(reserve.client);
                       const response = await reservarBox(reserve);
                       setIdToken(response);
                       setReserva(true);
@@ -242,7 +258,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           {sizeSelected && !reserva && !loadingPay && (
             <div>
               <div className="grid grid-cols-2 gap-8 p-8">
-                <UserForm />
+                <UserForm client={client} setClient={setClient} />
                 <Booking
                   store={store!}
                   startDate={startDate!}
@@ -258,6 +274,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                     setReserves([]);
 
                     reserves.map(async (reserve) => {
+                      console.log(reserve.client);
                       for (var i = 0; i < reserve.Cantidad!; i++) {
                         const response = await reservarBox(reserve);
                         const updatedReserve = {
@@ -274,6 +291,12 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                     setLoadingPay(true);
                     await new Promise((resolve) => setTimeout(resolve, 3000));
                     setLoadingPay(false);
+
+                    const clientResponse = await createClient(client);
+                    await createTransaction({
+                      ...transaction,
+                      client: clientResponse.identifier,
+                    });
 
                     setReserva(true);
                   }}

@@ -53,6 +53,7 @@ export default function SizeSelector(props: {
             Confirmado: false,
             Modo: "Por fecha",
             Cantidad: cantidad,
+            client: "ansel",
           }),
         );
 

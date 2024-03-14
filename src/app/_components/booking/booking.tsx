@@ -124,17 +124,27 @@ export default function Booking(props: {
             {days >= 1 && (
               <div className="grid-cols-6 gap-8">
                 <Label className="pr-5">Días adicionales: {days}</Label>
-                <Label className="text-red-500">-{discount}% aplicado</Label>
+                <Label className="text-red-500">
+                  -{fees?.find((s: Fee) => s.size === size.id)?.discount!}%
+                  aplicado
+                </Label>
               </div>
             )}
           </div>
           <div className="grid-cols-6 ">
             <div className="grid-cols-6">
               <Label>
-                {prices[size.id]!} {coin}
+                {prices[size.id]!}{" "}
+                {
+                  coins?.data?.find(
+                    (s: Coin) =>
+                      s.identifier ===
+                      fees?.find((s: Fee) => s.size === size.id)?.coin!,
+                  )?.description!
+                }
               </Label>
             </div>
-            {days > 1 && (
+            {days >= 1 && (
               <div className="grid-cols-6">
                 <Label>
                   {parseFloat(

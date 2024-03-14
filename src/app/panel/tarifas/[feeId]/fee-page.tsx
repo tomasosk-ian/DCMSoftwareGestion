@@ -40,22 +40,33 @@ import {
 } from "~/components/ui/select";
 import { Fee } from "~/server/api/routers/fee";
 import { Size } from "~/server/api/routers/sizes";
+import { Coin } from "~/server/api/routers/coin";
 
-export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
-  const { mutateAsync: renameCoin } = api.fee.change.useMutation();
-  const router = useRouter();
-
+export default function FeePage(props: {
+  coins: Coin[];
+  fee: Fee;
+  sizes: Size[];
+}) {
   const [description, setDescription] = useState(props.fee.description!);
   const [coin, setCoin] = useState(props.fee.coin!);
   const [size, setSize] = useState(props.fee.size!);
   const [value, setValue] = useState<number>(props.fee.value!);
   const [discount, setDiscount] = useState<number>(props.fee.discount!);
+  const [loading, setLoading] = useState(false);
+  const { mutateAsync: renameFee } = api.fee.change.useMutation();
+  const { mutateAsync: renameStore, isLoading } =
+    api.size.changeImage.useMutation();
   const selectedSize = api.size.getById.useQuery({
     sizeId: props.fee.size!,
   });
+  const selectedCoin = api.coin.getById.useQuery({
+    id: props.fee.coin!,
+  });
+  const router = useRouter();
+
   async function handleChange() {
     try {
-      await renameCoin({
+      await renameFee({
         identifier: props.fee!.identifier,
         description,
         value,
@@ -74,9 +85,13 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Modificar tarifa</Title>
-          <Button onClick={handleChange}>
-            <CheckIcon className="mr-2" />
+          <Title>Tarifa</Title>
+          <Button disabled={isLoading} onClick={handleChange}>
+            {isLoading ? (
+              <Loader2 className="mr-2 animate-spin" />
+            ) : (
+              <CheckIcon className="mr-2" />
+            )}
             Aplicar
           </Button>
         </div>
@@ -90,6 +105,7 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
               <Card className="p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
+                    <Label>Descripción</Label>
                     <Input
                       id="name"
                       placeholder="Descripción"
@@ -99,18 +115,24 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
                   </div>
 
                   <div>
+                    <Label>Valor</Label>
                     <Input
                       id="name"
                       placeholder="Valor"
-                      value={value}
                       type="number"
+                      step="0.1"
+                      value={value}
                       onChange={(e) => {
-                        const intValue = parseInt(e.target.value);
-                        setValue(intValue);
+                        const floatValue = parseFloat(
+                          e.target.value.replace(",", "."),
+                        );
+                        setValue(floatValue);
                       }}
                     />
                   </div>
                   <div>
+                    {" "}
+                    <Label>Descuento</Label>
                     <Input
                       id="discount"
                       placeholder="Descuento"
@@ -122,8 +144,9 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
                       }}
                     />
                   </div>
+
                   <div>
-                    <Label className="text-right">Tamaño</Label>
+                    <Label className="text-right">Tarifa</Label>
                     <Select
                       onValueChange={(value: string) => {
                         const intValue = parseInt(value);
@@ -152,11 +175,39 @@ export default async function FeePage(props: { fee: Fee; sizes: Size[] }) {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <Label className="text-right">Moneda</Label>
+                    <Select
+                      onValueChange={(value: string) => {
+                        setCoin(value);
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue
+                          placeholder={selectedCoin?.data?.description}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Seleccione una moneda</SelectLabel>
+                          {props.coins.map((e) => {
+                            return (
+                              <SelectItem
+                                key={e.identifier}
+                                value={e.identifier}
+                              >
+                                {e.description}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </Card>
             </AccordionContent>
           </AccordionItem>
-
           <AccordionItem value="item-4" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar tarifa</h2>

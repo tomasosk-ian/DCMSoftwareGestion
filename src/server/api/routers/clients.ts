@@ -5,6 +5,7 @@ import { createId } from "~/lib/utils";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
+import { clients } from "~/server/db/schema";
 
 export const clientsRouter = createTRPCRouter({
   get: publicProcedure.query(({ ctx }) => {
@@ -16,11 +17,11 @@ export const clientsRouter = createTRPCRouter({
   create: publicProcedure
     .input(
       z.object({
-        name: z.string().min(0).max(1023).optional(),
-        surname: z.string().min(0).max(1023).optional(),
-        email: z.string().min(0).max(1023).optional(),
-        prefijo: z.number().optional(),
-        telefono: z.number().optional(),
+        name: z.string().min(0).max(1023).nullable().optional(),
+        surname: z.string().min(0).max(1023).nullable().optional(),
+        email: z.string().min(0).max(1023).nullable().optional(),
+        prefijo: z.number().nullable().optional(),
+        telefono: z.number().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -42,17 +43,33 @@ export const clientsRouter = createTRPCRouter({
   getById: publicProcedure
     .input(
       z.object({
-        Id: z.string(),
+        identifier: z.string(),
       }),
     )
     .query(async ({ input }) => {
       const channel = await db.query.clients.findFirst({
-        where: eq(schema.clients.identifier, input.Id),
+        where: eq(schema.clients.identifier, input.identifier),
       });
 
       return channel;
     }),
-
+  change: publicProcedure
+    .input(
+      z.object({
+        identifier: z.string(),
+        name: z.string().min(0).max(1023).optional().nullable(),
+        surname: z.string().min(0).max(1023).optional().nullable(),
+        email: z.string().min(0).max(1023).optional().nullable(),
+        prefijo: z.number().optional().nullable(),
+        telefono: z.number().optional().nullable(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.db
+        .update(clients)
+        .set(input)
+        .where(eq(clients.identifier, input.identifier));
+    }),
   delete: publicProcedure
     .input(
       z.object({
@@ -66,4 +83,4 @@ export const clientsRouter = createTRPCRouter({
     }),
 });
 
-export type City = RouterOutputs["clients"]["get"][number];
+export type Client = RouterOutputs["client"]["get"][number];

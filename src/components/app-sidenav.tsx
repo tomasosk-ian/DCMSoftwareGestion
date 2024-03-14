@@ -1,3 +1,4 @@
+import { PersonIcon } from "@radix-ui/react-icons";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import {
   ActivityIcon,
@@ -12,7 +13,10 @@ import {
   LayoutDashboardIcon,
   MessageCircleQuestionIcon,
   MessageSquareReplyIcon,
+  PersonStanding,
   Settings2Icon,
+  TagsIcon,
+  TentIcon,
   UsersIcon,
 } from "lucide-react";
 
@@ -34,6 +38,9 @@ export default function AppSidenav() {
       </SidenavItem>
       <SidenavItem icon={<DollarSignIcon />} href="/panel/tarifas">
         Tarifas
+      </SidenavItem>
+      <SidenavItem icon={<TagsIcon />} href="/panel/clientes">
+        Clientes
       </SidenavItem>
 
       {/* <SidenavSeparator>Separador</SidenavSeparator>

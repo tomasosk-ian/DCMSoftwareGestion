@@ -4,11 +4,12 @@ import { globalConfigRouter } from "~/server/api/routers/globalConfig";
 import { storeRouter } from "~/server/api/routers/store";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { sizeRouter } from "./routers/sizes";
-import { pokemonRouter } from "./routers/lockerReserveRouter";
 import { lockerRouter } from "./routers/lockers";
 import { feeRouter } from "./routers/fee";
 import { coinRouter } from "./routers/coin";
+import { transactionRouter } from "./routers/transactions";
 import { clientsRouter } from "./routers/clients";
+import { lockerReserveRouter } from "./routers/lockerReserveRouter";
 
 /**
  * This is the primary router for your server.
@@ -20,13 +21,13 @@ export const appRouter = createTRPCRouter({
   city: cityRouter,
   store: storeRouter,
   size: sizeRouter,
-  pokemon: pokemonRouter,
   locker: lockerRouter,
   globalConfig: globalConfigRouter,
   fee: feeRouter,
   coin: coinRouter,
-  clients: clientsRouter,
-  // lockerReserve: lockerReserveRouter,
+  transaction: transactionRouter,
+  client: clientsRouter,
+  lockerReserve: lockerReserveRouter,
 });
 
 // export type definition of API

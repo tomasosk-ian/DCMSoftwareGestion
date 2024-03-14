@@ -1,6 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
+  boolean,
+  datetime,
   decimal,
   float,
   index,
@@ -231,7 +233,7 @@ export const coinData = mysqlTable(
 export const clients = mysqlTable(
   "clients",
   {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
+    identifier: varchar("identifier", { length: 255 }),
     name: varchar("name", { length: 255 }),
     surname: varchar("surname", { length: 255 }),
     email: varchar("email", { length: 255 }),
@@ -242,6 +244,25 @@ export const clients = mysqlTable(
     compoundKey: primaryKey(vt.identifier),
   }),
 );
+export const transactions = mysqlTable(
+  "transactions",
+  {
+    id: int("number").primaryKey().autoincrement(),
+    confirm: boolean("confirm").default(false),
+    confirmedAt: datetime("confirmedAt").default(new Date()),
+    client: varchar("client", { length: 255 }),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.id),
+  }),
+);
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  clients: one(clients, {
+    fields: [transactions.client],
+    references: [clients.identifier],
+  }),
+}));
 
 export const sizes = mysqlTable(
   "sizes",
@@ -260,3 +281,33 @@ export const sizes = mysqlTable(
     compoundKey: primaryKey(vt.id),
   }),
 );
+
+export const reservas = mysqlTable(
+  "reservas",
+  {
+    identifier: varchar("identifier", { length: 255 }),
+    NroSerie: varchar("NroSerie", { length: 255 }),
+    IdSize: int("IdSize"),
+    IdBox: int("IdBox"),
+    Token1: int("Token1"),
+    FechaCreacion: varchar("FechaCreacion", { length: 255 }),
+    FechaInicio: varchar("FechaInicio", { length: 255 }),
+    FechaFin: varchar("FechaFin", { length: 255 }),
+    Contador: int("Contador"),
+    Confirmado: boolean("Confirmado"),
+    Modo: varchar("Modo", { length: 255 }),
+    Cantidad: int("Cantidad"),
+    IdTransaction: int("IdTransaction"),
+    client: varchar("client", { length: 255 }),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const reservasRelations = relations(reservas, ({ one }) => ({
+  clients: one(clients, {
+    fields: [reservas.client],
+    references: [clients.identifier],
+  }),
+}));
