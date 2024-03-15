@@ -6,7 +6,7 @@ import {
 } from "~/server/api/trpc";
 import { RouterOutputs } from "~/trpc/shared";
 import nodemailer from "nodemailer";
-import * as handlebars from "handlebars";
+import { env } from "~/env";
 export const emailRouter = createTRPCRouter({
   sendEmail: publicProcedure
     .input(
@@ -18,7 +18,7 @@ export const emailRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       console.log("Email api");
       const sgMail = require("@sendgrid/mail");
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      sgMail.setApiKey(env.SENDGRID_API_KEY);
       const msg = {
         to: input.to,
         from: "anselmo@dcm.com.ar",
@@ -39,45 +39,45 @@ export const emailRouter = createTRPCRouter({
     }),
 });
 
-export async function sendMail({
-  to,
-  name,
-  subject,
-  body,
-}: {
-  to: string;
-  name: string;
-  subject: string;
-  body: string;
-}) {
-  const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
+// export async function sendMail({
+//   to,
+//   name,
+//   subject,
+//   body,
+// }: {
+//   to: string;
+//   name: string;
+//   subject: string;
+//   body: string;
+// }) {
+//   const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
 
-  const transport = nodemailer.createTransport({
-    service: "hotmail",
-    auth: {
-      user: SMTP_EMAIL,
-      pass: SMTP_PASSWORD,
-    },
-  });
-  try {
-    const testResult = await transport.verify();
-    console.log(testResult);
-  } catch (error) {
-    console.error({ error });
-    return;
-  }
+//   const transport = nodemailer.createTransport({
+//     service: "hotmail",
+//     auth: {
+//       user: SMTP_EMAIL,
+//       pass: SMTP_PASSWORD,
+//     },
+//   });
+//   try {
+//     const testResult = await transport.verify();
+//     console.log(testResult);
+//   } catch (error) {
+//     console.error({ error });
+//     return;
+//   }
 
-  try {
-    const sendResult = await transport.sendMail({
-      from: SMTP_EMAIL,
-      to,
-      subject,
-      // html,
-    });
-    console.log(sendResult);
-  } catch (error) {
-    console.log(error);
-  }
-}
+//   try {
+//     const sendResult = await transport.sendMail({
+//       from: SMTP_EMAIL,
+//       to,
+//       subject,
+//       // html,
+//     });
+//     console.log(sendResult);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
-export type City = RouterOutputs["city"]["get"][number];
+// export type City = RouterOutputs["city"]["get"][number];
