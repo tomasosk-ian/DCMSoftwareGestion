@@ -16,26 +16,31 @@ export const emailRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log("Email api");
-      const sgMail = require("@sendgrid/mail");
-      sgMail.setApiKey(env.SENDGRID_API_KEY);
+      try {
+        console.log("Email api");
+        const sgMail = require("@sendgrid/mail");
+        sgMail.setApiKey(env.SENDGRID_API_KEY);
+        console.log(env.SENDGRID_API_KEY);
+        const msg = {
+          to: input.to,
+          from: "anselmo@dcm.com.ar",
+          subject: "Confirmación de reserva locker.",
+          // text: "and easy to do anywhere, even with Node.js",
+          html: `<strong>Su código de reserva es ${input.token}</strong>`,
+        };
+        console.log(msg);
 
-      const msg = {
-        to: input.to,
-        from: "anselmo@dcm.com.ar",
-        subject: "Confirmación de reserva locker.",
-        // text: "and easy to do anywhere, even with Node.js",
-        html: `<strong>Su código de reserva es ${input.token}</strong>`,
-      };
-      sgMail
-        .send(msg)
-        .then(() => {
-          console.log("Email sent");
-        })
-        .catch((e: Error) => {
-          console.log(e);
-        });
-
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent");
+          })
+          .catch((e: Error) => {
+            console.log(e);
+          });
+      } catch (error) {
+        console.log(error);
+      }
       //   sendMail({
       //     to: "anselmo@dcm.com.ar",
       //     name: "Anselmo",
