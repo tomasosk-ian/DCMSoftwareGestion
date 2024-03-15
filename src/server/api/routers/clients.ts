@@ -26,19 +26,26 @@ export const clientsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // TODO: verificar permisos
-
-      const identifier = createId();
-
-      await db.insert(schema.clients).values({
-        identifier,
-        name: input.name,
-        surname: input.surname,
-        email: input.email,
-        prefijo: input.prefijo,
-        telefono: input.telefono,
+      const existingClient = await db.query.clients.findFirst({
+        where: eq(schema.clients.email, input.email!),
       });
 
-      return { identifier };
+      const identifier = createId();
+      if (!existingClient) {
+        await db.insert(schema.clients).values({
+          identifier,
+          name: input.name,
+          surname: input.surname,
+          email: input.email,
+          prefijo: input.prefijo,
+          telefono: input.telefono,
+        });
+
+        return { identifier };
+      } else {
+        console.log("Ya existe un cliente con este correo electrónico.");
+        return 0;
+      }
     }),
   getById: publicProcedure
     .input(

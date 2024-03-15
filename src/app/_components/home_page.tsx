@@ -74,6 +74,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
   const { mutateAsync: createClient } = api.client.create.useMutation();
+  const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
   if (props.cities.length !== 0) {
     return (
       <div className="container">
@@ -293,10 +294,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                     setLoadingPay(false);
 
                     const clientResponse = await createClient(client);
-                    await createTransaction({
-                      ...transaction,
-                      client: clientResponse.identifier,
-                    });
 
                     setReserva(true);
                   }}
@@ -327,14 +324,22 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                           type="submit"
                           onClick={async () => {
                             setLoadingPay(true);
-                            console.log(reserves1);
                             const updatedReserves1 = await Promise.all(
                               reserves1.map(async (reserve) => {
                                 if (reserve.IdTransaction) {
-                                  console.log(reserve.IdTransaction);
                                   const response = await confirmarBox({
                                     idToken: reserve.IdTransaction!,
                                   });
+                                  if (response) {
+                                    await createTransaction({
+                                      ...transaction,
+                                      client: reserve.client,
+                                    });
+                                    sendEmail({
+                                      to: client.email!,
+                                      token: response,
+                                    });
+                                  }
                                   return {
                                     ...reserve,
                                     Token1: response, // Asignar el token devuelto por la API
