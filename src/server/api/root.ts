@@ -10,7 +10,6 @@ import { coinRouter } from "./routers/coin";
 import { transactionRouter } from "./routers/transactions";
 import { clientsRouter } from "./routers/clients";
 import { lockerReserveRouter } from "./routers/lockerReserveRouter";
-import { emailRouter } from "./routers/email";
 
 /**
  * This is the primary router for your server.
@@ -29,7 +28,6 @@ export const appRouter = createTRPCRouter({
   transaction: transactionRouter,
   client: clientsRouter,
   lockerReserve: lockerReserveRouter,
-  email: emailRouter,
 });
 
 // export type definition of API

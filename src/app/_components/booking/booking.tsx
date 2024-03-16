@@ -83,13 +83,7 @@ export default function Booking(props: {
         prices[reserve.IdSize!] = price;
 
         totalPrice +=
-          price +
-          (price *
-            reserve.Cantidad! *
-            days *
-            (100 -
-              fees?.find((s: Fee) => s.size === reserve.IdSize)?.discount!)) /
-            100;
+          price + (price * reserve.Cantidad! * days * (100 - discount!)) / 100; // Sumar al total local
         totalPrice = parseFloat(totalPrice.toFixed(2));
       });
       setTotal(totalPrice);
