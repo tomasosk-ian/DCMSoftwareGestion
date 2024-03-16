@@ -20,6 +20,7 @@ export const emailRouter = createTRPCRouter({
         console.log("Email api");
         const sgMail = require("@sendgrid/mail");
         sgMail.setApiKey(env.SENDGRID_API_KEY);
+        console.log(env.SENDGRID_API_KEY);
         const msg = {
           to: input.to,
           from: "anselmo@dcm.com.ar",
@@ -27,8 +28,9 @@ export const emailRouter = createTRPCRouter({
           // text: "and easy to do anywhere, even with Node.js",
           html: `<strong>Su código de reserva es ${input.token}</strong>`,
         };
+        console.log(msg);
 
-        await sgMail
+        sgMail
           .send(msg)
           .then(() => {
             console.log("Email sent");
