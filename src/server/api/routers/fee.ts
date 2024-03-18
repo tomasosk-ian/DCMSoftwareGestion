@@ -7,7 +7,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { cities, feeData } from "~/server/db/schema";
+import { cities, feeData, sizes } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 
@@ -104,6 +104,11 @@ export const feeRouter = createTRPCRouter({
       await db
         .delete(schema.feeData)
         .where(eq(schema.feeData.identifier, input.id));
+
+      await ctx.db
+        .update(sizes)
+        .set({ tarifa: null })
+        .where(eq(sizes.tarifa, input.id));
     }),
 });
 

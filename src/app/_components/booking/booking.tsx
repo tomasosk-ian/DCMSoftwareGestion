@@ -163,7 +163,7 @@ export default function Booking(props: {
     );
   }
   return (
-    <div className="w-4/5 grid-cols-12 gap-4 bg-green-200 px-8 pt-3">
+    <div className="w-4/5 grid-cols-12 gap-4 bg-green-200 px-8 pt-3" id="root">
       <Title className="text-2xl font-bold text-slate-400">Tu reserva</Title>
       <div className="rounded py-5">
         <Card className="rounded bg-gray-50 pl-5 pr-5 ">

@@ -1,9 +1,2 @@
-- disabled botones (aplicar).
-- si el tamaño no tiene tarifa no lo muestro.
-- elijo un tamaño, vuelvo para atras, pongo cantidad cero y quiero que desaparezca de booking.
-- las tarifas al editarlas se recargan todo el tiempo.
-- al crear dos tarifas consecutivas el dialog queda con lo ultimo seteado escrito.
-- arreglar decimales.
 - implementar usuarios. *
-- porcentaje de descuento configurable. *
-- agregar numero de transaccion que es el id de el usuario. *
+- pasar todos los tokens al mail y enviar algo más lindo.

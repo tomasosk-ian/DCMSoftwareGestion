@@ -110,7 +110,8 @@ export const sizeRouter = createTRPCRouter({
           }
         }),
       );
-      return validatedData;
+
+      return validatedData.filter((s) => s.tarifa != null);
     }),
 
   getById: publicProcedure

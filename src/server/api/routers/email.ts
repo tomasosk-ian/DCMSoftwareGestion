@@ -11,7 +11,7 @@ export const emailRouter = createTRPCRouter({
     .input(
       z.object({
         to: z.string(),
-        token: z.number(),
+        token: z.array(z.number()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -19,13 +19,17 @@ export const emailRouter = createTRPCRouter({
         console.log("Email api");
         const sgMail = require("@sendgrid/mail");
         sgMail.setApiKey(env.SENDGRID_API_KEY);
-
+        console.log(input.token);
+        input.token.map((x) => console.log(x));
         const msg = {
           to: input.to,
           from: "anselmo@dcm.com.ar",
           subject: "Confirmación de reserva locker.",
-          // text: "and easy to do anywhere, even with Node.js",
-          html: `<strong>Su código de reserva es ${input.token}</strong>`,
+          html: `${input.token
+            .map((x) => {
+              return `Su código de reserva es <strong>${x}</strong><br>`;
+            })
+            .join("")}`,
           // attachments: [
           //   {
           //     content: pdfBuffer.toString("base64"),
@@ -36,7 +40,6 @@ export const emailRouter = createTRPCRouter({
           // ],
         };
         console.log(msg);
-
         sgMail
           .send(msg)
           .then(() => {

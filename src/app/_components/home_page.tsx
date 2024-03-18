@@ -22,6 +22,9 @@ import { format } from "date-fns";
 import { Title } from "@radix-ui/react-toast";
 import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
+import dynamic from "next/dynamic";
+
+import { renderToString } from "@react-pdf/renderer";
 
 import {
   AlertDialog,
@@ -38,6 +41,8 @@ import { Loader2 } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
+import ReactDOM from "react-dom";
+import ReactPDF from "@react-pdf/renderer";
 
 export const Icons = {
   spinner: Loader2,
@@ -66,6 +71,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [transaction, setTransaction] = useState<Transaction>();
+
+  // const [token, setToken] = useState<number[]>([]);
   const [client, setClient] = useState<Client>({
     identifier: null,
     name: "",
@@ -78,6 +85,36 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     api.transaction.create.useMutation();
   const { mutateAsync: createClient } = api.client.create.useMutation();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
+  const [errors, setErrors] = useState({
+    name: "",
+    surname: "",
+    email: "",
+    prefijo: "",
+    telefono: "",
+  });
+  const isValidEmail = (email: string) => {
+    // Regular expression for email validation
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+  const handleSubmit = () => {
+    // Check if any field is empty and set error message accordingly
+    const newErrors = {
+      name: client.name ? "" : "Nombre es obligatorio",
+      surname: client.surname ? "" : "Apellido es obligatorio",
+      email: isValidEmail(client.email!) ? "" : "Correo electrónico no válido",
+      prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
+      telefono: client.telefono ? "" : "Telefono es obligatorio",
+    };
+
+    // If there are any errors, prevent form submission and display them
+    if (Object.values(newErrors).some((error) => error)) {
+      setErrors(newErrors);
+
+      return false;
+    }
+    return true;
+  };
 
   // if (props.cities.length !== 0) {
   //   return (
@@ -198,36 +235,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   // } else {
   return (
     <div className="container">
-      <div className="grid grid-cols-3 justify-items-center gap-4	">
-        <Menubar className="border-0 shadow-none ">
-          {store && !endDate && !sizeSelected && !reserva && (
-            <Button onClick={() => setStore(null)}>volver</Button>
-          )}
-          {endDate && !sizeSelected && !reserva && (
-            <Button onClick={() => setEndDate(undefined)}>volver</Button>
-          )}
-          {sizeSelected && !reserva && (
-            <Button
-              onClick={() => {
-                setsizeSelected(false);
-                setReserves([]);
-                setReserves1([]);
-              }}
-            >
-              volver
-            </Button>
-          )}
-          {reserva && (
-            <Button
-              onClick={() => {
-                setReserva(false);
-              }}
-            >
-              volver
-            </Button>
-          )}
-        </Menubar>
-      </div>
+      <div className="grid grid-cols-3 justify-items-center gap-4	"></div>
       <div className="flex flex-col items-center justify-center pt-2">
         <StoreSelector
           stores={storess.data}
@@ -265,7 +273,12 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         {sizeSelected && !reserva && !loadingPay && (
           <div>
             <div className="grid grid-cols-2 gap-8 p-8">
-              <UserForm client={client} setClient={setClient} />
+              <UserForm
+                client={client}
+                setClient={setClient}
+                errors={errors}
+                setErrors={setErrors}
+              />
               <Booking
                 store={store!}
                 startDate={startDate!}
@@ -277,27 +290,29 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               <Button
                 type="submit"
                 onClick={async () => {
-                  setReserves1([]);
-                  setReserves([]);
-                  reserves.map(async (reserve) => {
-                    console.log(reserve.client);
-                    for (var i = 0; i < reserve.Cantidad!; i++) {
-                      const response = await reservarBox(reserve);
-                      const updatedReserve = {
-                        ...reserve,
-                        IdTransaction: response,
-                      };
-                      setReserves1((prevReserves) => [
-                        ...prevReserves,
-                        updatedReserve,
-                      ]);
-                    }
-                  });
-                  setLoadingPay(true);
-                  await new Promise((resolve) => setTimeout(resolve, 3000));
-                  setLoadingPay(false);
-                  const clientResponse = await createClient(client);
-                  setReserva(true);
+                  if (handleSubmit()) {
+                    setReserves1([]);
+                    setReserves([]);
+                    reserves.map(async (reserve) => {
+                      console.log(reserve.client);
+                      for (var i = 0; i < reserve.Cantidad!; i++) {
+                        const response = await reservarBox(reserve);
+                        const updatedReserve = {
+                          ...reserve,
+                          IdTransaction: response,
+                        };
+                        setReserves1((prevReserves) => [
+                          ...prevReserves,
+                          updatedReserve,
+                        ]);
+                      }
+                    });
+                    setLoadingPay(true);
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+                    setLoadingPay(false);
+                    const clientResponse = await createClient(client);
+                    setReserva(true);
+                  }
                 }}
               >
                 Continuar al pago
@@ -325,38 +340,41 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                       <Button
                         type="submit"
                         onClick={async () => {
-                          setLoadingPay(true);
-                          const updatedReserves1 = await Promise.all(
-                            reserves1.map(async (reserve) => {
-                              if (reserve.IdTransaction) {
-                                const response = await confirmarBox({
-                                  idToken: reserve.IdTransaction!,
-                                });
-                                if (response) {
-                                  await createTransaction({
-                                    ...transaction,
-                                    client: reserve.client,
+                          try {
+                            setLoadingPay(true);
+                            let token: number[] = [];
+                            const updatedReserves1 = await Promise.all(
+                              reserves1.map(async (reserve) => {
+                                if (reserve.IdTransaction) {
+                                  const response = await confirmarBox({
+                                    idToken: reserve.IdTransaction!,
                                   });
-                                  console.log(
-                                    "*--------------------------------------*",
-                                  );
+                                  if (response) {
+                                    token = [...token, response];
+                                    await createTransaction({
+                                      ...transaction,
+                                      client: reserve.client,
+                                    });
+                                  }
 
-                                  await sendEmail({
-                                    to: client.email!,
-                                    token: response,
-                                  });
+                                  return {
+                                    ...reserve,
+                                    Token1: response,
+                                  };
                                 }
-                                return {
-                                  ...reserve,
-                                  Token1: response,
-                                };
-                              }
-                              return reserve;
-                            }),
-                          );
-                          setReserves1(updatedReserves1);
-                          setLoadingPay(false);
-                          setPagoOk(true);
+                                return reserve;
+                              }),
+                            );
+                            await sendEmail({
+                              to: client.email!,
+                              token,
+                            });
+                            setReserves1(updatedReserves1);
+                            setLoadingPay(false);
+                            setPagoOk(true);
+                          } catch (error) {
+                            console.log(error);
+                          }
                         }}
                       >
                         Confirmar pago
