@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import { City } from "~/server/api/routers/city";
 import { Transaction } from "~/server/api/routers/transactions";
 import { Button } from "~/components/ui/button";
@@ -20,6 +20,8 @@ import { format } from "date-fns";
 import { Title } from "@radix-ui/react-toast";
 import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
+import { usePDF } from "react-to-pdf";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -74,319 +76,326 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
   const { mutateAsync: createClient } = api.client.create.useMutation();
-  if (props.cities.length !== 0) {
-    return (
-      <div className="container">
-        <div className="grid grid-cols-3 justify-items-center gap-4	">
-          <Menubar className="border-0 shadow-none ">
-            {city && !store && !size && !endDate && (
-              <Button onClick={() => setCity(null)}>volver</Button>
-            )}
-            {endDate && !store && !size && (
-              <Button onClick={() => setEndDate(undefined)}>volver</Button>
-            )}
-            {store && !size && (
-              <Button onClick={() => setStore(null)}>volver</Button>
-            )}
-
-            {size && (
-              <Button
-                onClick={() => {
-                  setsizeSelected(false);
-                  setReserves([]);
-                }}
-              >
-                volver
-              </Button>
-            )}
-          </Menubar>
-        </div>
-        <div className="flex flex-col items-center justify-center pt-2">
-          <CitySelector
-            cities={props.cities}
-            city={city}
-            setCity={setCity}
-            setStores={setStores}
-          />
-
-          {city && (
-            <StoreSelector stores={stores} store={store} setStore={setStore} />
+  const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
+  const [pdf, setPDF] = useState<MutableRefObject<any>>();
+  // if (props.cities.length !== 0) {
+  //   return (
+  //     <div className="container">
+  //       <div className="grid grid-cols-3 justify-items-center gap-4	">
+  //         <Menubar className="border-0 shadow-none ">
+  //           {city && !store && !size && !endDate && (
+  //             <Button onClick={() => setCity(null)}>volver</Button>
+  //           )}
+  //           {endDate && !store && !size && (
+  //             <Button onClick={() => setEndDate(undefined)}>volver</Button>
+  //           )}
+  //           {store && !size && (
+  //             <Button onClick={() => setStore(null)}>volver</Button>
+  //           )}
+  //           {size && (
+  //             <Button
+  //               onClick={() => {
+  //                 setsizeSelected(false);
+  //                 setReserves([]);
+  //               }}
+  //             >
+  //               volver
+  //             </Button>
+  //           )}
+  //         </Menubar>
+  //       </div>
+  //       <div className="flex flex-col items-center justify-center pt-2">
+  //         <CitySelector
+  //           cities={props.cities}
+  //           city={city}
+  //           setCity={setCity}
+  //           setStores={setStores}
+  //         />
+  //         {city && (
+  //           <StoreSelector stores={stores} store={store} setStore={setStore} />
+  //         )}
+  //         {store && (
+  //           <div>
+  //             <DateComponent
+  //               startDate={startDate!}
+  //               setStartDate={setStartDate}
+  //               endDate={endDate!}
+  //               setEndDate={setEndDate}
+  //               days={days}
+  //               setDays={setDays}
+  //             />
+  //           </div>
+  //         )}
+  //         {endDate && (
+  //           <SizeSelector
+  //             nroSerieLocker={store?.serieLocker!}
+  //             inicio={startDate}
+  //             fin={endDate!}
+  //             size={size}
+  //             setSize={setSize}
+  //             sizeSelected={sizeSelected}
+  //             setSizeSelected={setsizeSelected}
+  //             reserves={reserves}
+  //             setReserves={setReserves}
+  //             startDate={startDate!}
+  //             endDate={endDate!}
+  //           />
+  //         )}
+  //         {sizeSelected && !reserva && (
+  //           <div>
+  //             <div className="grid grid-cols-2 gap-8 p-8">
+  //               <UserForm client={client} setClient={setClient} />
+  //               <Booking
+  //                 store={store!}
+  //                 startDate={startDate!}
+  //                 endDate={endDate!}
+  //                 reserves={reserves!}
+  //               />
+  //             </div>
+  //             <div className="flex flex-row-reverse px-8">
+  //               <Button
+  //                 type="submit"
+  //                 onClick={async () => {
+  //                   reserves.map(async (reserve) => {
+  //                     const response = await reservarBox(reserve);
+  //                     setIdToken(response);
+  //                   });
+  //                   setReserva(true);
+  //                 }}
+  //               >
+  //                 Continuar al pago
+  //               </Button>
+  //             </div>
+  //           </div>
+  //         )}
+  //         {reserva && (
+  //           <Button
+  //             type="submit"
+  //             onClick={async () => {
+  //               const response = await confirmarBox({ idToken });
+  //               if (response.ok) {
+  //                 const jsonResponse = await response.json();
+  //                 toast.success("Confirmación exitosa");
+  //               } else {
+  //                 toast.error("Confirmación errónea");
+  //               }
+  //               setCity(null);
+  //               setSize(null);
+  //               setStore(null);
+  //               setStartDate(undefined);
+  //               setEndDate(undefined);
+  //               setStores(undefined);
+  //               setReserva(false);
+  //             }}
+  //           >
+  //             Confirmar locker
+  //           </Button>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // } else {
+  return (
+    <div className="container">
+      <div className="grid grid-cols-3 justify-items-center gap-4	">
+        <Menubar className="border-0 shadow-none ">
+          {store && !endDate && !sizeSelected && !reserva && (
+            <Button onClick={() => setStore(null)}>volver</Button>
           )}
-
-          {store && (
-            <div>
-              <DateComponent
-                startDate={startDate!}
-                setStartDate={setStartDate}
-                endDate={endDate!}
-                setEndDate={setEndDate}
-                days={days}
-                setDays={setDays}
-              />
-            </div>
-          )}
-          {endDate && (
-            <SizeSelector
-              nroSerieLocker={store?.serieLocker!}
-              inicio={startDate}
-              fin={endDate!}
-              size={size}
-              setSize={setSize}
-              sizeSelected={sizeSelected}
-              setSizeSelected={setsizeSelected}
-              reserves={reserves}
-              setReserves={setReserves}
-              startDate={startDate!}
-              endDate={endDate!}
-            />
+          {endDate && !sizeSelected && !reserva && (
+            <Button onClick={() => setEndDate(undefined)}>volver</Button>
           )}
           {sizeSelected && !reserva && (
-            <div>
-              {/* <UserForm /> */}
-              <div>
-                <Button
-                  type="submit"
-                  onClick={async () => {
-                    reserves.map(async (reserve) => {
-                      console.log(reserve.client);
-                      const response = await reservarBox(reserve);
-                      setIdToken(response);
-                      setReserva(true);
-                    });
-                  }}
-                >
-                  Continuar al pago
-                </Button>
-              </div>
-            </div>
+            <Button
+              onClick={() => {
+                setsizeSelected(false);
+                setReserves([]);
+                setReserves1([]);
+              }}
+            >
+              volver
+            </Button>
           )}
           {reserva && (
             <Button
-              type="submit"
-              onClick={async () => {
-                const response = await confirmarBox({ idToken });
-                if (response.ok) {
-                  const jsonResponse = await response.json();
-                  toast.success("Confirmación exitosa");
-                } else {
-                  toast.error("Confirmación errónea");
-                }
-                setCity(null);
-                setSize(null);
-                setStore(null);
-                setStartDate(undefined);
-                setEndDate(undefined);
-                setStores(undefined);
+              onClick={() => {
                 setReserva(false);
               }}
             >
-              Confirmar locker
+              volver
             </Button>
           )}
-        </div>
+        </Menubar>
       </div>
-    );
-  } else {
-    return (
-      <div className="container">
-        <div className="grid grid-cols-3 justify-items-center gap-4	">
-          <Menubar className="border-0 shadow-none ">
-            {store && !endDate && !sizeSelected && !reserva && (
-              <Button onClick={() => setStore(null)}>volver</Button>
-            )}
-            {endDate && !sizeSelected && !reserva && (
-              <Button onClick={() => setEndDate(undefined)}>volver</Button>
-            )}
-
-            {sizeSelected && !reserva && (
-              <Button
-                onClick={() => {
-                  setsizeSelected(false);
-                  setReserves([]);
-                  setReserves1([]);
-                }}
-              >
-                volver
-              </Button>
-            )}
-            {reserva && (
-              <Button
-                onClick={() => {
-                  setReserva(false);
-                }}
-              >
-                volver
-              </Button>
-            )}
-          </Menubar>
-        </div>
-        <div className="flex flex-col items-center justify-center pt-2">
-          <StoreSelector
-            stores={storess.data}
-            store={store}
-            setStore={setStore}
+      <div className="flex flex-col items-center justify-center pt-2">
+        <StoreSelector
+          stores={storess.data}
+          store={store}
+          setStore={setStore}
+        />
+        {store && (
+          <div>
+            <DateComponent
+              startDate={startDate!}
+              setStartDate={setStartDate}
+              endDate={endDate!}
+              setEndDate={setEndDate}
+              days={days}
+              setDays={setDays}
+            />
+          </div>
+        )}
+        {endDate && (
+          <SizeSelector
+            nroSerieLocker={store?.serieLocker!}
+            inicio={startDate}
+            fin={endDate!}
+            size={size}
+            setSize={setSize}
+            sizeSelected={sizeSelected}
+            setSizeSelected={setsizeSelected}
+            reserves={reserves}
+            setReserves={setReserves}
+            startDate={startDate!}
+            endDate={endDate!}
           />
-          {store && (
-            <div>
-              <DateComponent
+        )}
+        {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
+        {sizeSelected && !reserva && !loadingPay && (
+          <div>
+            <div className="grid grid-cols-2 gap-8 p-8">
+              <UserForm client={client} setClient={setClient} />
+              <Booking
+                store={store!}
                 startDate={startDate!}
-                setStartDate={setStartDate}
                 endDate={endDate!}
-                setEndDate={setEndDate}
-                days={days}
-                setDays={setDays}
+                reserves={reserves!}
               />
             </div>
-          )}
-          {endDate && (
-            <SizeSelector
-              nroSerieLocker={store?.serieLocker!}
-              inicio={startDate}
-              fin={endDate!}
-              size={size}
-              setSize={setSize}
-              sizeSelected={sizeSelected}
-              setSizeSelected={setsizeSelected}
-              reserves={reserves}
-              setReserves={setReserves}
-              startDate={startDate!}
-              endDate={endDate!}
-            />
-          )}
-          {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
-
-          {sizeSelected && !reserva && !loadingPay && (
-            <div>
-              <div className="grid grid-cols-2 gap-8 p-8">
-                <UserForm client={client} setClient={setClient} />
-                <Booking
-                  store={store!}
-                  startDate={startDate!}
-                  endDate={endDate!}
-                  reserves={reserves!}
-                />
-              </div>
-              <div className="flex flex-row-reverse px-8">
-                <Button
-                  type="submit"
-                  onClick={async () => {
-                    setReserves1([]);
-                    setReserves([]);
-
-                    reserves.map(async (reserve) => {
-                      console.log(reserve.client);
-                      for (var i = 0; i < reserve.Cantidad!; i++) {
-                        const response = await reservarBox(reserve);
-                        const updatedReserve = {
-                          ...reserve,
-                          IdTransaction: response,
-                        };
-
-                        setReserves1((prevReserves) => [
-                          ...prevReserves,
-                          updatedReserve,
-                        ]);
-                      }
-                    });
-                    setLoadingPay(true);
-                    await new Promise((resolve) => setTimeout(resolve, 3000));
-                    setLoadingPay(false);
-
-                    const clientResponse = await createClient(client);
-                    await createTransaction({
-                      ...transaction,
-                      client: clientResponse.identifier,
-                    });
-
-                    setReserva(true);
-                  }}
-                >
-                  Continuar al pago
-                </Button>
-              </div>
-            </div>
-          )}
-          {reserva && !pagoOk && !loadingPay && (
-            <div className="flex flex-row-reverse">
-              {!loadingPay && (
-                <AlertDialog>
-                  <AlertDialogTrigger>
-                    <Button>Confirmar pago</Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Va a confirmar el pago de la reserva.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction>
-                        <Button
-                          type="submit"
-                          onClick={async () => {
-                            setLoadingPay(true);
-                            console.log(reserves1);
-                            const updatedReserves1 = await Promise.all(
-                              reserves1.map(async (reserve) => {
-                                if (reserve.IdTransaction) {
-                                  console.log(reserve.IdTransaction);
-                                  const response = await confirmarBox({
-                                    idToken: reserve.IdTransaction!,
-                                  });
-                                  return {
-                                    ...reserve,
-                                    Token1: response, // Asignar el token devuelto por la API
-                                  };
-                                }
-                                return reserve;
-                              }),
-                            );
-                            setReserves1(updatedReserves1);
-                            setLoadingPay(false);
-                            setPagoOk(true);
-                          }}
-                        >
-                          Confirmar pago
-                        </Button>
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
-            </div>
-          )}
-          {pagoOk && (
-            <div>
-              <Success reserves={reserves1} store={store!} />
-
+            <div className="flex flex-row-reverse px-8">
               <Button
+                type="submit"
                 onClick={async () => {
-                  setCity(null);
-                  setStore(null);
-                  setStores(undefined);
-                  setSize(null);
-                  setsizeSelected(false);
-                  setCreationDate("");
-                  setStartDate("");
-                  setEndDate("");
-                  setIdLocker(0);
-                  setReserva(false);
-                  setIdToken(0);
-                  setDays(0);
-                  setReserves([]);
                   setReserves1([]);
+                  setReserves([]);
+                  reserves.map(async (reserve) => {
+                    console.log(reserve.client);
+                    for (var i = 0; i < reserve.Cantidad!; i++) {
+                      const response = await reservarBox(reserve);
+                      const updatedReserve = {
+                        ...reserve,
+                        IdTransaction: response,
+                      };
+                      setReserves1((prevReserves) => [
+                        ...prevReserves,
+                        updatedReserve,
+                      ]);
+                    }
+                  });
+                  setLoadingPay(true);
+                  await new Promise((resolve) => setTimeout(resolve, 3000));
                   setLoadingPay(false);
-                  setPagoOk(false);
+                  const clientResponse = await createClient(client);
+                  setReserva(true);
                 }}
               >
-                Cerrar
+                Continuar al pago
               </Button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        {reserva && !pagoOk && !loadingPay && (
+          <div className="flex flex-row-reverse">
+            {!loadingPay && (
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <Button>Confirmar pago</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Va a confirmar el pago de la reserva.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction>
+                      <Button
+                        type="submit"
+                        onClick={async () => {
+                          setLoadingPay(true);
+                          const updatedReserves1 = await Promise.all(
+                            reserves1.map(async (reserve) => {
+                              if (reserve.IdTransaction) {
+                                const response = await confirmarBox({
+                                  idToken: reserve.IdTransaction!,
+                                });
+                                if (response) {
+                                  await createTransaction({
+                                    ...transaction,
+                                    client: reserve.client,
+                                  });
+                                  console.log(
+                                    "*--------------------------------------*",
+                                  );
+                                  console.log(pdf);
+                                  sendEmail({
+                                    to: client.email!,
+                                    token: response,
+                                  });
+                                }
+                                return {
+                                  ...reserve,
+                                  Token1: response,
+                                };
+                              }
+                              return reserve;
+                            }),
+                          );
+                          setReserves1(updatedReserves1);
+                          setLoadingPay(false);
+                          setPagoOk(true);
+                        }}
+                      >
+                        Confirmar pago
+                      </Button>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        )}
+        {pagoOk && (
+          <div>
+            <Success reserves={reserves1} store={store!} />
+            <Button
+              onClick={async () => {
+                setCity(null);
+                setStore(null);
+                setStores(undefined);
+                setSize(null);
+                setsizeSelected(false);
+                setCreationDate("");
+                setStartDate("");
+                setEndDate("");
+                setIdLocker(0);
+                setReserva(false);
+                setIdToken(0);
+                setDays(0);
+                setReserves([]);
+                setReserves1([]);
+                setLoadingPay(false);
+                setPagoOk(false);
+              }}
+            >
+              Cerrar
+            </Button>
+          </div>
+        )}
       </div>
-    );
-  }
+    </div>
+  );
+  // }
 }
