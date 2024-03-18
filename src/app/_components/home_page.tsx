@@ -1,6 +1,8 @@
 "use client";
 
 import { MutableRefObject, useEffect, useState } from "react";
+import { useRef } from "react";
+
 import { City } from "~/server/api/routers/city";
 import { Transaction } from "~/server/api/routers/transactions";
 import { Button } from "~/components/ui/button";
@@ -20,7 +22,6 @@ import { format } from "date-fns";
 import { Title } from "@radix-ui/react-toast";
 import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
-import { usePDF } from "react-to-pdf";
 
 import {
   AlertDialog,
@@ -77,7 +78,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     api.transaction.create.useMutation();
   const { mutateAsync: createClient } = api.client.create.useMutation();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
-  const [pdf, setPDF] = useState<MutableRefObject<any>>();
+
   // if (props.cities.length !== 0) {
   //   return (
   //     <div className="container">
@@ -339,8 +340,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                   console.log(
                                     "*--------------------------------------*",
                                   );
-                                  console.log(pdf);
-                                  sendEmail({
+
+                                  await sendEmail({
                                     to: client.email!,
                                     token: response,
                                   });

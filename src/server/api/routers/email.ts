@@ -4,9 +4,8 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { RouterOutputs } from "~/trpc/shared";
-import nodemailer from "nodemailer";
 import { env } from "~/env";
+
 export const emailRouter = createTRPCRouter({
   sendEmail: publicProcedure
     .input(
@@ -20,13 +19,21 @@ export const emailRouter = createTRPCRouter({
         console.log("Email api");
         const sgMail = require("@sendgrid/mail");
         sgMail.setApiKey(env.SENDGRID_API_KEY);
-        console.log(env.SENDGRID_API_KEY);
+
         const msg = {
           to: input.to,
           from: "anselmo@dcm.com.ar",
           subject: "Confirmación de reserva locker.",
           // text: "and easy to do anywhere, even with Node.js",
           html: `<strong>Su código de reserva es ${input.token}</strong>`,
+          // attachments: [
+          //   {
+          //     content: pdfBuffer.toString("base64"),
+          //     filename: "nombre-del-archivo.pdf",
+          //     type: "application/pdf",
+          //     disposition: "attachment",
+          //   },
+          // ],
         };
         console.log(msg);
 
