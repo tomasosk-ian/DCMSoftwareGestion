@@ -12,6 +12,10 @@ export const emailRouter = createTRPCRouter({
       z.object({
         to: z.string(),
         token: z.array(z.number()),
+        precio: z.number(),
+        moneda: z.string(),
+        cliente: z.string(),
+        local: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -23,13 +27,31 @@ export const emailRouter = createTRPCRouter({
         input.token.map((x) => console.log(x));
         const msg = {
           to: input.to,
-          from: "anselmo@dcm.com.ar",
+          from: "back@lockersurbanos.com.ar",
           subject: "Confirmación de reserva locker.",
-          html: `${input.token
-            .map((x) => {
-              return `Su código de reserva es <strong>${x}</strong><br>`;
-            })
-            .join("")}`,
+          html: `<body>
+          <p>Estimado/a ${input.cliente},</p>
+        
+          <p>Nos complace confirmar que su reserva en ${
+            input.local
+          } ha sido exitosamente procesada.</p>
+        
+          <p>
+            ${input.token
+              .map((x) => {
+                return `Su código de reserva es <strong>${x}</strong><br>`;
+              })
+              .join("")}
+          </p>
+        
+          <p>El precio total de su reserva es: ${input.precio} ${
+            input.moneda
+          }</p>
+        
+          <p>Atentamente,</p>
+          <p>Lockers Urbanos</p>
+          
+        </body>`,
           // attachments: [
           //   {
           //     content: pdfBuffer.toString("base64"),

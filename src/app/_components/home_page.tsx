@@ -86,6 +86,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     api.transaction.create.useMutation();
   const { mutateAsync: createClient } = api.client.create.useMutation();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
+  const [total, setTotal] = useState<number>();
+  const [coin, setCoin] = useState<string>("");
+
   const [errors, setErrors] = useState({
     name: "",
     surname: "",
@@ -286,6 +289,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 startDate={startDate!}
                 endDate={endDate!}
                 reserves={reserves!}
+                total={total!}
+                setTotal={setTotal}
+                coin={coin}
+                setCoin={setCoin}
               />
             </div>
             <div className="flex flex-row-reverse px-8">
@@ -367,9 +374,15 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                 return reserve;
                               }),
                             );
+                            console.log("-----------");
+                            console.log(coin);
                             await sendEmail({
                               to: client.email!,
                               token,
+                              cliente: client.name!,
+                              precio: total!,
+                              moneda: coin!,
+                              local: store!.name!,
                             });
                             setReserves1(updatedReserves1);
                             setLoadingPay(false);
