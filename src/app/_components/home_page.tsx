@@ -304,30 +304,32 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               <Button
                 type="submit"
                 onClick={async () => {
-                  console.log(total);
-                  if (handleSubmit()) {
-                    setReserves1([]);
-                    setReserves([]);
-                    reserves.map(async (reserve) => {
-                      for (var i = 0; i < reserve.Cantidad!; i++) {
-                        const response = await reservarBox(reserve);
-                        const updatedReserve = {
-                          ...reserve,
-                          IdTransaction: response,
-                        };
-                        setReserves1((prevReserves) => [
-                          ...prevReserves,
-                          updatedReserve,
-                        ]);
-                      }
-                    });
-                    console.log(total);
-                    setLoadingPay(true);
-                    await new Promise((resolve) => setTimeout(resolve, 3000));
-                    setLoadingPay(false);
-                    const clientResponse = await createClient(client);
-                    setNReserve(parseInt(clientResponse.id));
-                    setReserva(true);
+                  try {
+                    if (handleSubmit()) {
+                      setReserves1([]);
+                      setReserves([]);
+                      reserves.map(async (reserve) => {
+                        for (var i = 0; i < reserve.Cantidad!; i++) {
+                          const response = await reservarBox(reserve);
+                          const updatedReserve = {
+                            ...reserve,
+                            IdTransaction: response,
+                          };
+                          setReserves1((prevReserves) => [
+                            ...prevReserves,
+                            updatedReserve,
+                          ]);
+                        }
+                      });
+                      setLoadingPay(true);
+                      await new Promise((resolve) => setTimeout(resolve, 3000));
+                      setLoadingPay(false);
+                      const clientResponse = await createClient(client);
+                      setNReserve(parseInt(clientResponse.id));
+                      setReserva(true);
+                    }
+                  } catch (error) {
+                    console.log(error);
                   }
                 }}
               >
