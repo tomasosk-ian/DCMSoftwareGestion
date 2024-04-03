@@ -20,7 +20,11 @@ import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
 import { api } from "~/trpc/react";
 
-export default function Success(props: { reserves: Reserve[]; store: Store }) {
+export default function Success(props: {
+  reserves: Reserve[];
+  store: Store;
+  nReserve: number;
+}) {
   const { data: sizes, isLoading } = api.size.get.useQuery();
   function getSize(idSize: number) {
     const size = sizes.find((s: Size) => s.id === idSize);
@@ -43,7 +47,7 @@ export default function Success(props: { reserves: Reserve[]; store: Store }) {
               </div>
               <div className="flex justify-between gap-4 px-5 py-2">
                 <div className="font-bold">Número de orden</div>
-                <div className="font-bold">123456</div>
+                <div className="font-bold">{props.nReserve}</div>
               </div>
               <div className="flex justify-between gap-4 px-5 py-2">
                 <div className="font-bold">Id organización</div>

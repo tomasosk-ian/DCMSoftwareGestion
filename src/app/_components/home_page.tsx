@@ -44,6 +44,7 @@ import { Client } from "~/server/api/routers/clients";
 import ReactDOM from "react-dom";
 import ReactPDF from "@react-pdf/renderer";
 import { Badge } from "~/components/ui/badge";
+import { es } from "date-fns/locale";
 
 export const Icons = {
   spinner: Loader2,
@@ -72,7 +73,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [transaction, setTransaction] = useState<Transaction>();
-
+  const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
   const [client, setClient] = useState<Client>({
     identifier: null,
@@ -86,7 +87,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     api.transaction.create.useMutation();
   const { mutateAsync: createClient } = api.client.create.useMutation();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
-  const [total, setTotal] = useState<number>();
+  const [total, setTotal] = useState<number>(0);
   const [coin, setCoin] = useState<string>("");
 
   const [errors, setErrors] = useState({
@@ -119,7 +120,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     }
     return true;
   };
-
+  function formatDateToTextDate(dateString: string): string {
+    const date = new Date(dateString);
+    const formattedDate = format(date, "eee dd MMMM", { locale: es });
+    return formattedDate;
+  }
   // if (props.cities.length !== 0) {
   //   return (
   //     <div className="container">
@@ -289,7 +294,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 startDate={startDate!}
                 endDate={endDate!}
                 reserves={reserves!}
-                total={total!}
+                total={total}
                 setTotal={setTotal}
                 coin={coin}
                 setCoin={setCoin}
@@ -299,11 +304,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               <Button
                 type="submit"
                 onClick={async () => {
+                  console.log(total);
                   if (handleSubmit()) {
                     setReserves1([]);
                     setReserves([]);
                     reserves.map(async (reserve) => {
-                      console.log(reserve.client);
                       for (var i = 0; i < reserve.Cantidad!; i++) {
                         const response = await reservarBox(reserve);
                         const updatedReserve = {
@@ -316,10 +321,12 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                         ]);
                       }
                     });
+                    console.log(total);
                     setLoadingPay(true);
                     await new Promise((resolve) => setTimeout(resolve, 3000));
                     setLoadingPay(false);
                     const clientResponse = await createClient(client);
+                    setNReserve(parseInt(clientResponse.id));
                     setReserva(true);
                   }
                 }}
@@ -351,15 +358,21 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                         onClick={async () => {
                           try {
                             setLoadingPay(true);
-                            let token: number[] = [];
+                            let token: [number, string][] = [];
                             const updatedReserves1 = await Promise.all(
                               reserves1.map(async (reserve) => {
                                 if (reserve.IdTransaction) {
                                   const response = await confirmarBox({
                                     idToken: reserve.IdTransaction!,
                                   });
+
                                   if (response) {
-                                    token = [...token, response];
+                                    token.push([
+                                      response,
+                                      props.sizes.find(
+                                        (x) => x.id == reserve.IdSize,
+                                      )?.nombre! ?? "",
+                                    ]);
                                     await createTransaction({
                                       ...transaction,
                                       client: reserve.client,
@@ -374,15 +387,16 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                 return reserve;
                               }),
                             );
-                            console.log("-----------");
-                            console.log(coin);
                             await sendEmail({
                               to: client.email!,
                               token,
-                              cliente: client.name!,
-                              precio: total!,
-                              moneda: coin!,
+                              client: client.name!,
+                              price: total,
+                              coin,
                               local: store!.name!,
+                              nReserve,
+                              from: formatDateToTextDate(startDate!),
+                              until: formatDateToTextDate(endDate!),
                             });
                             setReserves1(updatedReserves1);
                             setLoadingPay(false);
@@ -403,7 +417,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         )}
         {pagoOk && (
           <div>
-            <Success reserves={reserves1} store={store!} />
+            <Success reserves={reserves1} store={store!} nReserve={nReserve!} />
             <Button
               onClick={async () => {
                 setCity(null);

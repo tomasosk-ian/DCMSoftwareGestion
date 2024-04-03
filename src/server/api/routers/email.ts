@@ -11,16 +11,18 @@ export const emailRouter = createTRPCRouter({
     .input(
       z.object({
         to: z.string(),
-        token: z.array(z.number()),
-        precio: z.number(),
-        moneda: z.string(),
-        cliente: z.string(),
+        token: z.array(z.tuple([z.number(), z.string()])),
+        price: z.number(),
+        coin: z.string(),
+        client: z.string(),
         local: z.string(),
+        nReserve: z.number(),
+        from: z.string(),
+        until: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("Email api");
         const sgMail = require("@sendgrid/mail");
         sgMail.setApiKey(env.SENDGRID_API_KEY);
         console.log(input.token);
@@ -28,25 +30,25 @@ export const emailRouter = createTRPCRouter({
         const msg = {
           to: input.to,
           from: "back@lockersurbanos.com.ar",
-          subject: "Confirmación de reserva locker.",
+          subject: `Confirmación de reserva locker N° ${input.nReserve}.`,
           html: `<body>
-          <p>Estimado/a ${input.cliente},</p>
+          <p>Estimado/a ${input.client},</p>
         
-          <p>Nos complace confirmar que su reserva en ${
-            input.local
-          } ha sido exitosamente procesada.</p>
+          ${
+            input.from === input.until
+              ? `<p>Nos complace confirmar que su reserva en ${input.local} para hoy ha sido exitosamente procesada.</p>`
+              : `<p>Nos complace confirmar que su reserva en ${input.local} desde <strong>${input.from}</strong> hasta <strong>${input.until}</strong> ha sido exitosamente procesada.</p>`
+          }
         
           <p>
             ${input.token
               .map((x) => {
-                return `Su código de reserva es <strong>${x}</strong><br>`;
+                return `Su código de reserva es <strong>${x[0]} (${x[1]})</strong><br>`;
               })
               .join("")}
           </p>
         
-          <p>El precio total de su reserva es: ${input.precio} ${
-            input.moneda
-          }</p>
+          <p>El precio total de su reserva es: ${input.coin} ${input.price}</p>
         
           <p>Atentamente,</p>
           <p>Lockers Urbanos</p>

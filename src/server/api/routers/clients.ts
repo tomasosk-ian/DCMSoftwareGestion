@@ -27,23 +27,20 @@ export const clientsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // TODO: verificar permisos
 
-      const identifier = createId();
-
-      await db.insert(schema.clients).values({
-        identifier,
+      const result = await db.insert(schema.clients).values({
         name: input.name,
         surname: input.surname,
         email: input.email,
         prefijo: input.prefijo,
         telefono: input.telefono,
       });
-
-      return { identifier };
+      const id = result.insertId;
+      return { id };
     }),
   getById: publicProcedure
     .input(
       z.object({
-        identifier: z.string(),
+        identifier: z.number(),
       }),
     )
     .query(async ({ input }) => {
@@ -56,7 +53,7 @@ export const clientsRouter = createTRPCRouter({
   change: publicProcedure
     .input(
       z.object({
-        identifier: z.string(),
+        identifier: z.number(),
         name: z.string().min(0).max(1023).optional().nullable(),
         surname: z.string().min(0).max(1023).optional().nullable(),
         email: z.string().min(0).max(1023).optional().nullable(),

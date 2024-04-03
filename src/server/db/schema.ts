@@ -233,7 +233,7 @@ export const coinData = mysqlTable(
 export const clients = mysqlTable(
   "clients",
   {
-    identifier: varchar("identifier", { length: 255 }),
+    identifier: int("identifier").autoincrement(),
     name: varchar("name", { length: 255 }),
     surname: varchar("surname", { length: 255 }),
     email: varchar("email", { length: 255 }),

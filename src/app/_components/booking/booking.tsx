@@ -72,7 +72,6 @@ export default function Booking(props: {
         );
 
         const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
-        console.log(price);
         const discount = fees?.find((s: Fee) => s.size === reserve.IdSize)
           ?.discount!;
         if (coins) {
@@ -86,7 +85,7 @@ export default function Booking(props: {
         }
 
         prices[reserve.IdSize!] = price;
-        if (days > 1) {
+        if (days >= 1) {
           totalPrice +=
             price * reserve.Cantidad! +
             (price * reserve.Cantidad! * days * (100 - discount)) / 100; // Sumar al total local
@@ -95,7 +94,9 @@ export default function Booking(props: {
         }
       });
       totalPrice = parseFloat(totalPrice.toFixed(2));
-      props.setTotal(totalPrice);
+      if (totalPrice != 0) {
+        props.setTotal(totalPrice);
+      }
       setSubTotal(totalPrice);
 
       setPrices(prices);
