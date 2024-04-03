@@ -70,13 +70,13 @@ export const clientsRouter = createTRPCRouter({
   delete: publicProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await db
-        .delete(schema.cities)
-        .where(eq(schema.cities.identifier, input.id));
+        .delete(schema.clients)
+        .where(eq(schema.clients.identifier, input.id));
     }),
 });
 

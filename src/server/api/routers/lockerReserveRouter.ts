@@ -18,7 +18,7 @@ export const lockerReserveRouter = createTRPCRouter({
   get: publicProcedure
     .input(
       z.object({
-        clientId: z.string().optional(),
+        clientId: z.number().optional(),
       }),
     )
     .query(async ({ input }) => {

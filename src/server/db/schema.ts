@@ -298,7 +298,7 @@ export const reservas = mysqlTable(
     Modo: varchar("Modo", { length: 255 }),
     Cantidad: int("Cantidad"),
     IdTransaction: int("IdTransaction"),
-    client: varchar("client", { length: 255 }),
+    client: int("client"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
