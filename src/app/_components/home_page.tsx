@@ -43,11 +43,8 @@ import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
 import ReactDOM from "react-dom";
 import ReactPDF from "@react-pdf/renderer";
-<<<<<<< HEAD
-=======
 import { Badge } from "~/components/ui/badge";
 import { es } from "date-fns/locale";
->>>>>>> main
 
 export const Icons = {
   spinner: Loader2,
@@ -247,7 +244,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   // } else {
   return (
     <div className="container">
-      <div className="grid grid-cols-3 justify-items-center gap-4"></div>
+      <Badge>DEVELOPMENT</Badge>
+      <div className="grid grid-cols-3 justify-items-center gap-4	"></div>
       <div className="flex flex-col items-center justify-center pt-2">
         <StoreSelector
           stores={storess.data}
