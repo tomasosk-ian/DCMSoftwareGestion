@@ -34,6 +34,7 @@ export const env = createEnv({
     AZURE_TENANT_ID: z.string(),
     SERVER_URL: z.string().url(),
     SENDGRID_API_KEY: z.string(),
+    MAIL_SENDER: z.string(),
   },
 
   /**
@@ -59,6 +60,7 @@ export const env = createEnv({
     AZURE_TENANT_ID: process.env.AZURE_TENANT_ID,
     SERVER_URL: process.env.SERVER_URL,
     SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+    MAIL_SENDER: process.env.MAIL_SENDER,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

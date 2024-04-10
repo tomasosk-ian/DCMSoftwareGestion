@@ -29,17 +29,34 @@ export const emailRouter = createTRPCRouter({
         input.token.map((x) => console.log(x));
         const msg = {
           to: input.to,
-          from: "anselmo@dcm.com.ar",
+          from: `${env.MAIL_SENDER}`,
           subject: `Confirmación de reserva locker N° ${input.nReserve}.`,
-          html: `<body>
+          html: `
+          <style>
+              hr {
+                  border: none;
+                  border-top: 1px solid #ccc;
+                  width: 50vh; /* Ancho de la línea */
+                  margin: 5px auto; /* Margen superior e inferior automático y centrado */
+              }
+          </style>
+          <body>
           <p>Estimado/a ${input.client},</p>
+          <p>Nos complace confirmar que tu reserva en ${input.local} ha sido exitosamente procesada.</p>
+
+          <hr>
+
+          <p><strong>N° Reserva</strong></p>
+          <p><strong>${input.nReserve}</strong></p>
+
+          <hr>
+
+          <p><strong>Período</strong></p>
+          <p>Entrega desde              ${input.from}</p>
+          <p>Recogida hasta             ${input.until}</p>
         
-          ${
-            input.from === input.until
-              ? `<p>Nos complace confirmar que su reserva en ${input.local} para hoy ha sido exitosamente procesada.</p>`
-              : `<p>Nos complace confirmar que su reserva en ${input.local} desde <strong>${input.from}</strong> hasta <strong>${input.until}</strong> ha sido exitosamente procesada.</p>`
-          }
-        
+          <hr>
+
           <p>
             ${input.token
               .map((x) => {
@@ -47,9 +64,13 @@ export const emailRouter = createTRPCRouter({
               })
               .join("")}
           </p>
-        
-          <p>El precio total de su reserva es: ${input.coin} ${input.price}</p>
-        
+
+          <hr>
+
+          <p><strong>Precio Total</strong>         ${input.coin} ${input.price}</p>
+
+          <hr>
+          
           <p>Atentamente,</p>
           <p>Lockers Urbanos</p>
           

@@ -45,6 +45,7 @@ import ReactDOM from "react-dom";
 import ReactPDF from "@react-pdf/renderer";
 import { Badge } from "~/components/ui/badge";
 import { es } from "date-fns/locale";
+import { es } from "date-fns/locale";
 
 export const Icons = {
   spinner: Loader2,
@@ -74,6 +75,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [transaction, setTransaction] = useState<Transaction>();
   const [nReserve, setNReserve] = useState<number>(0);
+  const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
   const [client, setClient] = useState<Client>({
     identifier: 0,
@@ -87,6 +89,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     api.transaction.create.useMutation();
   const { mutateAsync: createClient } = api.client.create.useMutation();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
+  const [total, setTotal] = useState<number>(0);
+  const [coin, setCoin] = useState<string>("");
+
   const [total, setTotal] = useState<number>(0);
   const [coin, setCoin] = useState<string>("");
 
@@ -122,7 +127,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   };
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
-    const formattedDate = format(date, "eee dd MMMM", { locale: es });
+    const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
     return formattedDate;
   }
   // if (props.cities.length !== 0) {
@@ -244,7 +249,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   // } else {
   return (
     <div className="container">
-      <Badge>DEVELOPMENT</Badge>
       <div className="grid grid-cols-3 justify-items-center gap-4	"></div>
       <div className="flex flex-col items-center justify-center pt-2">
         <StoreSelector

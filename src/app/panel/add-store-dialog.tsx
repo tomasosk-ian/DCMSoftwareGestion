@@ -42,6 +42,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
   const [image, setImage] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [serieLocker, setSerieLocker] = useState("");
+  const [address, setAddress] = useState("");
 
   const router = useRouter();
 
@@ -51,6 +52,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
         name,
         image,
         cityId,
+        address,
       });
 
       toast.success("Local creado correctamente");
@@ -85,53 +87,64 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div>
-            <Label className="text-right">Ciudad</Label>
-            <Select
-              onValueChange={(value: string) => {
-                setCity(value);
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Ciudades</SelectLabel>
-                  {props.cities.map((e) => {
-                    return (
-                      <SelectItem key={e.identifier} value={e.identifier}>
-                        {e.name}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+          <div className="flex">
+            <div className="col-6 pr-4">
+              <Label className="text-right">Ciudad</Label>
+              <Select
+                onValueChange={(value: string) => {
+                  setCity(value);
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Ciudades</SelectLabel>
+                    {props.cities.map((e) => {
+                      return (
+                        <SelectItem key={e.identifier} value={e.identifier}>
+                          {e.name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="col-6">
+              <Label className="text-right">Locker</Label>
+              <Select
+                onValueChange={(value: string) => {
+                  setSerieLocker(value);
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Lockers</SelectLabel>
+                    {props.lockers.map((e) => {
+                      return (
+                        <SelectItem key={e.id} value={e.nroSerieLocker}>
+                          {e.nroSerieLocker}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div>
-            <Label className="text-right">Locker</Label>
-            <Select
-              onValueChange={(value: string) => {
-                setSerieLocker(value);
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Lockers</SelectLabel>
-                  {props.lockers.map((e) => {
-                    return (
-                      <SelectItem key={e.id} value={e.nroSerieLocker}>
-                        {e.nroSerieLocker}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+          <div className="col-8 py-4">
+            <Label htmlFor="address">Dirección</Label>
+            <Input
+              id="address"
+              placeholder="ej: Rivadavia 123"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
           </div>
           <div>
             <Label htmlFor="description">Imagen</Label>
