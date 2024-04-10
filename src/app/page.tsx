@@ -10,6 +10,7 @@ const inter = Inter({
 });
 export default async function Home() {
   const cities = await api.city.get.query();
+  const sizes = await api.size.get.query();
   return (
     <html lang="es">
       <head>
@@ -401,7 +402,7 @@ export default async function Home() {
         <main>
           <div>
             <Header />
-            <HomePage cities={cities} sizes={[]} />
+            <HomePage cities={cities} sizes={sizes} />
           </div>
         </main>
       </body>

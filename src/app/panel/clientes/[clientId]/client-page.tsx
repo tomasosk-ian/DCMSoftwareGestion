@@ -166,7 +166,7 @@ export default function ClientPage({ client }: { client: Client }) {
   );
 }
 
-function DeleteChannel(props: { clientId: string }) {
+function DeleteChannel(props: { clientId: number }) {
   const { mutateAsync: deleteChannel, isLoading } =
     api.client.delete.useMutation();
 

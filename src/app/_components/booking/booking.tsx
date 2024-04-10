@@ -27,18 +27,19 @@ export default function Booking(props: {
   startDate: string;
   endDate: string;
   reserves: Reserve[];
+  total: number;
+  setTotal: (total: number) => void;
+  coin: string;
+  setCoin: (coin: string) => void;
 }) {
   const { data: sizes, isLoading } = api.size.get.useQuery();
   const { data: fees } = api.fee.get.useQuery();
-  const [total, setTotal] = useState<number>();
   const [subTotal, setSubTotal] = useState<number>(0);
-  const [coin, setCoin] = useState<string>("");
   const [reserveGroupBySize, setReserveGroupBySize] = useState<
     Record<number, Reserve>
   >({});
   const [prices, setPrices] = useState<Record<number, number>>({});
   const [count, setCount] = useState<Record<number, number>>({});
-  const [discount, setDiscount] = useState<number>();
   const coins = api.coin.get.useQuery();
   useEffect(() => {
     const counts: Record<number, number> = {};
@@ -71,27 +72,36 @@ export default function Booking(props: {
         );
 
         const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
-        setDiscount(
-          fees?.find((s: Fee) => s.size === reserve.IdSize)?.discount!,
-        );
-        const coinId = fees?.find((s: Fee) => s.size === reserve.IdSize)?.coin!;
-        if (coins)
-          setCoin(
-            coins?.data?.find((s: Coin) => s.identifier === coinId)
-              ?.description!,
+        const discount = fees?.find((s: Fee) => s.size === reserve.IdSize)
+          ?.discount!;
+        if (coins) {
+          props.setCoin(
+            coins?.data?.find(
+              (s: Coin) =>
+                s.identifier ===
+                fees?.find((s: Fee) => s.size === reserve.IdSize)?.coin!,
+            )?.description!,
           );
-        prices[reserve.IdSize!] = price;
+        }
 
-        totalPrice +=
-          price + (price * reserve.Cantidad! * days * (100 - discount!)) / 100; // Sumar al total local
-        totalPrice = parseFloat(totalPrice.toFixed(2));
+        prices[reserve.IdSize!] = price;
+        if (days >= 1) {
+          totalPrice +=
+            price * reserve.Cantidad! +
+            (price * reserve.Cantidad! * days * (100 - discount)) / 100; // Sumar al total local
+        } else {
+          totalPrice += price * reserve.Cantidad!;
+        }
       });
-      setTotal(totalPrice);
+      totalPrice = parseFloat(totalPrice.toFixed(2));
+      if (totalPrice != 0) {
+        props.setTotal(totalPrice);
+      }
       setSubTotal(totalPrice);
 
       setPrices(prices);
     }
-  }, [fees, discount]);
+  }, [fees, coins]);
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM", { locale: es });
@@ -149,11 +159,21 @@ export default function Booking(props: {
                 <Label>
                   {parseFloat(
                     (
-                      (prices[size.id]! * days * (100 - discount!)) /
+                      (prices[size.id]! *
+                        days *
+                        (100 -
+                          fees?.find((s: Fee) => s.size === size.id)
+                            ?.discount!!)) /
                       100
                     ).toFixed(2),
                   )}{" "}
-                  {coin}
+                  {
+                    coins?.data?.find(
+                      (s: Coin) =>
+                        s.identifier ===
+                        fees?.find((s: Fee) => s.size === size.id)?.coin!,
+                    )?.description!
+                  }{" "}
                 </Label>
               </div>
             )}
@@ -241,7 +261,7 @@ export default function Booking(props: {
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
                 <Label>
-                  {subTotal} {coin}
+                  {subTotal} {props.coin}
                 </Label>
               </div>
             </div>
@@ -258,7 +278,7 @@ export default function Booking(props: {
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
                 <Label>
-                  {total} {coin}
+                  {props.total} {props.coin}
                 </Label>
               </div>
             </div>

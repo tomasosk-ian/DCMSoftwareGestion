@@ -1,143 +1,56 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  bigint,
-  boolean,
-  datetime,
-  decimal,
-  float,
-  index,
-  int,
-  mysqlTableCreator,
-  primaryKey,
   text,
-  timestamp,
-  varchar,
-} from "drizzle-orm/mysql-core";
-import { type AdapterAccount } from "next-auth/adapters";
+  index,
+  integer,
+  primaryKey,
+  real,
+  sqliteTableCreator,
+} from "drizzle-orm/sqlite-core";
+export const sqliteTable = sqliteTableCreator((name) => `test_${name}`);
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
-export const mysqlTable = mysqlTableCreator((name) => `test_${name}`);
-
-export const posts = mysqlTable(
-  "post",
-  {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    name: varchar("name", { length: 256 }),
-    createdById: varchar("createdById", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
-  },
-  (example) => ({
-    createdByIdIdx: index("createdById_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
-  }),
-);
-
-export const users = mysqlTable("user", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
-  name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 255 }).notNull(),
-  emailVerified: timestamp("emailVerified", {
-    mode: "date",
-    fsp: 3,
-  }).default(sql`CURRENT_TIMESTAMP(3)`),
-  image: varchar("image", { length: 255 }),
-});
-
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-  sessions: many(sessions),
-}));
-
-export const accounts = mysqlTable(
-  "account",
-  {
-    userId: varchar("userId", { length: 255 }).notNull(),
-    type: varchar("type", { length: 255 })
-      .$type<AdapterAccount["type"]>()
-      .notNull(),
-    provider: varchar("provider", { length: 255 }).notNull(),
-    providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: int("expires_at"),
-    token_type: varchar("token_type", { length: 255 }),
-    scope: varchar("scope", { length: 255 }),
-    id_token: text("id_token"),
-    session_state: varchar("session_state", { length: 255 }),
-  },
-  (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
-    userIdIdx: index("userId_idx").on(account.userId),
-  }),
-);
-
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, { fields: [accounts.userId], references: [users.id] }),
-}));
-
-export const sessions = mysqlTable(
-  "session",
-  {
-    sessionToken: varchar("sessionToken", { length: 255 })
-      .notNull()
-      .primaryKey(),
-    userId: varchar("userId", { length: 255 }).notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
-  },
-  (session) => ({
-    userIdIdx: index("userId_idx").on(session.userId),
-  }),
-);
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}));
-
-export const verificationTokens = mysqlTable(
-  "verificationToken",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    token: varchar("token", { length: 255 }).notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
-  }),
-);
-
-export const cities = mysqlTable(
+export const cities = sqliteTable(
   "cities",
   {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    description: varchar("description", { length: 255 }).notNull(),
-    image: varchar("image", { length: 255 }),
+    identifier: text("identifier", { length: 255 }).notNull(),
+    name: text("name", { length: 255 }).notNull(),
+    description: text("description", { length: 255 }).notNull(),
+    image: text("image", { length: 255 }),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
   }),
 );
-export const stores = mysqlTable(
+
+export const clients = sqliteTable(
+  "clients",
+  {
+    identifier: integer("identifier").primaryKey({ autoIncrement: true }),
+    name: text("name", { length: 255 }),
+    surname: text("surname", { length: 255 }),
+    email: text("email", { length: 255 }),
+    prefijo: integer("prefijo"),
+    telefono: integer("telefono"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const stores = sqliteTable(
   "stores",
   {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    image: varchar("image", { length: 255 }),
-    cityId: varchar("cityId", { length: 255 }).notNull(),
-    serieLocker: varchar("serieLocker", { length: 255 }),
+    identifier: text("identifier", { length: 255 }).notNull(),
+    name: text("name", { length: 255 }).notNull(),
+    image: text("image", { length: 255 }),
+    cityId: text("cityId", { length: 255 }).notNull(),
+    serieLocker: text("serieLocker", { length: 255 }),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
   }),
 );
+
 export const storesRelations = relations(stores, ({ one }) => ({
   city: one(cities, {
     fields: [stores.cityId],
@@ -145,112 +58,13 @@ export const storesRelations = relations(stores, ({ one }) => ({
   }),
 }));
 
-export const config = mysqlTable(
-  "config",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    description: varchar("description", { length: 255 }),
-    token: varchar("token", { length: 20 }),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
-  }),
-);
-
-export const lockers = mysqlTable(
-  "lockers",
-  {
-    id: varchar("identifier", { length: 255 }).notNull(),
-    nroSerieLocker: varchar("name", { length: 255 }).notNull(),
-    status: varchar("description", { length: 255 }),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.id),
-  }),
-);
-
-export const globalconfig = mysqlTable(
-  "globalconfig",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    image: varchar("image", { length: 255 }),
-    token: varchar("token", { length: 255 }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
-  }),
-);
-
-export const userData = mysqlTable(
-  "userdata",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    last_name: varchar("last_name", { length: 255 }).notNull(),
-    email: varchar("email", { length: 255 }).notNull(),
-    tel: int("tel").notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
-  }),
-);
-
-export const feeData = mysqlTable(
-  "feedata",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    description: varchar("description", { length: 255 }),
-    coin: varchar("coin", { length: 255 }),
-    size: int("size"),
-    value: float("value"),
-    discount: float("discount"),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
-  }),
-);
-
-export const feeRelations = relations(feeData, ({ one }) => ({
-  coin: one(coinData, {
-    fields: [feeData.coin],
-    references: [coinData.identifier],
-  }),
-}));
-export const coinData = mysqlTable(
-  "coindate",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    description: varchar("description", { length: 255 }),
-    value: float("value"),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
-  }),
-);
-
-export const clients = mysqlTable(
-  "clients",
-  {
-    identifier: varchar("identifier", { length: 255 }),
-    name: varchar("name", { length: 255 }),
-    surname: varchar("surname", { length: 255 }),
-    email: varchar("email", { length: 255 }),
-    prefijo: int("prefijo"),
-    telefono: int("telefono"),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
-  }),
-);
-export const transactions = mysqlTable(
+export const transactions = sqliteTable(
   "transactions",
   {
-    id: int("number").primaryKey().autoincrement(),
-    confirm: boolean("confirm").default(false),
-    confirmedAt: datetime("confirmedAt").default(new Date()),
-    client: varchar("client", { length: 255 }),
+    id: integer("number").primaryKey().primaryKey({ autoIncrement: true }),
+    confirm: integer("confirm", { mode: "boolean" }).default(false),
+    confirmedAt: text("confirmedAt").default(sql`(CURRENT_DATE)`),
+    client: text("client", { length: 255 }),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.id),
@@ -264,41 +78,41 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
   }),
 }));
 
-export const sizes = mysqlTable(
+export const sizes = sqliteTable(
   "sizes",
   {
-    id: int("id").notNull(),
-    alto: int("alto"),
-    ancho: int("ancho"),
-    profundidad: int("profundidad"),
-    nombre: varchar("nombre", { length: 255 }),
-    cantidad: int("cantidad"),
-    cantidadSeleccionada: int("cantidadSeleccionada"),
-    tarifa: varchar("tarifa", { length: 255 }),
-    image: varchar("image", { length: 255 }),
+    id: integer("id").notNull(),
+    alto: integer("alto"),
+    ancho: integer("ancho"),
+    profundidad: integer("profundidad"),
+    nombre: text("nombre", { length: 255 }),
+    cantidad: integer("cantidad"),
+    cantidadSeleccionada: integer("cantidadSeleccionada"),
+    tarifa: text("tarifa", { length: 255 }),
+    image: text("image", { length: 255 }),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.id),
   }),
 );
 
-export const reservas = mysqlTable(
+export const reservas = sqliteTable(
   "reservas",
   {
-    identifier: varchar("identifier", { length: 255 }),
-    NroSerie: varchar("NroSerie", { length: 255 }),
-    IdSize: int("IdSize"),
-    IdBox: int("IdBox"),
-    Token1: int("Token1"),
-    FechaCreacion: varchar("FechaCreacion", { length: 255 }),
-    FechaInicio: varchar("FechaInicio", { length: 255 }),
-    FechaFin: varchar("FechaFin", { length: 255 }),
-    Contador: int("Contador"),
-    Confirmado: boolean("Confirmado"),
-    Modo: varchar("Modo", { length: 255 }),
-    Cantidad: int("Cantidad"),
-    IdTransaction: int("IdTransaction"),
-    client: varchar("client", { length: 255 }),
+    identifier: text("identifier", { length: 255 }),
+    NroSerie: text("NroSerie", { length: 255 }),
+    IdSize: integer("IdSize"),
+    IdBox: integer("IdBox"),
+    Token1: integer("Token1"),
+    FechaCreacion: text("FechaCreacion", { length: 255 }),
+    FechaInicio: text("FechaInicio", { length: 255 }),
+    FechaFin: text("FechaFin", { length: 255 }),
+    Contador: integer("Contador"),
+    Confirmado: integer("Confirmado", { mode: "boolean" }).default(false),
+    Modo: text("Modo", { length: 255 }),
+    Cantidad: integer("Cantidad"),
+    IdTransaction: integer("IdTransaction"),
+    client: integer("client"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
@@ -311,3 +125,151 @@ export const reservasRelations = relations(reservas, ({ one }) => ({
     references: [clients.identifier],
   }),
 }));
+
+export const config = sqliteTable(
+  "config",
+  {
+    identifier: text("identifier", { length: 255 }).notNull(),
+    name: text("name", { length: 255 }).notNull(),
+    description: text("description", { length: 255 }),
+    token: text("token", { length: 20 }),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const lockers = sqliteTable(
+  "lockers",
+  {
+    id: text("identifier", { length: 255 }).notNull(),
+    nroSerieLocker: text("name", { length: 255 }).notNull(),
+    status: text("description", { length: 255 }),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.id),
+  }),
+);
+
+export const globalconfig = sqliteTable(
+  "globalconfig",
+  {
+    identifier: text("identifier", { length: 255 }).notNull(),
+    name: text("name", { length: 255 }).notNull(),
+    image: text("image", { length: 255 }),
+    token: text("token", { length: 255 }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const userData = sqliteTable(
+  "userdata",
+  {
+    identifier: text("identifier", { length: 255 }).notNull(),
+    name: text("name", { length: 255 }).notNull(),
+    last_name: text("last_name", { length: 255 }).notNull(),
+    email: text("email", { length: 255 }).notNull(),
+    tel: integer("tel").notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const feeData = sqliteTable(
+  "feedata",
+  {
+    identifier: text("identifier", { length: 255 }).notNull(),
+    description: text("description", { length: 255 }),
+    coin: text("coin", { length: 255 }),
+    size: integer("size"),
+    value: real("value"),
+    discount: real("discount"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const coinData = sqliteTable(
+  "coindate",
+  {
+    identifier: text("identifier", { length: 255 }).notNull(),
+    description: text("description", { length: 255 }),
+    value: real("value"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+export const feeRelations = relations(feeData, ({ one }) => ({
+  coin: one(coinData, {
+    fields: [feeData.coin],
+    references: [coinData.identifier],
+  }),
+}));
+export const sessions = sqliteTable(
+  "session",
+  {
+    sessionToken: text("sessionToken", { length: 255 }).notNull().primaryKey(),
+    userId: text("userId", { length: 255 }).notNull(),
+    expires: integer("expires", { mode: "timestamp" }),
+  },
+  (session) => ({
+    userIdIdx: index("userId_idx").on(session.userId),
+  }),
+);
+export const users = sqliteTable("user", {
+  id: text("id", { length: 255 }).notNull().primaryKey(),
+  name: text("name", { length: 255 }),
+  email: text("email", { length: 255 }).notNull(),
+  emailVerified: text("emailVerified").default(sql`(CURRENT_DATE)`),
+  image: text("image", { length: 255 }),
+});
+
+export const accounts = sqliteTable(
+  "account",
+  {
+    userId: text("userId", { length: 255 }).notNull(),
+    type: text("type", { length: 255 }).notNull(),
+    provider: text("provider", { length: 255 }).notNull(),
+    providerAccountId: text("providerAccountId", { length: 255 }).notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type", { length: 255 }),
+    scope: text("scope", { length: 255 }),
+    id_token: text("id_token"),
+    session_state: text("session_state", { length: 255 }),
+  },
+  (account) => ({
+    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    userIdIdx: index("userId_idxx").on(account.userId),
+  }),
+);
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  sessions: many(sessions),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const verificationTokens = sqliteTable(
+  "verificationToken",
+  {
+    identifier: text("identifier", { length: 255 }).notNull(),
+    token: text("token", { length: 255 }).notNull(),
+    expires: integer("expires", { mode: "timestamp" }),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier, vt.token),
+  }),
+);

@@ -27,23 +27,21 @@ export const clientsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // TODO: verificar permisos
 
-      const identifier = createId();
-
-      await db.insert(schema.clients).values({
-        identifier,
+      const result = await db.insert(schema.clients).values({
         name: input.name,
         surname: input.surname,
         email: input.email,
         prefijo: input.prefijo,
         telefono: input.telefono,
       });
+      const id = parseInt(result.lastInsertRowid?.toString()!);
 
-      return { identifier };
+      return { id };
     }),
   getById: publicProcedure
     .input(
       z.object({
-        identifier: z.string(),
+        identifier: z.number(),
       }),
     )
     .query(async ({ input }) => {
@@ -56,7 +54,7 @@ export const clientsRouter = createTRPCRouter({
   change: publicProcedure
     .input(
       z.object({
-        identifier: z.string(),
+        identifier: z.number(),
         name: z.string().min(0).max(1023).optional().nullable(),
         surname: z.string().min(0).max(1023).optional().nullable(),
         email: z.string().min(0).max(1023).optional().nullable(),
@@ -73,13 +71,13 @@ export const clientsRouter = createTRPCRouter({
   delete: publicProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await db
-        .delete(schema.cities)
-        .where(eq(schema.cities.identifier, input.id));
+        .delete(schema.clients)
+        .where(eq(schema.clients.identifier, input.id));
     }),
 });
 

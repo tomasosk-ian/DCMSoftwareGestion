@@ -13,6 +13,7 @@ import { db, schema } from "~/server/db";
 
 export const cityRouter = createTRPCRouter({
   get: publicProcedure.query(({ ctx }) => {
+    ctx.db.select().from(cities);
     const result = ctx.db.query.cities.findMany({
       orderBy: (cities, { desc }) => [desc(cities.identifier)],
     });

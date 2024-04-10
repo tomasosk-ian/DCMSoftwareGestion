@@ -18,7 +18,6 @@ export const transactionRouter = createTRPCRouter({
     .input(
       z.object({
         confirm: z.boolean().nullable().optional(),
-        confirmedAt: z.date().nullable().optional(),
         client: z.string().nullable().optional(),
       }),
     )
@@ -29,7 +28,6 @@ export const transactionRouter = createTRPCRouter({
 
       await db.insert(schema.transactions).values({
         confirm: input.confirm,
-        confirmedAt: input.confirmedAt,
         client: input.client,
       });
 
@@ -53,7 +51,6 @@ export const transactionRouter = createTRPCRouter({
       z.object({
         id: z.number(),
         confirm: z.boolean().optional(),
-        confirmedAt: z.date().optional(),
       }),
     )
     .mutation(({ ctx, input }) => {
