@@ -34,7 +34,8 @@ export const clientsRouter = createTRPCRouter({
         prefijo: input.prefijo,
         telefono: input.telefono,
       });
-      const id = result.insertId;
+      const id = parseInt(result.lastInsertRowid?.toString()!);
+
       return { id };
     }),
   getById: publicProcedure

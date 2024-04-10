@@ -76,7 +76,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
   const [client, setClient] = useState<Client>({
-    identifier: null,
+    identifier: 0,
     name: "",
     surname: "",
     email: "",
@@ -325,7 +325,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                       await new Promise((resolve) => setTimeout(resolve, 3000));
                       setLoadingPay(false);
                       const clientResponse = await createClient(client);
-                      setNReserve(parseInt(clientResponse.id));
+                      setNReserve(clientResponse.id);
                       setReserva(true);
                     }
                   } catch (error) {
