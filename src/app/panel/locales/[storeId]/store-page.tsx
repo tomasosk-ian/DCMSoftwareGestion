@@ -56,6 +56,7 @@ export default function StorePage(props: {
   const [name, setName] = useState(props.store.name);
   const [cityId, setCity] = useState(props.store.cityId!);
   const [serieLocker, setSerieLocker] = useState(props.store.serieLocker);
+  const [address, setAddress] = useState(props.store.address);
   const [loading, setLoading] = useState(false);
   const { mutateAsync: renameStore, isLoading } =
     api.store.change.useMutation();
@@ -70,6 +71,7 @@ export default function StorePage(props: {
         image,
         cityId,
         serieLocker,
+        address,
       });
       toast.success("Se ha modificado el local.");
       router.refresh();
@@ -159,6 +161,14 @@ export default function StorePage(props: {
                         </SelectGroup>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="name">Dirección</Label>
+                    <Input
+                      id="address"
+                      value={address!}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
                   </div>
                   <div className="col-span-2">
                     <Label htmlFor="description">Imagen</Label>

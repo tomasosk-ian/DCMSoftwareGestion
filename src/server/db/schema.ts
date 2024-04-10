@@ -45,6 +45,7 @@ export const stores = sqliteTable(
     image: text("image", { length: 255 }),
     cityId: text("cityId", { length: 255 }).notNull(),
     serieLocker: text("serieLocker", { length: 255 }),
+    address: text("address", { length: 255 }),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),

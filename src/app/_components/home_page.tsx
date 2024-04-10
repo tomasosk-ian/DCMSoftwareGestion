@@ -122,7 +122,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   };
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
-    const formattedDate = format(date, "eee dd MMMM", { locale: es });
+    const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
     return formattedDate;
   }
   // if (props.cities.length !== 0) {
