@@ -29,7 +29,7 @@ export const emailRouter = createTRPCRouter({
         input.token.map((x) => console.log(x));
         const msg = {
           to: input.to,
-          from: "back@lockersurbanos.com.ar",
+          from: "anselmo@dcm.com.ar",
           subject: `Confirmación de reserva locker N° ${input.nReserve}.`,
           html: `<body>
           <p>Estimado/a ${input.client},</p>
