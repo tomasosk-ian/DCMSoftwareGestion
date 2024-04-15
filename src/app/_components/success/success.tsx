@@ -24,6 +24,7 @@ export default function Success(props: {
   reserves: Reserve[];
   store: Store;
   nReserve: number;
+  total: number;
 }) {
   const { data: sizes, isLoading } = api.size.get.useQuery();
   function getSize(idSize: number) {
@@ -56,6 +57,10 @@ export default function Success(props: {
               <div className="flex justify-between gap-4 px-5 py-2">
                 <div className="font-bold">Número de factura</div>
                 <div className="font-bold">123456</div>
+              </div>
+              <div className="flex justify-between gap-4 px-5 py-2">
+                <div className="font-bold">Precio total</div>
+                <div className="font-bold">{props.total}</div>
               </div>
               {props.reserves.map((r, index) => (
                 <div

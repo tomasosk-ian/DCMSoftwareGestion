@@ -10,14 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Store } from "~/server/api/routers/store";
 import { es } from "date-fns/locale";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { api } from "~/trpc/react";
-import { number } from "zod";
 import { useEffect, useState } from "react";
 import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
@@ -32,7 +30,7 @@ export default function Booking(props: {
   coin: string;
   setCoin: (coin: string) => void;
 }) {
-  const { data: sizes, isLoading } = api.size.get.useQuery();
+  const { data: sizes } = api.size.get.useQuery();
   const { data: fees } = api.fee.get.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [reserveGroupBySize, setReserveGroupBySize] = useState<
@@ -72,8 +70,9 @@ export default function Booking(props: {
         );
 
         const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
-        const discount = fees?.find((s: Fee) => s.size === reserve.IdSize)
-          ?.discount!;
+        const discount = fees?.find(
+          (s: Fee) => s.size === reserve.IdSize,
+        )?.discount!;
         if (coins) {
           props.setCoin(
             coins?.data?.find(
@@ -224,9 +223,11 @@ export default function Booking(props: {
                             (reserve) => reserve.IdSize === size.id,
                           )?.Cantidad == 1
                             ? "1 unidad"
-                            : `${props.reserves.find(
-                                (reserve) => reserve.IdSize === size.id,
-                              )?.Cantidad} unidades`}
+                            : `${
+                                props.reserves.find(
+                                  (reserve) => reserve.IdSize === size.id,
+                                )?.Cantidad
+                              } unidades`}
                         </div>
                       </div>
                     );

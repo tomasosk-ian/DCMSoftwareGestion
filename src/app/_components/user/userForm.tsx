@@ -4,12 +4,14 @@ import { Title } from "@radix-ui/react-toast";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Client } from "~/server/api/routers/clients";
@@ -32,6 +34,7 @@ export default function UserForm(props: {
     telefono: string;
   }) => void;
 }) {
+  // console.log(myCountryCodesObject);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     props.setClient({ ...props.client, [name]: value });
@@ -78,6 +81,36 @@ export default function UserForm(props: {
           props.setErrors({ ...props.errors, [name]: "" });
         }}
       />
+
+      <div>
+        <Label className="text-right">Prefijo</Label>
+        {/* <Select
+          name="prefijo"
+          onValueChange={(value) => {
+            props.setClient({ ...props.client, prefijo: parseInt(value) });
+            props.setErrors({ ...props.errors, prefijo: "" });
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder={"Prefijo"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Lockers</SelectLabel>
+              {myCountryCodesObject.map((e: any) => {
+                console.log(e[0]);
+                return (
+                  // <SelectItem key={e[0]} value={e[0]}>
+                  //   {e.}
+                  // </SelectItem>
+
+                  <p>hola</p>
+                );
+              })}
+            </SelectGroup>
+          </SelectContent>
+        </Select> */}
+      </div>
       <span className="col-span-10 text-red-500">{props.errors.prefijo}</span>
 
       <Input

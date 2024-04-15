@@ -1,20 +1,8 @@
 export default async function Home() {
   return (
-    <div
-      id="the7-body"
-      className="home page-template-default page page-id-11 wp-embed-responsive the7-core-ver-2.7.6 title-off dt-responsive-on right-mobile-menu-close-icon ouside-menu-close-icon mobile-hamburger-close-bg-enable mobile-hamburger-close-bg-hover-enable fade-medium-mobile-menu-close-icon fade-medium-menu-close-icon srcset-enabled btn-flat custom-btn-color custom-btn-hover-color phantom-slide phantom-disable-decoration phantom-custom-logo-on top-header first-switch-logo-left first-switch-menu-right second-switch-logo-left second-switch-menu-right right-mobile-menu layzr-loading-on popup-message-style the7-ver-11.9.3 dt-fa-compatibility wpb-js-composer js-comp-ver-7.1 vc_responsive rs-safari no-mobile closed-overlay-mobile-header"
-      data-multibackground-mousewheeloverridespeed="true"
-    >
-      <div id="page" className="closed-mobile-header closed-header">
-        <a
-          className="skip-link screen-reader-text"
-          href="https://lockersurbanos.com.ar/#content"
-        >
-          Saltar al contenido
-        </a>
-      </div>
+    <div>
       <div
-        className="masthead inline-header center widgets full-height large-mobile-menu-icon dt-parent-menu-clickable show-sub-menu-on-hover show-device-logo show-mobile-logo"
+        className="masthead inline-header center widgets full-height large-mobile-menu-icon dt-parent-menu-clickable show-sub-menu-on-hover show-device-logo show-mobile-logo top-0"
         role="banner"
       >
         <div className="top-bar top-bar-empty top-bar-line-hide">

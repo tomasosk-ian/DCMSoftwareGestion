@@ -36,9 +36,7 @@ export default function storeSelector(props: {
                   >
                     <CardHeader>
                       <CardTitle> {store.name}</CardTitle>
-                      <CardDescription>
-                        Seleccione local preferido.
-                      </CardDescription>
+                      <CardDescription>{store.address}</CardDescription>
                     </CardHeader>
                     <img
                       className="aspect-video object-cover"

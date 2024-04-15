@@ -243,7 +243,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   //   );
   // } else {
   return (
-    <div className="container">
+    <div className="container absolute">
       <Badge>DEVELOPMENT</Badge>
       <div className="grid grid-cols-3 justify-items-center gap-4	"></div>
       <div className="flex flex-col items-center justify-center pt-2">
@@ -419,7 +419,12 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         )}
         {pagoOk && (
           <div>
-            <Success reserves={reserves1} store={store!} nReserve={nReserve!} />
+            <Success
+              reserves={reserves1}
+              store={store!}
+              nReserve={nReserve!}
+              total={total}
+            />
             <Button
               onClick={async () => {
                 setCity(null);

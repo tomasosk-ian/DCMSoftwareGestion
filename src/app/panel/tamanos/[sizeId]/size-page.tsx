@@ -76,8 +76,8 @@ export default function SizePage(props: { size: Size }) {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Tamaño</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
-            {isLoading ? (
+          <Button disabled={isLoading || loading} onClick={handleChange}>
+            {isLoading || loading ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
               <CheckIcon className="mr-2" />
@@ -115,6 +115,7 @@ export default function SizePage(props: { size: Size }) {
                       onClientUploadComplete={(res) => {
                         // Do something with the response
                         // setImage(res.keys.arguments);
+
                         setLoading(false);
                         setImage(res[0]!.url);
                         toast.success("Imagen cargada con éxito.");
