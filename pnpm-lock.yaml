@@ -83,6 +83,9 @@ dependencies:
   cmdk:
     specifier: ^0.2.1
     version: 0.2.1(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
+  countries-list:
+    specifier: ^3.1.0
+    version: 3.1.0
   date-fns:
     specifier: ^3.6.0
     version: 3.6.0
@@ -2633,6 +2636,10 @@ packages:
     engines: {node: '>=12.13'}
     dependencies:
       is-what: 4.1.16
+    dev: false
+
+  /countries-list@3.1.0:
+    resolution: {integrity: sha512-HpTBLZba1VPTZSjUnUwR7SykxV7Z/7/+ZM5x5wi5tO99Qvom6bE2SC+AQ18016ujg3jSlYBbMITrHNnPAHSM9Q==}
     dev: false
 
   /cross-fetch@3.1.8:

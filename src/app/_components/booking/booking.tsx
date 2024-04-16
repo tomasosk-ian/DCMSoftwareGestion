@@ -39,6 +39,7 @@ export default function Booking(props: {
   const [prices, setPrices] = useState<Record<number, number>>({});
   const [count, setCount] = useState<Record<number, number>>({});
   const coins = api.coin.get.useQuery();
+
   useEffect(() => {
     const counts: Record<number, number> = {};
 

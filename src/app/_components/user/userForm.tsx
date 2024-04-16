@@ -1,7 +1,7 @@
 "use client";
 
 import { Title } from "@radix-ui/react-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -15,6 +15,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Client } from "~/server/api/routers/clients";
+import { continents, countries, languages } from "countries-list";
 
 export default function UserForm(props: {
   client: Client;
@@ -34,7 +35,19 @@ export default function UserForm(props: {
     telefono: string;
   }) => void;
 }) {
-  // console.log(myCountryCodesObject);
+  const [phones, setPhones] = useState<Record<string, number>[]>();
+
+  useEffect(() => {
+    const phoneNumbers: Record<string, number>[] = [];
+
+    Object.entries(countries).forEach(([countryCode, countryData]) => {
+      const { phone } = countryData;
+      // console.log(`${countryCode}: ${phone}`);
+      phoneNumbers.push({ [countryCode]: phone[0]! });
+    });
+
+    setPhones(phoneNumbers);
+  }, []);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     props.setClient({ ...props.client, [name]: value });
@@ -70,7 +83,7 @@ export default function UserForm(props: {
       />
       <span className="col-span-12 text-red-500">{props.errors.email}</span>
 
-      <Input
+      {/* <Input
         className="col-span-4 border-4 border-indigo-300/50"
         placeholder={"Prefijo"}
         name="prefijo"
@@ -80,38 +93,42 @@ export default function UserForm(props: {
           props.setClient({ ...props.client, [name]: parseInt(value) });
           props.setErrors({ ...props.errors, [name]: "" });
         }}
-      />
+      /> */}
 
-      <div>
-        <Label className="text-right">Prefijo</Label>
-        {/* <Select
-          name="prefijo"
-          onValueChange={(value) => {
-            props.setClient({ ...props.client, prefijo: parseInt(value) });
-            props.setErrors({ ...props.errors, prefijo: "" });
+      <div className="col-span-4 border-4 border-indigo-300/50">
+        <Select
+          onValueChange={(value: string) => {
+            props.setClient({
+              ...props.client,
+              ["prefijo"]: parseInt(value),
+            });
+            props.setErrors({ ...props.errors, ["prefijo"]: "" });
           }}
         >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={"Prefijo"} />
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={"Elija un prefijo"} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Lockers</SelectLabel>
-              {myCountryCodesObject.map((e: any) => {
-                console.log(e[0]);
-                return (
-                  // <SelectItem key={e[0]} value={e[0]}>
-                  //   {e.}
-                  // </SelectItem>
+              <SelectLabel>Prefijos</SelectLabel>
+              {phones?.map((item) => {
+                // console.log(Object.keys(item)[0]);
+                // console.log(item[Object.keys(item)[0]!]);
 
-                  <p>hola</p>
+                return (
+                  <SelectItem
+                    key={Object.keys(item)[0]}
+                    value={item[Object.keys(item!)[0]!]!.toString()}
+                  >
+                    ({item[Object.keys(item!)[0]!]!.toString()}){" "}
+                    {Object.keys(item)[0]}
+                  </SelectItem>
                 );
               })}
             </SelectGroup>
           </SelectContent>
-        </Select> */}
+        </Select>
       </div>
-      <span className="col-span-10 text-red-500">{props.errors.prefijo}</span>
 
       <Input
         className="col-span-8 border-4 border-indigo-300/50"

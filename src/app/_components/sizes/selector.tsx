@@ -14,9 +14,10 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
-import { format } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { Car } from "lucide-react";
 import styles from "selector.module.css";
+import { Fee } from "~/server/api/routers/fee";
 
 export default function SizeSelector(props: {
   size: Size | null;
@@ -33,12 +34,76 @@ export default function SizeSelector(props: {
 }) {
   // const [reservas, setReservas] = useState<Reserve[]>();
   const [values, setValues] = useState<Record<string, number>>({});
+  const [price, setPrice] = useState<number>(0);
+  const { data: fees } = api.fee.get.useQuery();
   const { data: sizes, isLoading } = api.size.getAvailability.useQuery({
     nroSerieLocker: props.nroSerieLocker!,
     inicio: props.inicio!,
     fin: props.fin!,
   });
+  useEffect(() => {
+    try {
+      if (values) {
+        const newReserves: Reserve[] = Object.entries(values).map(
+          ([id, cantidad]) => ({
+            IdLocker: null,
+            NroSerie: props.nroSerieLocker,
+            IdSize: parseInt(id),
+            IdBox: null,
+            Token1: null,
+            FechaCreacion: format(Date.now(), "yyyy-MM-dd'T'00:00:00"),
+            FechaInicio: props.startDate!,
+            FechaFin: props.endDate!,
+            Contador: -1,
+            Confirmado: false,
+            Modo: "Por fecha",
+            Cantidad: cantidad,
+            client: "ansel",
+          }),
+        );
 
+        // const updatedReserves = props.reserves
+        //   ? [...props.reserves, ...newReserves]
+        //   : [...newReserves];
+        // props.setReserves(updatedReserves);
+
+        if (fees) {
+          let totalPrice = 0; // Variable local para llevar un seguimiento de la suma total
+
+          const prices: Record<number, number> = {};
+          newReserves.forEach((reserve) => {
+            const days = differenceInDays(
+              reserve?.FechaFin!,
+              reserve?.FechaCreacion!,
+            );
+
+            const price = fees?.find(
+              (s: Fee) => s.size === reserve.IdSize,
+            )?.value!;
+            const discount = fees?.find(
+              (s: Fee) => s.size === reserve.IdSize,
+            )?.discount!;
+
+            prices[reserve.IdSize!] = price;
+            if (days >= 1) {
+              totalPrice +=
+                price * reserve.Cantidad! +
+                (price * reserve.Cantidad! * days * (100 - discount)) / 100; // Sumar al total local
+            } else {
+              totalPrice += price * reserve.Cantidad!;
+            }
+          });
+          totalPrice = parseFloat(totalPrice.toFixed(2));
+          if (totalPrice != 0) {
+            setPrice(totalPrice);
+          }
+        }
+      }
+      // props.setSizeSelected(true);
+    } catch (error) {
+      // Manejar errores aquí
+    }
+  }, [fees, values]);
   function applyReserve() {
     try {
       if (values) {
@@ -156,8 +221,8 @@ export default function SizeSelector(props: {
                   //     </CardFooter>
                   //   </Card>
                   // </div>
-                  <div key={size.id} className="px-5 pb-5">
-                    <Card className="  h-96 w-72  bg-emerald-100 backdrop-blur-sm">
+                  <div key={size.id} className="h-full px-5 pb-5">
+                    <Card className="  h-96 w-72  overflow-hidden bg-emerald-100 backdrop-blur-sm">
                       <Card
                         style={{
                           clipPath: "polygon(29% 1%,1% 1%,1% 24%)",
@@ -188,7 +253,13 @@ export default function SizeSelector(props: {
                           alt="Image"
                         />
                       </Card>
-                      <div className="flex gap-2">
+                      <div className="flex gap-32">
+                        <p>Primer día</p>
+                        <p>
+                          {fees?.find((s: Fee) => s.size === size.id)?.value!}
+                        </p>
+                      </div>
+                      <div className="flex gap-4">
                         <div className="">Número de taquillas</div>
                         <div className="float-end inline-flex">
                           <button
@@ -236,7 +307,7 @@ export default function SizeSelector(props: {
                 onClick={applyReserve}
                 className="bottom-0 pt-3"
               >
-                APLICAR
+                APLICAR {price}
               </Button>
             )}
           </div>
