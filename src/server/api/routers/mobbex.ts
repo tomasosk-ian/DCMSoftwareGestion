@@ -13,6 +13,7 @@ export const mobbexRouter = createTRPCRouter({
     .input(
       z.object({
         amount: z.number(),
+        reference: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -25,7 +26,7 @@ export const mobbexRouter = createTRPCRouter({
       const checkout = {
         total: input.amount,
         currency: "ARS",
-        reference: "32165464asjajhdsj45",
+        reference: input.reference,
         description: "Descripción de la Venta",
         test: true,
         items: [

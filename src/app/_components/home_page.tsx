@@ -322,9 +322,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                       const clientResponse = await createClient(client);
                       setNReserve(clientResponse.id);
                       setReserva(true);
-                      let checkoutNumber = await test({ amount: total });
-                      console.log("checkoutNumber is");
-                      console.log(checkoutNumber);
+                      let checkoutNumber = await test({
+                        amount: total,
+                        reference: clientResponse.id.toString(),
+                      });
                       setCheckoutNumber(checkoutNumber);
                     }
                   } catch (error) {
