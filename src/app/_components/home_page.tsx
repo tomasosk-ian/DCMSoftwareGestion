@@ -45,6 +45,7 @@ import ReactDOM from "react-dom";
 import ReactPDF from "@react-pdf/renderer";
 import { Badge } from "~/components/ui/badge";
 import { es } from "date-fns/locale";
+import Payment from "./payment/page";
 
 export const Icons = {
   spinner: Loader2,
@@ -58,6 +59,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [sizeSelected, setsizeSelected] = useState(false);
   const [creationDate, setCreationDate] = useState<string>("");
   const [startDate, setStartDate] = useState<string>();
+  const [checkoutNumber, setCheckoutNumber] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
   const [idLocker, setIdLocker] = useState<number>(0);
   const [reserva, setReserva] = useState<boolean>(false);
@@ -66,13 +68,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [days, setDays] = useState<number>(0);
   const { mutateAsync: reservarBox } =
     api.lockerReserve.reserveBox.useMutation();
-  const { mutateAsync: confirmarBox } =
-    api.lockerReserve.confirmBox.useMutation();
+
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
-  const [transaction, setTransaction] = useState<Transaction>();
   const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
   const [client, setClient] = useState<Client>({
@@ -83,12 +83,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     prefijo: 0,
     telefono: 0,
   });
-  const { mutateAsync: createTransaction } =
-    api.transaction.create.useMutation();
+
   const { mutateAsync: createClient } = api.client.create.useMutation();
-  const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
   const [total, setTotal] = useState<number>(0);
   const [coin, setCoin] = useState<string>("");
+  const { mutateAsync: test } = api.mobbex.test.useMutation();
 
   const [errors, setErrors] = useState({
     name: "",
@@ -120,11 +119,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     }
     return true;
   };
-  function formatDateToTextDate(dateString: string): string {
-    const date = new Date(dateString);
-    const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
-    return formattedDate;
-  }
+
   // if (props.cities.length !== 0) {
   //   return (
   //     <div className="container">
@@ -327,6 +322,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                       const clientResponse = await createClient(client);
                       setNReserve(clientResponse.id);
                       setReserva(true);
+                      let checkoutNumber = await test({ amount: total });
+                      console.log("checkoutNumber is");
+                      console.log(checkoutNumber);
+                      setCheckoutNumber(checkoutNumber);
                     }
                   } catch (error) {
                     console.log(error);
@@ -341,79 +340,95 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         {reserva && !pagoOk && !loadingPay && (
           <div className="flex flex-row-reverse">
             {!loadingPay && (
-              <AlertDialog>
-                <AlertDialogTrigger>
-                  <Button>Confirmar pago</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Va a confirmar el pago de la reserva.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction>
-                      <Button
-                        type="submit"
-                        onClick={async () => {
-                          try {
-                            setLoadingPay(true);
-                            let token: [number, string][] = [];
-                            const updatedReserves1 = await Promise.all(
-                              reserves1.map(async (reserve) => {
-                                if (reserve.IdTransaction) {
-                                  const response = await confirmarBox({
-                                    idToken: reserve.IdTransaction!,
-                                  });
+              // <AlertDialog>
+              //   <AlertDialogTrigger>
+              //     <Button>Confirmar pago</Button>
+              //   </AlertDialogTrigger>
+              //   <AlertDialogContent>
+              //     <AlertDialogHeader>
+              //       <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
+              //       <AlertDialogDescription>
+              //         Va a confirmar el pago de la reserva.
+              //       </AlertDialogDescription>
+              //     </AlertDialogHeader>
+              //     <AlertDialogFooter>
+              //       <AlertDialogCancel>Cancel</AlertDialogCancel>
+              //       <AlertDialogAction>
+              //         <Button
+              //           type="submit"
+              //           onClick={async () => {
+              //             try {
+              //               setLoadingPay(true);
+              //               let token: [number, string][] = [];
+              //               const updatedReserves1 = await Promise.all(
+              //                 reserves1.map(async (reserve) => {
+              //                   if (reserve.IdTransaction) {
+              //                     const response = await confirmarBox({
+              //                       idToken: reserve.IdTransaction!,
+              //                     });
 
-                                  if (response) {
-                                    token.push([
-                                      response,
-                                      props.sizes.find(
-                                        (x) => x.id == reserve.IdSize,
-                                      )?.nombre! ?? "",
-                                    ]);
-                                    await createTransaction({
-                                      ...transaction,
-                                      client: reserve.client,
-                                    });
-                                  }
+              //                     if (response) {
+              //                       token.push([
+              //                         response,
+              //                         props.sizes.find(
+              //                           (x) => x.id == reserve.IdSize,
+              //                         )?.nombre! ?? "",
+              //                       ]);
+              //                       await createTransaction({
+              //                         ...transaction,
+              //                         client: reserve.client,
+              //                       });
+              //                     }
 
-                                  return {
-                                    ...reserve,
-                                    Token1: response,
-                                  };
-                                }
-                                return reserve;
-                              }),
-                            );
-                            await sendEmail({
-                              to: client.email!,
-                              token,
-                              client: client.name!,
-                              price: total,
-                              coin,
-                              local: store!.name!,
-                              nReserve,
-                              from: formatDateToTextDate(startDate!),
-                              until: formatDateToTextDate(endDate!),
-                            });
-                            setReserves1(updatedReserves1);
-                            setLoadingPay(false);
-                            setPagoOk(true);
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}
-                      >
-                        Confirmar pago
-                      </Button>
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              //                     return {
+              //                       ...reserve,
+              //                       Token1: response,
+              //                     };
+              //                   }
+              //                   return reserve;
+              //                 }),
+              //               );
+              //               await sendEmail({
+              //                 to: client.email!,
+              //                 token,
+              //                 client: client.name!,
+              //                 price: total,
+              //                 coin,
+              //                 local: store!.name!,
+              //                 nReserve,
+              //                 from: formatDateToTextDate(startDate!),
+              //                 until: formatDateToTextDate(endDate!),
+              //               });
+              //               setReserves1(updatedReserves1);
+              //               setLoadingPay(false);
+              //               setPagoOk(true);
+              //             } catch (error) {
+              //               console.log(error);
+              //             }
+              //           }}
+              //         >
+              //           Confirmar pago
+              //         </Button>
+              //       </AlertDialogAction>
+              //     </AlertDialogFooter>
+              //   </AlertDialogContent>
+              // </AlertDialog>
+
+              <Payment
+                checkoutNumber={checkoutNumber!}
+                setLoadingPay={setLoadingPay}
+                client={client}
+                coin={coin}
+                endDate={endDate!}
+                startDate={startDate!}
+                nReserve={nReserve}
+                reserves1={reserves1}
+                setPagoOk={setPagoOk}
+                setReserves1={setReserves1}
+                sizes={props.sizes}
+                store={store!}
+                total={total}
+              />
             )}
           </div>
         )}
