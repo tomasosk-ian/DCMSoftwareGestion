@@ -166,8 +166,6 @@ export default function Payment(props: {
           } catch (error) {
             console.log(error);
           }
-
-          console.info("Payment: ", data);
         },
         onOpen: () => {
           console.info("Pago iniciado.");
@@ -187,8 +185,7 @@ export default function Payment(props: {
       }
 
       const script = document.createElement("script");
-      script.src =
-        "https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}";
+      script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
       script.async = true;
       script.crossOrigin = "anonymous";
       script.addEventListener("load", () => {

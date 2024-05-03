@@ -33,11 +33,9 @@ export function About() {
                 </div>
                 <div className="col-6">
                   <AlertDialogTitle className="pb-4">
-                    Versión 2.13
+                    Versión 3
                   </AlertDialogTitle>
-                  <AlertDialogTitle>
-                    Fecha: 16 de abril de 2024
-                  </AlertDialogTitle>
+                  <AlertDialogTitle>Fecha: 3 de mayo de 2024</AlertDialogTitle>
                 </div>
               </div>
               <AlertDialogDescription>

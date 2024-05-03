@@ -28,7 +28,7 @@ export default function Success(props: {
 }) {
   const { data: sizes, isLoading } = api.size.get.useQuery();
   function getSize(idSize: number) {
-    const size = sizes.find((s: Size) => s.id === idSize);
+    const size = sizes!.find((s: Size) => s.id === idSize);
     return size.nombre;
   }
   return (

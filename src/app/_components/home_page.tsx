@@ -278,143 +278,69 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         {sizeSelected && !reserva && !loadingPay && (
           <div>
             <div className="grid grid-cols-2 gap-8 p-8">
-              <UserForm
-                client={client}
-                setClient={setClient}
-                errors={errors}
-                setErrors={setErrors}
-              />
-              <Booking
-                store={store!}
-                startDate={startDate!}
-                endDate={endDate!}
-                reserves={reserves!}
-                total={total}
-                setTotal={setTotal}
-                coin={coin}
-                setCoin={setCoin}
-              />
-            </div>
-            <div className="flex flex-row-reverse px-8">
-              <Button
-                type="submit"
-                onClick={async () => {
-                  try {
-                    if (handleSubmit()) {
-                      setReserves1([]);
-                      setReserves([]);
-                      reserves.map(async (reserve) => {
-                        for (var i = 0; i < reserve.Cantidad!; i++) {
-                          const response = await reservarBox(reserve);
-                          const updatedReserve = {
-                            ...reserve,
-                            IdTransaction: response,
-                          };
-                          setReserves1((prevReserves) => [
-                            ...prevReserves,
-                            updatedReserve,
-                          ]);
+              <div>
+                <UserForm
+                  client={client}
+                  setClient={setClient}
+                  errors={errors}
+                  setErrors={setErrors}
+                />
+              </div>
+              <div>
+                <Booking
+                  store={store!}
+                  startDate={startDate!}
+                  endDate={endDate!}
+                  reserves={reserves!}
+                  total={total}
+                  setTotal={setTotal}
+                  coin={coin}
+                  setCoin={setCoin}
+                />
+
+                <div className="flex flex-row-reverse py-2">
+                  <Button
+                    type="submit"
+                    onClick={async () => {
+                      try {
+                        if (handleSubmit()) {
+                          reserves.map(async (reserve) => {
+                            for (var i = 0; i < reserve.Cantidad!; i++) {
+                              const response = await reservarBox(reserve);
+                              const updatedReserve = {
+                                ...reserve,
+                                IdTransaction: response,
+                              };
+                              setReserves1((prevReserves) => [
+                                ...prevReserves,
+                                updatedReserve,
+                              ]);
+                            }
+                          });
+                          const clientResponse = await createClient(client);
+                          setNReserve(clientResponse.id);
+                          setReserva(true);
+                          let checkoutNumber = await test({
+                            amount: total,
+                            reference: clientResponse.id.toString(),
+                          });
+                          setCheckoutNumber(checkoutNumber);
                         }
-                      });
-                      setLoadingPay(true);
-                      await new Promise((resolve) => setTimeout(resolve, 3000));
-                      setLoadingPay(false);
-                      const clientResponse = await createClient(client);
-                      setNReserve(clientResponse.id);
-                      setReserva(true);
-                      let checkoutNumber = await test({
-                        amount: total,
-                        reference: clientResponse.id.toString(),
-                      });
-                      setCheckoutNumber(checkoutNumber);
-                    }
-                  } catch (error) {
-                    console.log(error);
-                  }
-                }}
-              >
-                Continuar al pago
-              </Button>
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                  >
+                    Continuar al pago
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         )}
         {reserva && !pagoOk && !loadingPay && (
           <div className="flex flex-row-reverse">
             {!loadingPay && (
-              // <AlertDialog>
-              //   <AlertDialogTrigger>
-              //     <Button>Confirmar pago</Button>
-              //   </AlertDialogTrigger>
-              //   <AlertDialogContent>
-              //     <AlertDialogHeader>
-              //       <AlertDialogTitle>¿Estás seguro? </AlertDialogTitle>
-              //       <AlertDialogDescription>
-              //         Va a confirmar el pago de la reserva.
-              //       </AlertDialogDescription>
-              //     </AlertDialogHeader>
-              //     <AlertDialogFooter>
-              //       <AlertDialogCancel>Cancel</AlertDialogCancel>
-              //       <AlertDialogAction>
-              //         <Button
-              //           type="submit"
-              //           onClick={async () => {
-              //             try {
-              //               setLoadingPay(true);
-              //               let token: [number, string][] = [];
-              //               const updatedReserves1 = await Promise.all(
-              //                 reserves1.map(async (reserve) => {
-              //                   if (reserve.IdTransaction) {
-              //                     const response = await confirmarBox({
-              //                       idToken: reserve.IdTransaction!,
-              //                     });
-
-              //                     if (response) {
-              //                       token.push([
-              //                         response,
-              //                         props.sizes.find(
-              //                           (x) => x.id == reserve.IdSize,
-              //                         )?.nombre! ?? "",
-              //                       ]);
-              //                       await createTransaction({
-              //                         ...transaction,
-              //                         client: reserve.client,
-              //                       });
-              //                     }
-
-              //                     return {
-              //                       ...reserve,
-              //                       Token1: response,
-              //                     };
-              //                   }
-              //                   return reserve;
-              //                 }),
-              //               );
-              //               await sendEmail({
-              //                 to: client.email!,
-              //                 token,
-              //                 client: client.name!,
-              //                 price: total,
-              //                 coin,
-              //                 local: store!.name!,
-              //                 nReserve,
-              //                 from: formatDateToTextDate(startDate!),
-              //                 until: formatDateToTextDate(endDate!),
-              //               });
-              //               setReserves1(updatedReserves1);
-              //               setLoadingPay(false);
-              //               setPagoOk(true);
-              //             } catch (error) {
-              //               console.log(error);
-              //             }
-              //           }}
-              //         >
-              //           Confirmar pago
-              //         </Button>
-              //       </AlertDialogAction>
-              //     </AlertDialogFooter>
-              //   </AlertDialogContent>
-              // </AlertDialog>
-
               <Payment
                 checkoutNumber={checkoutNumber!}
                 setLoadingPay={setLoadingPay}
@@ -443,22 +369,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             />
             <Button
               onClick={async () => {
-                setCity(null);
-                setStore(null);
-                setStores(undefined);
-                setSize(null);
-                setsizeSelected(false);
-                setCreationDate("");
-                setStartDate("");
-                setEndDate("");
-                setIdLocker(0);
-                setReserva(false);
-                setIdToken(0);
-                setDays(0);
-                setReserves([]);
-                setReserves1([]);
-                setLoadingPay(false);
-                setPagoOk(false);
+                location.reload();
               }}
             >
               Cerrar

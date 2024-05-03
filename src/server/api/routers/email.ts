@@ -25,8 +25,6 @@ export const emailRouter = createTRPCRouter({
       try {
         const sgMail = require("@sendgrid/mail");
         sgMail.setApiKey(env.SENDGRID_API_KEY);
-        console.log(input.token);
-        input.token.map((x) => console.log(x));
         const msg = {
           to: input.to,
           from: `${env.MAIL_SENDER}`,

@@ -6,7 +6,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { RouterOutputs } from "~/trpc/shared";
 
 export const mobbexRouter = createTRPCRouter({
   test: publicProcedure
@@ -26,7 +25,7 @@ export const mobbexRouter = createTRPCRouter({
       const checkout = {
         total: input.amount,
         currency: "ARS",
-        reference: "312156542asdasdASDASD",
+        reference: `123ASKFJR5${input.reference}`,
         description: "Descripción de la Venta",
         test: true,
         items: [
