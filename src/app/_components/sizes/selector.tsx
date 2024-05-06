@@ -158,7 +158,7 @@ export default function SizeSelector(props: {
       {!props.sizeSelected && (
         <div className=" flex flex-col items-center justify-center">
           <h2 className="text-2xl font-semibold">
-            Selecciona tamaño de tu taquilla.
+            Selecciona tamaño de tu Locker.
           </h2>
           <div className="grid grid-cols-3">
             {isLoading && <div>Cargando...</div>}
@@ -180,7 +180,7 @@ export default function SizeSelector(props: {
                   //     ></img>
                   //     <CardFooter className="bg-green-100 backdrop-blur-sm">
                   //       <div className="flex pt-5">
-                  //         <div className="">Número de taquillas</div>
+                  //         <div className="">Número de Lockers</div>
                   //         <div className="float-end inline-flex">
                   //           <button
                   //             disabled={(values[size.id] || 0) == 0}
@@ -260,7 +260,7 @@ export default function SizeSelector(props: {
                         </p>
                       </div>
                       <div className="flex gap-4">
-                        <div className="">Número de taquillas</div>
+                        <div className="">Número de Lockers</div>
                         <div className="float-end inline-flex">
                           <button
                             disabled={(values[size.id] || 0) == 0}

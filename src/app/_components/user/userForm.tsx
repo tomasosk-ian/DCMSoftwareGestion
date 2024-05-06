@@ -154,7 +154,7 @@ export default function UserForm(props: {
       </div>
 
       <Label className="col-span-12 p-3 text-xs italic">
-        Te enviaremos un código para que puedas abrir tu taquilla.
+        Te enviaremos un código para que puedas abrir tu Locker.
       </Label>
       <Label className="col-span-12 p-3 text-xs italic text-red-500">
         Añade tu codigo de descuento

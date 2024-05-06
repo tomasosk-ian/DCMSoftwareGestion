@@ -215,7 +215,7 @@ export default function Booking(props: {
                       >
                         <div className=" pt-2">
                           <Title className=" font-bold">
-                            Taquilla {getSizeNameById(size.id!)}
+                            Locker {getSizeNameById(size.id!)}
                           </Title>
                         </div>
                         <div className="flex-col pt-2">
@@ -244,7 +244,7 @@ export default function Booking(props: {
             return (
               <div className="pb-5" key={size.id}>
                 <Title className="pb-2 font-bold">
-                  Taquilla {getSizeNameById(size.id!)}
+                  Locker {getSizeNameById(size.id!)}
                 </Title>
                 {getDays(size)}
               </div>
