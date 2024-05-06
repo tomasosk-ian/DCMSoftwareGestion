@@ -46,6 +46,7 @@ import ReactPDF from "@react-pdf/renderer";
 import { Badge } from "~/components/ui/badge";
 import { es } from "date-fns/locale";
 import Payment from "./payment/page";
+import { Coin } from "~/server/api/routers/coin";
 
 export const Icons = {
   spinner: Loader2,
@@ -86,8 +87,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
 
   const { mutateAsync: createClient } = api.client.create.useMutation();
   const [total, setTotal] = useState<number>(0);
-  const [coin, setCoin] = useState<string>("");
+  const [coin, setCoin] = useState<Coin>();
   const { mutateAsync: test } = api.mobbex.test.useMutation();
+  const { data: coins } = api.coin.get.useQuery();
 
   const [errors, setErrors] = useState({
     name: "",
@@ -294,8 +296,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   reserves={reserves!}
                   total={total}
                   setTotal={setTotal}
-                  coin={coin}
+                  coin={coin!}
                   setCoin={setCoin}
+                  coins={coins!}
                 />
 
                 <div className="flex flex-row-reverse py-2">
@@ -345,7 +348,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 checkoutNumber={checkoutNumber!}
                 setLoadingPay={setLoadingPay}
                 client={client}
-                coin={coin}
+                coin={coin!}
                 endDate={endDate!}
                 startDate={startDate!}
                 nReserve={nReserve}

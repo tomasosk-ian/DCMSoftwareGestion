@@ -44,7 +44,7 @@ export default function UserForm(props: {
       const { phone } = countryData;
       // console.log(`${countryCode}: ${phone}`);
       phoneNumbers.push({ [countryCode]: phone[0]! });
-    });
+    }, []);
 
     setPhones(phoneNumbers);
   }, []);
@@ -141,7 +141,17 @@ export default function UserForm(props: {
           props.setErrors({ ...props.errors, [name]: "" });
         }}
       />
-      <span className="col-span-8 text-red-500">{props.errors.telefono}</span>
+      <div className="col-span-4 ">
+        <span className="col-span-6 w-full text-red-500">
+          {props.errors.prefijo}
+        </span>
+      </div>
+
+      <div className="col-span-4  ">
+        <span className="col-span-6 w-full text-red-500">
+          {props.errors.telefono}
+        </span>
+      </div>
 
       <Label className="col-span-12 p-3 text-xs italic">
         Te enviaremos un código para que puedas abrir tu taquilla.

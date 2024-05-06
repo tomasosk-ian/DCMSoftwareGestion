@@ -72,7 +72,6 @@ export const emailRouter = createTRPCRouter({
           //   },
           // ],
         };
-        console.log(msg);
         sgMail
           .send(msg)
           .then(() => {

@@ -16,12 +16,10 @@ export const mobbexRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log("hello from mobbex router");
       mobbex.configurations.configure({
         apiKey: "zJ8LFTBX6Ba8D611e9io13fDZAwj0QmKO1Hn1yIj",
         accessToken: "d31f0721-2f85-44e7-bcc6-15e19d1a53cc",
       });
-      console.log(input.reference);
       const checkout = {
         total: input.amount,
         currency: "ARS",
@@ -47,7 +45,6 @@ export const mobbexRouter = createTRPCRouter({
       const a = await mobbex.checkout
         .create(checkout)
         .then((result: any) => {
-          console.log(result.data);
           checkoutNumber = result.data.id;
         })
         .catch((error) => console.log(error));

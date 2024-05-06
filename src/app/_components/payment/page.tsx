@@ -88,7 +88,7 @@ export default function Payment(props: {
   reserves1: Reserve[];
   sizes: Size[];
   client: Client;
-  coin: string;
+  coin: Coin;
   total: number;
   nReserve: number;
   store: Store;
@@ -103,7 +103,7 @@ export default function Payment(props: {
     api.transaction.create.useMutation();
   const [transaction, setTransaction] = useState<Transaction>();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
-
+  const [statusCode, setStatusCode] = useState<number>();
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
@@ -116,55 +116,66 @@ export default function Payment(props: {
         type: "checkout",
         onResult: (data: any) => {
           // OnResult es llamado cuando se toca el Botón Cerrar
+
           window.MobbexEmbed.close();
         },
         onPayment: async (data: any) => {
-          try {
-            props.setLoadingPay(true);
-            let token: [number, string][] = [];
-            const updatedReserves1 = await Promise.all(
-              props.reserves1.map(async (reserve) => {
-                if (reserve.IdTransaction) {
-                  const response = await confirmarBox({
-                    idToken: reserve.IdTransaction!,
-                  });
+          console.log("data.status");
+          console.log(data);
+          console.log(parseInt(data.data.status.code));
+          setStatusCode(data.data.status.code);
+          if (statusCode == 200) {
+            location.reload();
 
-                  if (response) {
-                    token.push([
-                      response,
-                      props.sizes.find((x) => x.id == reserve.IdSize)
-                        ?.nombre! ?? "",
-                    ]);
-                    await createTransaction({
-                      ...transaction,
-                      client: reserve.client,
+            try {
+              props.setLoadingPay(true);
+              let token: [number, string][] = [];
+              const updatedReserves1 = await Promise.all(
+                props.reserves1.map(async (reserve) => {
+                  if (reserve.IdTransaction) {
+                    const response = await confirmarBox({
+                      idToken: reserve.IdTransaction!,
                     });
-                  }
 
-                  return {
-                    ...reserve,
-                    Token1: response,
-                  };
-                }
-                return reserve;
-              }),
-            );
-            await sendEmail({
-              to: props.client.email!,
-              token,
-              client: props.client.name!,
-              price: props.total,
-              coin: props.coin!,
-              local: props.store!.name!,
-              nReserve: props.nReserve,
-              from: formatDateToTextDate(props.startDate!),
-              until: formatDateToTextDate(props.endDate!),
-            });
-            props.setReserves1(updatedReserves1);
-            props.setLoadingPay(false);
-            props.setPagoOk(true);
-          } catch (error) {
-            console.log(error);
+                    if (response) {
+                      token.push([
+                        response,
+                        props.sizes.find((x) => x.id == reserve.IdSize)
+                          ?.nombre! ?? "",
+                      ]);
+                      await createTransaction({
+                        ...transaction,
+                        client: reserve.client,
+                      });
+                    }
+
+                    return {
+                      ...reserve,
+                      Token1: response,
+                    };
+                  }
+                  return reserve;
+                }),
+              );
+              await sendEmail({
+                to: props.client.email!,
+                token,
+                client: props.client.name!,
+                price: props.total,
+                coin: props.coin.description!,
+                local: props.store!.name!,
+                nReserve: props.nReserve,
+                from: formatDateToTextDate(props.startDate!),
+                until: formatDateToTextDate(props.endDate!),
+              });
+              props.setReserves1(updatedReserves1);
+              props.setLoadingPay(false);
+              props.setPagoOk(true);
+            } catch (error) {
+              console.log(error);
+            }
+          } else {
+            location.reload();
           }
         },
         onOpen: () => {
@@ -172,6 +183,9 @@ export default function Payment(props: {
         },
         onError: (error: any) => {
           console.error("ERROR: ", error);
+        },
+        onClose: (error: any) => {
+          // console.error("ERROR: ", error);
         },
       };
 
