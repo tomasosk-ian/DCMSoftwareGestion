@@ -103,13 +103,13 @@ export default function Payment(props: {
     api.transaction.create.useMutation();
   const [transaction, setTransaction] = useState<Transaction>();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
-  const [statusCode, setStatusCode] = useState<number>();
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
     return formattedDate;
   }
   useEffect(() => {
+    let statusCode = 0;
     if (props.checkoutNumber) {
       const options = {
         id: props.checkoutNumber,
@@ -120,13 +120,9 @@ export default function Payment(props: {
           window.MobbexEmbed.close();
         },
         onPayment: async (data: any) => {
-          console.log("data.status");
-          console.log(data);
-          console.log(parseInt(data.data.status.code));
-          setStatusCode(data.data.status.code);
-          if (statusCode == 200) {
-            location.reload();
+          statusCode = parseInt(data.data.status.code);
 
+          if (statusCode == 200) {
             try {
               props.setLoadingPay(true);
               let token: [number, string][] = [];
@@ -175,7 +171,7 @@ export default function Payment(props: {
               console.log(error);
             }
           } else {
-            location.reload();
+            // location.reload();
           }
         },
         onOpen: () => {
@@ -185,7 +181,11 @@ export default function Payment(props: {
           console.error("ERROR: ", error);
         },
         onClose: (error: any) => {
-          // console.error("ERROR: ", error);
+          console.log(statusCode);
+
+          if (statusCode != 200) {
+            location.reload();
+          }
         },
       };
 
