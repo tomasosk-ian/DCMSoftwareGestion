@@ -12,9 +12,15 @@ export default async function middleware(request: NextRequest) {
 
   console.log("path is");
   console.log(request.nextUrl.pathname);
+  console.log("cokkie is");
+  console.log(cookie);
+  console.log("session is");
+  console.log(session);
+  console.log("result is");
+  console.log(result);
+  console.log("and roles allow to");
+  console.log(access);
   if (access === undefined) {
-    console.log("and roles allow to");
-    console.log(access);
     return NextResponse.redirect(new URL("/accessdenied", request.url));
   }
 
