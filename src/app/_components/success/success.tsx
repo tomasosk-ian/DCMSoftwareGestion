@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { Coin } from "~/server/api/routers/coin";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
@@ -25,6 +26,7 @@ export default function Success(props: {
   store: Store;
   nReserve: number;
   total: number;
+  coin: Coin;
 }) {
   const { data: sizes, isLoading } = api.size.get.useQuery();
   function getSize(idSize: number) {
@@ -52,7 +54,7 @@ export default function Success(props: {
               </div>
               <div className="flex justify-between gap-4 px-5 py-2">
                 <div className="font-bold">Id organización</div>
-                <div className="font-bold">Lockers Urbanos</div>
+                <div className="font-bold">{props.store.organizationName}</div>
               </div>
               <div className="flex justify-between gap-4 px-5 py-2">
                 <div className="font-bold">Número de factura</div>
@@ -60,7 +62,9 @@ export default function Success(props: {
               </div>
               <div className="flex justify-between gap-4 px-5 py-2">
                 <div className="font-bold">Precio total</div>
-                <div className="font-bold">{props.total}</div>
+                <div className="font-bold">
+                  {props.total} {props.coin.description}
+                </div>
               </div>
               {props.reserves.map((r, index) => (
                 <div

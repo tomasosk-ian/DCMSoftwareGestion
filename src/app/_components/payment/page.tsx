@@ -1,69 +1,3 @@
-// "use client";
-
-// import Script from "next/script";
-// import { api } from "~/trpc/react";
-// declare global {
-//   interface Window {
-//     MobbexJS: any; // Aquí deberías utilizar el tipo correcto si está disponible
-//   }
-// }
-// export default function Payment(props: { checkoutNumber: string }) {
-//   console.log(props.checkoutNumber);
-//   return (
-//     <>
-//       <Script
-//         src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
-//         integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
-//         crossOrigin="anonymous"
-//       ></Script>
-//       {props.checkoutNumber && (
-//         <Script id="show-banner">
-//           {`
-//         var options = {
-//           id: "${props.checkoutNumber!}",
-//           type: "checkout",
-//           onResult: (data) => {
-//               // OnResult es llamado cuando se toca el Botón Cerrar
-//               window.MobbexEmbed.close();
-//           },
-//           onPayment: (data) => {
-//               console.info("Payment: ", data);
-//           },
-//           onOpen: () => {
-//               console.info("Pago iniciado.");
-//           },
-
-//           onError: (error) => {
-//               console.error("ERROR: ", error);
-//           },
-//       };
-//       function renderMobbexButton() {
-//         window.MobbexEmbed.render(options, "#mbbx-button");
-//     }
-//     function initMobbexPayment() {
-//       var mbbxButton = window.MobbexEmbed.init(options);
-
-//       mbbxButton.open();
-//   }
-//       var script = document.createElement("script");
-//             script.src = "https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}";
-//             console.log("https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}");
-//             script.async = true;
-//             script.crossorigin = "anonymous";
-//             script.addEventListener("load", () => {
-
-//                 initMobbexPayment(); // Abre inmediatamente el modal de pago
-//             });
-//             document.body.appendChild(script);`}
-//         </Script>
-//       )}
-//       {/* <button onClick={handleClick}>test</button> */}
-//       <h1>HOLA</h1>
-//       <div id="mbbx-container"></div>
-//     </>
-//   );
-// }
-
 import { Transaction } from "@libsql/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -85,7 +19,7 @@ declare global {
 export default function Payment(props: {
   checkoutNumber: string;
   setLoadingPay: (loadingPay: boolean) => void;
-  reserves1: Reserve[];
+  reserves: Reserve[];
   sizes: Size[];
   client: Client;
   coin: Coin;
@@ -94,7 +28,7 @@ export default function Payment(props: {
   store: Store;
   startDate: string;
   endDate: string;
-  setReserves1: (reserves1: Reserve[]) => void;
+  setReserves: (reserves: Reserve[]) => void;
   setPagoOk: (pagoOk: boolean) => void;
 }) {
   const { mutateAsync: confirmarBox } =
@@ -126,13 +60,18 @@ export default function Payment(props: {
             try {
               props.setLoadingPay(true);
               let token: [number, string][] = [];
-              const updatedReserves1 = await Promise.all(
-                props.reserves1.map(async (reserve) => {
+              console.log(props.reserves);
+
+              const updatedReserves = await Promise.all(
+                props.reserves.map(async (reserve) => {
+                  console.log("aaa");
                   if (reserve.IdTransaction) {
+                    console.log("bbb");
+
                     const response = await confirmarBox({
                       idToken: reserve.IdTransaction!,
                     });
-
+                    console.log(response);
                     if (response) {
                       token.push([
                         response,
@@ -149,10 +88,12 @@ export default function Payment(props: {
                       ...reserve,
                       Token1: response,
                     };
+                  } else {
+                    return reserve;
                   }
-                  return reserve;
                 }),
               );
+              props.setReserves(updatedReserves);
               await sendEmail({
                 to: props.client.email!,
                 token,
@@ -164,7 +105,7 @@ export default function Payment(props: {
                 from: formatDateToTextDate(props.startDate!),
                 until: formatDateToTextDate(props.endDate!),
               });
-              props.setReserves1(updatedReserves1);
+
               props.setLoadingPay(false);
               props.setPagoOk(true);
             } catch (error) {
@@ -181,8 +122,6 @@ export default function Payment(props: {
           console.error("ERROR: ", error);
         },
         onClose: (error: any) => {
-          console.log(statusCode);
-
           if (statusCode != 200) {
             location.reload();
           }

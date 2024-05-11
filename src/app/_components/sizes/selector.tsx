@@ -18,6 +18,7 @@ import { differenceInDays, format } from "date-fns";
 import { Car } from "lucide-react";
 import styles from "selector.module.css";
 import { Fee } from "~/server/api/routers/fee";
+import { Coin } from "~/server/api/routers/coin";
 
 export default function SizeSelector(props: {
   size: Size | null;
@@ -29,18 +30,31 @@ export default function SizeSelector(props: {
   sizeSelected: boolean;
   reserves: Reserve[] | null;
   setReserves: (reserves: Reserve[]) => void;
+  setReserves1: (reserves: Reserve[]) => void;
   startDate: string;
   endDate: string;
+  coins: Coin[];
+  setFailedResponse: (failedResponse: boolean) => void;
+  failedResponse: boolean;
 }) {
   // const [reservas, setReservas] = useState<Reserve[]>();
   const [values, setValues] = useState<Record<string, number>>({});
   const [price, setPrice] = useState<number>(0);
   const { data: fees } = api.fee.get.useQuery();
+  const [coin, setCoin] = useState<Coin>();
+  const { mutateAsync: reservarBox } =
+    api.lockerReserve.reserveBox.useMutation();
+  const [updatedReserve, setUpdatedReserve] = useState<Reserve[]>([]);
+  const [updatedReserveWithToken, setUpdatedReserveWithToken] = useState<
+    Reserve[]
+  >([]);
   const { data: sizes, isLoading } = api.size.getAvailability.useQuery({
     nroSerieLocker: props.nroSerieLocker!,
     inicio: props.inicio!,
     fin: props.fin!,
   });
+  const [reservesUpdate, setReservesUpdate] = useState<boolean>(false);
+
   useEffect(() => {
     try {
       if (values) {
@@ -62,14 +76,11 @@ export default function SizeSelector(props: {
           }),
         );
 
-        // const updatedReserves = props.reserves
-        //   ? [...props.reserves, ...newReserves]
-        //   : [...newReserves];
-        // props.setReserves(updatedReserves);
-
         if (fees) {
-          let totalPrice = 0; // Variable local para llevar un seguimiento de la suma total
-
+          let totalPrice = 0;
+          setCoin(
+            props.coins?.find((s: Coin) => s.identifier === fees![0]?.coin)!,
+          );
           const prices: Record<number, number> = {};
           newReserves.forEach((reserve) => {
             const days = differenceInDays(
@@ -99,7 +110,6 @@ export default function SizeSelector(props: {
           }
         }
       }
-      // props.setSizeSelected(true);
     } catch (error) {
       // Manejar errores aquí
     }
@@ -130,12 +140,70 @@ export default function SizeSelector(props: {
           : [...newReserves];
         props.setReserves(updatedReserves);
       }
-      props.setSizeSelected(true);
     } catch (error) {
       // Manejar errores aquí
     }
   }
+  useEffect(() => {
+    props.reserves?.map(async (reserve: Reserve) => {
+      console.log(3);
 
+      for (var i = 0; i < reserve.Cantidad!; i++) {
+        try {
+          const test = {
+            ...reserve,
+          };
+          setUpdatedReserve((prevReserves) => [...prevReserves, test]);
+
+          // const response = parseInt(await reservarBox(reserve));
+          // console.log(reserve);
+          // console.log(await reservarBox(reserve));
+          // if (!isNaN(response)) {
+          //   console.log("isnotnan");
+          //   const test = {
+          //     ...reserve,
+          //     IdTransaction: response ? response : undefined,
+          //   };
+          //   console.log("reserveupdated");
+          //   setReservesUpdate(true);
+          //   setUpdatedReserve((prevReserves) => [...prevReserves, test]);
+          // } else {
+          //   console.log();
+          //   props.setFailedResponse(true);
+          // }
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    });
+  }, [props.reserves]);
+
+  useEffect(() => {
+    updatedReserve.map(async (reserve: Reserve) => {
+      const response = parseInt(await reservarBox(reserve));
+
+      if (!isNaN(response)) {
+        console.log("isnotnan");
+        const test = {
+          ...reserve,
+          IdTransaction: response ? response : undefined,
+        };
+        console.log("reserveupdated");
+        setUpdatedReserveWithToken((prevReserves) => [...prevReserves, test]);
+      } else {
+        console.log();
+        props.setFailedResponse(true);
+      }
+    });
+  }, [updatedReserve]);
+
+  useEffect(() => {
+    if (updatedReserveWithToken.length > 0) {
+      console.log("OK");
+      props.setReserves1(updatedReserveWithToken);
+      props.setSizeSelected(true);
+    }
+  }, [updatedReserveWithToken]);
   useEffect(() => {
     const filteredValues: Record<string, number> = {};
     Object.entries(values).forEach(([key, value]) => {
@@ -144,7 +212,6 @@ export default function SizeSelector(props: {
       }
     });
 
-    // Verificar si los valores filtrados son diferentes de los actuales antes de actualizar el estado
     if (JSON.stringify(filteredValues) !== JSON.stringify(values)) {
       setValues(filteredValues);
     }
@@ -253,15 +320,18 @@ export default function SizeSelector(props: {
                           alt="Image"
                         />
                       </Card>
-                      <div className="flex gap-32">
-                        <p>Primer día</p>
+                      <div className="flex gap-32 ">
+                        <p className="px-1 text-slate-500">Primer día</p>
                         <p>
-                          {fees?.find((s: Fee) => s.size === size.id)?.value!}
+                          {fees?.find((s: Fee) => s.size === size.id)?.value!}{" "}
+                          {coin?.description}
                         </p>
                       </div>
                       <div className="flex gap-4">
-                        <div className="">Número de Lockers</div>
-                        <div className="float-end inline-flex">
+                        <div className="px-1 text-slate-500">
+                          Número de Lockers
+                        </div>
+                        <div className=" inline-flex pb-5">
                           <button
                             disabled={(values[size.id] || 0) == 0}
                             onClick={() =>
@@ -305,9 +375,10 @@ export default function SizeSelector(props: {
               <Button
                 disabled={Object.keys(values).length === 0}
                 onClick={applyReserve}
-                className="bottom-0 pt-3"
+                className="bottom-0 w-full rounded-full border-black bg-emerald-100 pt-3 font-bold text-black hover:bg-emerald-400"
               >
-                APLICAR {price}
+                FINALIZAR: {Object.keys(values).length === 0 ? 0 : price}
+                {coin?.description}
               </Button>
             )}
           </div>

@@ -13,19 +13,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     <html lang="es">
       <body>
         <AuthProvider>
-          <AppLayout
-            title={<h1>DCM Solution</h1>}
-            user={session?.user}
-            sidenav={<AppSidenav />}
-          >
-            <div className="mb-10 flex justify-center">
-              <TRPCReactProvider cookies={cookies().toString()}>
-                <Toaster />
-                <LayoutContainer>{props.children}</LayoutContainer>
-              </TRPCReactProvider>
-            </div>
-            <div></div>
-          </AppLayout>
+          <div className="mb-10 flex justify-center">
+            <TRPCReactProvider cookies={cookies().toString()}>
+              <LayoutContainer>{props.children}</LayoutContainer>
+            </TRPCReactProvider>
+          </div>
+          <div></div>
         </AuthProvider>
       </body>
     </html>

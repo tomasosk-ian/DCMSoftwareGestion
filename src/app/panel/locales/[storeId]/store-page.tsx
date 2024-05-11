@@ -57,6 +57,9 @@ export default function StorePage(props: {
   const [cityId, setCity] = useState(props.store.cityId!);
   const [serieLocker, setSerieLocker] = useState(props.store.serieLocker);
   const [address, setAddress] = useState(props.store.address);
+  const [organizationName, setOrganizationName] = useState(
+    props.store.organizationName!,
+  );
   const [loading, setLoading] = useState(false);
   const { mutateAsync: renameStore, isLoading } =
     api.store.change.useMutation();
@@ -72,6 +75,7 @@ export default function StorePage(props: {
         cityId,
         serieLocker,
         address,
+        organizationName,
       });
       toast.success("Se ha modificado el local.");
       router.refresh();
@@ -168,6 +172,15 @@ export default function StorePage(props: {
                       id="address"
                       value={address!}
                       onChange={(e) => setAddress(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="name">Nombre de organización</Label>
+                    <Input
+                      id="orgname"
+                      value={organizationName!}
+                      onChange={(e) => setOrganizationName(e.target.value)}
                     />
                   </div>
                   <div className="col-span-2">

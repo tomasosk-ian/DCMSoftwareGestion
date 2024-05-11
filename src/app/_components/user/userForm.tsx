@@ -42,7 +42,6 @@ export default function UserForm(props: {
 
     Object.entries(countries).forEach(([countryCode, countryData]) => {
       const { phone } = countryData;
-      // console.log(`${countryCode}: ${phone}`);
       phoneNumbers.push({ [countryCode]: phone[0]! });
     }, []);
 
@@ -112,9 +111,6 @@ export default function UserForm(props: {
             <SelectGroup>
               <SelectLabel>Prefijos</SelectLabel>
               {phones?.map((item) => {
-                // console.log(Object.keys(item)[0]);
-                // console.log(item[Object.keys(item)[0]!]);
-
                 return (
                   <SelectItem
                     key={Object.keys(item)[0]}
