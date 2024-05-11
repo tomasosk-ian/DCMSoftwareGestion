@@ -4,7 +4,9 @@ import { db } from "~/server/db";
 export default async function middleware(request: NextRequest) {
   const result = await db.query.roles.findMany();
   const sessions = await db.query.sessions.findMany({ with: { user: true } });
-  let cookie = request.cookies.get("next-auth.session-token");
+  const { cookies } = request;
+
+  let cookie = cookies.get("next-auth.session-token");
   const session = sessions.find(
     (session: any) => session.sessionToken === cookie?.value,
   );
@@ -12,6 +14,8 @@ export default async function middleware(request: NextRequest) {
 
   console.log("path is");
   console.log(request.nextUrl.pathname);
+  console.log("cookies is");
+  console.log(cookies);
   console.log("cokkie is");
   console.log(cookie);
   console.log("session is");
