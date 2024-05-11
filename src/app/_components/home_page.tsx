@@ -23,8 +23,7 @@ import { Title } from "@radix-ui/react-toast";
 import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
 import dynamic from "next/dynamic";
-
-import { renderToString } from "@react-pdf/renderer";
+import { usePDF } from "react-to-pdf";
 
 import {
   AlertDialog,
@@ -42,7 +41,6 @@ import { Label } from "~/components/ui/label";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
 import ReactDOM from "react-dom";
-import ReactPDF from "@react-pdf/renderer";
 import { Badge } from "~/components/ui/badge";
 import { es } from "date-fns/locale";
 import Payment from "./payment/page";
@@ -53,28 +51,22 @@ export const Icons = {
 };
 
 export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
-  const [city, setCity] = useState<City | null>(null);
   const [store, setStore] = useState<Store | null>(null);
-  const [stores, setStores] = useState<Store[] | undefined>();
   const [size, setSize] = useState<Size | null>(null);
   const [sizeSelected, setsizeSelected] = useState(false);
-  const [creationDate, setCreationDate] = useState<string>("");
   const [startDate, setStartDate] = useState<string>();
   const [checkoutNumber, setCheckoutNumber] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
-  const [idLocker, setIdLocker] = useState<number>(0);
   const [reserva, setReserva] = useState<boolean>(false);
   const [pagoOk, setPagoOk] = useState<boolean>(false);
-  const [idToken, setIdToken] = useState<number>(0);
   const [days, setDays] = useState<number>(0);
-  const { mutateAsync: reservarBox } =
-    api.lockerReserve.reserveBox.useMutation();
 
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failedResponse, setFailedResponse] = useState<boolean>(false);
+
   const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
   const [client, setClient] = useState<Client>({
@@ -100,12 +92,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     telefono: "",
   });
   const isValidEmail = (email: string) => {
-    // Regular expression for email validation
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
   const handleSubmit = () => {
-    // Check if any field is empty and set error message accordingly
     const newErrors = {
       name: client.name ? "" : "Nombre es obligatorio",
       surname: client.surname ? "" : "Apellido es obligatorio",
@@ -114,7 +104,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       telefono: client.telefono ? "" : "Telefono es obligatorio",
     };
 
-    // If there are any errors, prevent form submission and display them
     if (Object.values(newErrors).some((error) => error)) {
       setErrors(newErrors);
 
@@ -147,6 +136,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       </AlertDialog>
     );
   }
+
   return (
     <div className="container absolute">
       {failedResponse && <AlertFailedResponse />}
@@ -220,24 +210,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                     onClick={async () => {
                       try {
                         if (handleSubmit()) {
-                          // reserves.map(async (reserve) => {
-                          //   for (var i = 0; i < reserve.Cantidad!; i++) {
-                          //     const response = await reservarBox(reserve);
-                          //     console.log(response);
-                          //     if (response == "No hay disponibilidad") {
-                          //     } else {
-                          //       const updatedReserve = {
-                          //         ...reserve,
-                          //         IdTransaction: response,
-                          //       };
-                          //       setReserves1((prevReserves) => [
-                          //         ...prevReserves,
-                          //         updatedReserve,
-                          //       ]);
-                          //     }
-                          //   }
-                          // });
-
                           const clientResponse = await createClient(client);
                           setNReserve(clientResponse.id);
                           setReserva(true);
@@ -282,24 +254,19 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         )}
         {pagoOk && (
           <div>
-            <Success
-              reserves={reserves1}
-              store={store!}
-              nReserve={nReserve!}
-              total={total}
-              coin={coin!}
-            />
-            <Button
-              onClick={async () => {
-                location.reload();
-              }}
-            >
-              Cerrar
-            </Button>
+            <div>
+              <Success
+                reserves={reserves1}
+                store={store!}
+                nReserve={nReserve!}
+                total={total}
+                coin={coin!}
+                checkoutNumber={checkoutNumber!}
+              />
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-  // }
 }
