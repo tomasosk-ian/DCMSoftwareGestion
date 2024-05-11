@@ -84,6 +84,12 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await db.delete(schema.users).where(eq(schema.users.id, input.id));
+      await db
+        .delete(schema.accounts)
+        .where(eq(schema.accounts.userId, input.id));
+      await db
+        .delete(schema.sessions)
+        .where(eq(schema.sessions.userId, input.id));
     }),
 });
 
