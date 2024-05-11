@@ -35,7 +35,7 @@ export const env = createEnv({
     SERVER_URL: z.string().url(),
     SENDGRID_API_KEY: z.string(),
     MAIL_SENDER: z.string(),
-    VERCE_ENV: z.string(),
+    NODE_ENV: z.string(),
   },
 
   /**
@@ -62,7 +62,7 @@ export const env = createEnv({
     SERVER_URL: process.env.SERVER_URL,
     SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
     MAIL_SENDER: process.env.MAIL_SENDER,
-    VERCE_ENV: process.env.VERCE_ENV,
+    NODE_ENV: process.env.VERCE_ENV,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
