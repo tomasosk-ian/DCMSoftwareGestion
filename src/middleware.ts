@@ -10,7 +10,11 @@ export default async function middleware(request: NextRequest) {
   );
   const access = result.find((role) => role.id === session?.user.role)?.access;
 
+  console.log("path is");
+  console.log(request.nextUrl.pathname);
   if (access === undefined) {
+    console.log("and roles allow to");
+    console.log(access);
     return NextResponse.redirect(new URL("/accessdenied", request.url));
   }
 
