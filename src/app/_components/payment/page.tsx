@@ -60,18 +60,12 @@ export default function Payment(props: {
             try {
               props.setLoadingPay(true);
               let token: [number, string][] = [];
-              console.log(props.reserves);
-
               const updatedReserves = await Promise.all(
                 props.reserves.map(async (reserve) => {
-                  console.log("aaa");
                   if (reserve.IdTransaction) {
-                    console.log("bbb");
-
                     const response = await confirmarBox({
                       idToken: reserve.IdTransaction!,
                     });
-                    console.log(response);
                     if (response) {
                       token.push([
                         response,
