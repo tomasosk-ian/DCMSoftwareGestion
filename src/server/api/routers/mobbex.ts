@@ -13,6 +13,9 @@ export const mobbexRouter = createTRPCRouter({
       z.object({
         amount: z.number(),
         reference: z.string(),
+        mail: z.string(),
+        name: z.string(),
+        identification: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -26,6 +29,11 @@ export const mobbexRouter = createTRPCRouter({
         reference: `123ASKFJR5${input.reference}`,
         description: "Descripción de la Venta",
         test: true,
+        customer: {
+          email: `${input.mail}`,
+          name: `${input.name}`,
+          identification: `${input.identification}`,
+        },
         items: [
           {
             image:

@@ -1,50 +1,31 @@
 "use client";
-
-import { MutableRefObject, useEffect, useState } from "react";
-import { useRef } from "react";
-
 import { City } from "~/server/api/routers/city";
-import { Transaction } from "~/server/api/routers/transactions";
 import { Button } from "~/components/ui/button";
-import CitySelector from "./city/selector";
 import StoreSelector from "./store/selector";
 import { Store } from "~/server/api/routers/store";
 import { Size } from "~/server/api/routers/sizes";
 import SizeSelector from "./sizes/selector";
-import { Menubar } from "~/components/ui/menubar";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
-import { stores } from "~/server/db/schema";
 import DateComponent from "./dates/dateComponent";
-import { ZodNull, nullable } from "zod";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { Title } from "@radix-ui/react-toast";
 import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
-import dynamic from "next/dynamic";
-import { usePDF } from "react-to-pdf";
-
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
-import { Label } from "~/components/ui/label";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
-import ReactDOM from "react-dom";
 import { Badge } from "~/components/ui/badge";
-import { es } from "date-fns/locale";
 import Payment from "./payment/page";
 import { Coin } from "~/server/api/routers/coin";
+import { useState } from "react";
 
 export const Icons = {
   spinner: Loader2,
@@ -216,6 +197,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                           let checkoutNumber = await test({
                             amount: total,
                             reference: clientResponse.id.toString(),
+                            mail: client.email!,
+                            name: client.name!,
+                            identification: client.identifier!,
                           });
                           setCheckoutNumber(checkoutNumber);
                         }
