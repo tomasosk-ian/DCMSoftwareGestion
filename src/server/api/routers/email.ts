@@ -23,6 +23,33 @@ export const emailRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        var QRCode = require("qrcode");
+        const attachments: {
+          filename: string;
+          content: any;
+          type: string;
+          disposition: string;
+          contentId: string;
+        }[] = [];
+        await Promise.all(
+          input.token.map(async (token, index) => {
+            console.log(token[index]);
+            const img = await QRCode.toDataURL(token[0]!.toString(), {
+              type: "png",
+            });
+            const qrCode = img.split(";base64,").pop();
+            if (qrCode) {
+              attachments.push({
+                filename: `QR_Code_${index}.png`,
+                content: qrCode,
+                type: "image/png",
+                disposition: "attachment",
+                contentId: `qr_code_${index}`,
+              });
+            }
+          }),
+        );
+        console.log(attachments);
         const sgMail = require("@sendgrid/mail");
         sgMail.setApiKey(env.SENDGRID_API_KEY);
         const msg = {
@@ -64,74 +91,21 @@ export const emailRouter = createTRPCRouter({
           <p><img src="https://utfs.io/f/4993f452-6f46-4f15-9c4b-bd63722923d8-i5bkwc.jpg"/></p>
           
         </body>`,
-          // attachments: [
-          //   {
-          //     content: pdfBuffer.toString("base64"),
-          //     filename: "nombre-del-archivo.pdf",
-          //     type: "application/pdf",
-          //     disposition: "attachment",
-          //   },
-          // ],
+          attachments: attachments,
         };
         sgMail
           .send(msg)
           .then(() => {
             console.log("Email sent");
           })
-          .catch((e: Error) => {
+          .catch((e: any) => {
+            console.log("a");
             console.log(e);
           });
-      } catch (error) {
+      } catch (error: any) {
+        console.log("ab");
+
         console.log(error);
       }
-      //   sendMail({
-      //     to: "anselmo@dcm.com.ar",
-      //     name: "Anselmo",
-      //     subject: "Test",
-      //     body: "This is a test email body.",
-      //   });
     }),
 });
-
-// export async function sendMail({
-//   to,
-//   name,
-//   subject,
-//   body,
-// }: {
-//   to: string;
-//   name: string;
-//   subject: string;
-//   body: string;
-// }) {
-//   const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
-
-//   const transport = nodemailer.createTransport({
-//     service: "hotmail",
-//     auth: {
-//       user: SMTP_EMAIL,
-//       pass: SMTP_PASSWORD,
-//     },
-//   });
-//   try {
-//     const testResult = await transport.verify();
-//     console.log(testResult);
-//   } catch (error) {
-//     console.error({ error });
-//     return;
-//   }
-
-//   try {
-//     const sendResult = await transport.sendMail({
-//       from: SMTP_EMAIL,
-//       to,
-//       subject,
-//       // html,
-//     });
-//     console.log(sendResult);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
-// export type City = RouterOutputs["city"]["get"][number];

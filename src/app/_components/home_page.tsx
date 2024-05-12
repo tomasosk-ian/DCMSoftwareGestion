@@ -117,7 +117,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       </AlertDialog>
     );
   }
-
   return (
     <div className="container absolute">
       {failedResponse && <AlertFailedResponse />}
