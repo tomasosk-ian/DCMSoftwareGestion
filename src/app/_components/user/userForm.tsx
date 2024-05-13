@@ -130,7 +130,7 @@ export default function UserForm(props: {
         className="col-span-8 border-4 border-indigo-300/50"
         placeholder={"Telefono"}
         name="telefono"
-        value={props.client.telefono ?? 0}
+        value={props.client.telefono ? props.client.telefono : 0}
         onChange={(e) => {
           const { name, value } = e.target;
           props.setClient({ ...props.client, [name]: parseInt(value) });

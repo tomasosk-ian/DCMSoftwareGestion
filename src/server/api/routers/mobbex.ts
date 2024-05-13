@@ -26,7 +26,7 @@ export const mobbexRouter = createTRPCRouter({
       const checkout = {
         total: 10000,
         currency: "ARS",
-        reference: "123ASKFJR5132342348",
+        reference: `${input.reference}`,
         description: "Descripción de la Venta",
         test: true,
         customer: {

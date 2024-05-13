@@ -40,7 +40,7 @@ export const emailRouter = createTRPCRouter({
             const qrCode = img.split(";base64,").pop();
             if (qrCode) {
               attachments.push({
-                filename: `QR_Code_${index}.png`,
+                filename: `QR_${token[0]}_${token[1]}.png`,
                 content: qrCode,
                 type: "image/png",
                 disposition: "attachment",
