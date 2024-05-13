@@ -24,7 +24,7 @@ export const mobbexRouter = createTRPCRouter({
         accessToken: "a4a78473-14cb-4810-b716-02f003c183bb",
       });
       const checkout = {
-        total: 10000,
+        total: input.amount!,
         currency: "ARS",
         reference: `${input.reference}`,
         description: "Descripción de la Venta",
