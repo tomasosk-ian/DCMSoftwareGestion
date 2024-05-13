@@ -20,13 +20,13 @@ export const mobbexRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       mobbex.configurations.configure({
-        apiKey: "zJ8LFTBX6Ba8D611e9io13fDZAwj0QmKO1Hn1yIj",
-        accessToken: "d31f0721-2f85-44e7-bcc6-15e19d1a53cc",
+        apiKey: "MG6cQtZdWShlZ9MObv98AloWZKUVBv3WwYmpfzOS",
+        accessToken: "a4a78473-14cb-4810-b716-02f003c183bb",
       });
       const checkout = {
-        total: input.amount,
+        total: 10000,
         currency: "ARS",
-        reference: `123ASKFJR5${input.reference}`,
+        reference: "123ASKFJR5132342348",
         description: "Descripción de la Venta",
         test: true,
         customer: {
@@ -40,12 +40,10 @@ export const mobbexRouter = createTRPCRouter({
               "https://www.mobbex.com/wp-content/uploads/2019/03/web_logo.png",
             quantity: 2,
             description: "Mi Producto",
-            total: input.amount,
+            total: 10000,
           },
         ],
-        options: {
-          domain: "test.com",
-        },
+        options: { domain: "test.com" },
         return_url: "https://mobbex.com/sale/return?session=56789",
         webhook: "https://mobbex.com/sale/webhook?user=1234",
       };
