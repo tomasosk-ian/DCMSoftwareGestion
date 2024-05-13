@@ -9,7 +9,6 @@ import { clients, users } from "~/server/db/schema";
 
 export const clientsRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    await db.delete(users);
     const result = ctx.db.query.clients.findMany({
       orderBy: (client, { desc }) => [desc(client.identifier)],
     });
