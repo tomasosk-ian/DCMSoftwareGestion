@@ -8,7 +8,7 @@ import { db, schema } from "~/server/db";
 import { clients } from "~/server/db/schema";
 
 export const clientsRouter = createTRPCRouter({
-  get: publicProcedure.query(({ ctx }) => {
+  get: publicProcedure.query(async ({ ctx }) => {
     const result = ctx.db.query.clients.findMany({
       orderBy: (client, { desc }) => [desc(client.identifier)],
     });
