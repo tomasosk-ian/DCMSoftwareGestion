@@ -72,12 +72,7 @@ export function AddRoleDialog() {
           </div>
 
           <div>
-            <Input
-              id="access"
-              placeholder="access"
-              value={access}
-              onChange={(e) => setAccess([...access, e.target.value])}
-            />
+            <Label>El rol se editará al crearse.</Label>
           </div>
           {/* <div>
             <Label htmlFor="description">Imagen</Label>
