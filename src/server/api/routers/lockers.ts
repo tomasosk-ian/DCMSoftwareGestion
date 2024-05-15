@@ -10,7 +10,9 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const lockerRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    const sizeResponse = await fetch(`${env.SERVER_URL}/api/locker`);
+    const sizeResponse = await fetch(
+      `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
+    );
 
     // Handle the response from the external API
     if (!sizeResponse.ok) {

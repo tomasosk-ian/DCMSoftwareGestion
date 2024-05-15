@@ -37,6 +37,7 @@ export const env = createEnv({
     MAIL_SENDER: z.string(),
     MOBBEX_API_KEY: z.string(),
     MOBBEX_ACCESS_TOKEN: z.string(),
+    TOKEN_EMPRESA: z.string(),
   },
 
   /**
@@ -65,6 +66,7 @@ export const env = createEnv({
     MAIL_SENDER: process.env.MAIL_SENDER,
     MOBBEX_API_KEY: process.env.MOBBEX_API_KEY,
     MOBBEX_ACCESS_TOKEN: process.env.MOBBEX_ACCESS_TOKEN,
+    TOKEN_EMPRESA: process.env.TOKEN_EMPRESA,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

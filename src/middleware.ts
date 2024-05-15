@@ -17,20 +17,20 @@ export default async function middleware(request: NextRequest) {
   );
   const access = result.find((role) => role.id === session?.user.role)?.access;
 
-  if (access === undefined) {
-    return NextResponse.redirect(new URL("/accessdenied", request.url));
-  }
+  // if (access === undefined) {
+  //   return NextResponse.redirect(new URL("/accessdenied", request.url));
+  // }
 
-  if (
-    !access.some(
-      (path: string) =>
-        path === request.nextUrl.pathname ||
-        (request.nextUrl.pathname.startsWith(path.slice(0, -2)) &&
-          path.endsWith("/*")),
-    )
-  ) {
-    return NextResponse.redirect(new URL("/accessdenied", request.url));
-  }
+  // if (
+  //   !access.some(
+  //     (path: string) =>
+  //       path === request.nextUrl.pathname ||
+  //       (request.nextUrl.pathname.startsWith(path.slice(0, -2)) &&
+  //         path.endsWith("/*")),
+  //   )
+  // ) {
+  //   return NextResponse.redirect(new URL("/accessdenied", request.url));
+  // }
 }
 
 export const config = {
