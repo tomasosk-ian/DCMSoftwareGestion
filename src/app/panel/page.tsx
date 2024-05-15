@@ -10,10 +10,10 @@ import { AddCityDialog } from "./add-city-dialog";
 import { AddStoreDialog } from "./add-store-dialog";
 
 export default async function Home() {
-  const cities = await api.city.get.query();
-  const stores = await api.store.get.query();
-  const lockers = await api.locker.get.query();
-  // const sizes = await api.size.get.query();
+  const session = await getServerAuthSession();
+
+  // console.log("aaaaaaaaaaaaaaaaaaaaaaa");
+  // console.log(session?.user.role);
   return (
     <section className="space-y-2">
       <Title>Bienvenido.</Title>

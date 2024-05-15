@@ -6,11 +6,13 @@ import {
   primaryKey,
   real,
   sqliteTableCreator,
+  blob,
 } from "drizzle-orm/sqlite-core";
-export const sqliteTable = sqliteTableCreator((name) => `test_${name}`);
+// export const sqliteTable = sqliteTableCreator((name) => `test_${name}`);
+export const sqliteTable = sqliteTableCreator((name) => `${name}`);
 
 export const cities = sqliteTable(
-  "cities",
+  "test_cities",
   {
     identifier: text("identifier", { length: 255 }).notNull(),
     name: text("name", { length: 255 }).notNull(),
@@ -23,7 +25,7 @@ export const cities = sqliteTable(
 );
 
 export const clients = sqliteTable(
-  "clients",
+  "test_clients",
   {
     identifier: integer("identifier").primaryKey({ autoIncrement: true }),
     name: text("name", { length: 255 }),
@@ -38,7 +40,7 @@ export const clients = sqliteTable(
 );
 
 export const stores = sqliteTable(
-  "stores",
+  "test_stores",
   {
     identifier: text("identifier", { length: 255 }).notNull(),
     name: text("name", { length: 255 }).notNull(),
@@ -46,6 +48,7 @@ export const stores = sqliteTable(
     cityId: text("cityId", { length: 255 }).notNull(),
     serieLocker: text("serieLocker", { length: 255 }),
     address: text("address", { length: 255 }),
+    organizationName: text("organizationName", { length: 255 }),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
@@ -60,7 +63,7 @@ export const storesRelations = relations(stores, ({ one }) => ({
 }));
 
 export const transactions = sqliteTable(
-  "transactions",
+  "test_transactions",
   {
     id: integer("number").primaryKey().primaryKey({ autoIncrement: true }),
     confirm: integer("confirm", { mode: "boolean" }).default(false),
@@ -80,7 +83,7 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
 }));
 
 export const sizes = sqliteTable(
-  "sizes",
+  "test_sizes",
   {
     id: integer("id").notNull(),
     alto: integer("alto"),
@@ -98,7 +101,7 @@ export const sizes = sqliteTable(
 );
 
 export const reservas = sqliteTable(
-  "reservas",
+  "test_reservas",
   {
     identifier: text("identifier", { length: 255 }),
     NroSerie: text("NroSerie", { length: 255 }),
@@ -128,7 +131,7 @@ export const reservasRelations = relations(reservas, ({ one }) => ({
 }));
 
 export const config = sqliteTable(
-  "config",
+  "test_config",
   {
     identifier: text("identifier", { length: 255 }).notNull(),
     name: text("name", { length: 255 }).notNull(),
@@ -141,7 +144,7 @@ export const config = sqliteTable(
 );
 
 export const lockers = sqliteTable(
-  "lockers",
+  "test_lockers",
   {
     id: text("identifier", { length: 255 }).notNull(),
     nroSerieLocker: text("name", { length: 255 }).notNull(),
@@ -153,7 +156,7 @@ export const lockers = sqliteTable(
 );
 
 export const globalconfig = sqliteTable(
-  "globalconfig",
+  "test_globalconfig",
   {
     identifier: text("identifier", { length: 255 }).notNull(),
     name: text("name", { length: 255 }).notNull(),
@@ -166,7 +169,7 @@ export const globalconfig = sqliteTable(
 );
 
 export const userData = sqliteTable(
-  "userdata",
+  "test_userdata",
   {
     identifier: text("identifier", { length: 255 }).notNull(),
     name: text("name", { length: 255 }).notNull(),
@@ -180,7 +183,7 @@ export const userData = sqliteTable(
 );
 
 export const feeData = sqliteTable(
-  "feedata",
+  "test_feedata",
   {
     identifier: text("identifier", { length: 255 }).notNull(),
     description: text("description", { length: 255 }),
@@ -195,7 +198,7 @@ export const feeData = sqliteTable(
 );
 
 export const coinData = sqliteTable(
-  "coindate",
+  "test_coindate",
   {
     identifier: text("identifier", { length: 255 }).notNull(),
     description: text("description", { length: 255 }),
@@ -222,13 +225,20 @@ export const sessions = sqliteTable(
     userIdIdx: index("userId_idx").on(session.userId),
   }),
 );
-export const users = sqliteTable("user", {
-  id: text("id", { length: 255 }).notNull().primaryKey(),
-  name: text("name", { length: 255 }),
-  email: text("email", { length: 255 }).notNull(),
-  emailVerified: text("emailVerified").default(sql`(CURRENT_DATE)`),
-  image: text("image", { length: 255 }),
-});
+export const users = sqliteTable(
+  "user",
+  {
+    id: text("id", { length: 255 }).notNull().primaryKey(),
+    name: text("name", { length: 255 }),
+    email: text("email", { length: 255 }).notNull(),
+    emailVerified: text("emailVerified").default(sql`(CURRENT_DATE)`),
+    image: text("image", { length: 255 }),
+    role: text("role", { length: 255 }),
+  },
+  (user) => ({
+    roleIdx: index("role_idx").on(user.id),
+  }),
+);
 
 export const accounts = sqliteTable(
   "account",
@@ -253,6 +263,7 @@ export const accounts = sqliteTable(
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
+  roles: many(roles),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -274,3 +285,22 @@ export const verificationTokens = sqliteTable(
     compoundKey: primaryKey(vt.identifier, vt.token),
   }),
 );
+
+export const roles = sqliteTable(
+  "roles",
+  {
+    id: text("identifier", { length: 255 }).notNull(),
+    description: text("desription", { length: 255 }).notNull(),
+    access: text("access", { mode: "json" })
+      .notNull()
+      .$type<string[]>()
+      .default(sql`'[]'`),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.id),
+  }),
+);
+
+export const rolesRelations = relations(roles, ({ one }) => ({
+  user: one(users, { fields: [roles.id], references: [users.role] }),
+}));

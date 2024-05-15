@@ -6,7 +6,9 @@ import {
   AlignStartVerticalIcon,
   BanknoteIcon,
   CloudIcon,
+  DnaIcon,
   DollarSignIcon,
+  DotIcon,
   FileUpIcon,
   FingerprintIcon,
   GroupIcon,
@@ -17,6 +19,7 @@ import {
   Settings2Icon,
   TagsIcon,
   TentIcon,
+  UserIcon,
   UsersIcon,
 } from "lucide-react";
 
@@ -24,8 +27,14 @@ export default function AppSidenav() {
   return (
     <Sidenav>
       <SidenavSeparator>Administración</SidenavSeparator>
-      <SidenavItem icon={<Settings2Icon />} href="/panel">
+      <SidenavItem icon={<Settings2Icon />} href="/panel/global">
         Global
+      </SidenavItem>
+      <SidenavItem icon={<UserIcon />} href="/panel/users">
+        Usuarios
+      </SidenavItem>
+      <SidenavItem icon={<DnaIcon />} href="/panel/roles">
+        Roles
       </SidenavItem>
       <SidenavItem icon={<CloudIcon />} href="/panel/ciudades">
         Ciudades
@@ -42,7 +51,6 @@ export default function AppSidenav() {
       <SidenavItem icon={<TagsIcon />} href="/panel/clientes">
         Clientes
       </SidenavItem>
-
       {/* <SidenavSeparator>Separador</SidenavSeparator>
       <SidenavItem icon={<FingerprintIcon />} href="/panel/locales">
         Item 1

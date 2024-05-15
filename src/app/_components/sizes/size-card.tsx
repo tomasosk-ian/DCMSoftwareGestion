@@ -8,7 +8,7 @@
 //       <img className="aspect-video object-cover" src="/placeholder.svg"></img>
 //       <CardFooter className="bg-green-100 backdrop-blur-sm">
 //         <div className="flex pt-5">
-//           <div className="">Número de taquillas</div>
+//           <div className="">Número de Lockers</div>
 //           <div className="float-end inline-flex">
 //             <button
 //               onClick={() => setValue(value - 1)}

@@ -5,19 +5,18 @@ import { differenceInDays, format } from "date-fns";
 import { Button } from "~/components/ui/button";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Store } from "~/server/api/routers/store";
 import { es } from "date-fns/locale";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { api } from "~/trpc/react";
-import { number } from "zod";
 import { useEffect, useState } from "react";
 import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
@@ -29,10 +28,11 @@ export default function Booking(props: {
   reserves: Reserve[];
   total: number;
   setTotal: (total: number) => void;
-  coin: string;
-  setCoin: (coin: string) => void;
+  coin: Coin;
+  setCoin: (coin: Coin) => void;
+  coins: Coin[];
 }) {
-  const { data: sizes, isLoading } = api.size.get.useQuery();
+  const { data: sizes } = api.size.get.useQuery();
   const { data: fees } = api.fee.get.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [reserveGroupBySize, setReserveGroupBySize] = useState<
@@ -40,7 +40,6 @@ export default function Booking(props: {
   >({});
   const [prices, setPrices] = useState<Record<number, number>>({});
   const [count, setCount] = useState<Record<number, number>>({});
-  const coins = api.coin.get.useQuery();
   useEffect(() => {
     const counts: Record<number, number> = {};
 
@@ -48,7 +47,7 @@ export default function Booking(props: {
       if (reserve.IdSize !== undefined) {
         counts[reserve.IdSize!] = (counts[reserve.IdSize!] || 0) + 1;
       }
-    });
+    }, []);
 
     setCount(counts);
   }, [props.reserves]);
@@ -72,15 +71,16 @@ export default function Booking(props: {
         );
 
         const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
-        const discount = fees?.find((s: Fee) => s.size === reserve.IdSize)
-          ?.discount!;
-        if (coins) {
+        const discount = fees?.find(
+          (s: Fee) => s.size === reserve.IdSize,
+        )?.discount!;
+        if (props.coins) {
           props.setCoin(
-            coins?.data?.find(
+            props.coins?.find(
               (s: Coin) =>
                 s.identifier ===
                 fees?.find((s: Fee) => s.size === reserve.IdSize)?.coin!,
-            )?.description!,
+            )!,
           );
         }
 
@@ -101,7 +101,8 @@ export default function Booking(props: {
 
       setPrices(prices);
     }
-  }, [fees, coins]);
+  }, [props.reserves]);
+
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM", { locale: es });
@@ -144,14 +145,7 @@ export default function Booking(props: {
           <div className="grid-cols-6 ">
             <div className="grid-cols-6">
               <Label>
-                {prices[size.id]!}{" "}
-                {
-                  coins?.data?.find(
-                    (s: Coin) =>
-                      s.identifier ===
-                      fees?.find((s: Fee) => s.size === size.id)?.coin!,
-                  )?.description!
-                }
+                {prices[size.id]!} {props.coin?.description!}
               </Label>
             </div>
             {days >= 1 && (
@@ -168,11 +162,13 @@ export default function Booking(props: {
                     ).toFixed(2),
                   )}{" "}
                   {
-                    coins?.data?.find(
-                      (s: Coin) =>
-                        s.identifier ===
-                        fees?.find((s: Fee) => s.size === size.id)?.coin!,
-                    )?.description!
+                    // coins?.data?.find(
+                    //   (s: Coin) =>
+                    //     s.identifier ===
+                    //     fees?.find((s: Fee) => s.size === size.id)?.coin!,
+                    // )?.description!
+
+                    props.coin?.description!
                   }{" "}
                 </Label>
               </div>
@@ -189,7 +185,7 @@ export default function Booking(props: {
         <Card className="rounded bg-gray-50 pl-5 pr-5 ">
           <CardHeader className="">
             <CardTitle className="text-2xl"> {props.store.name}</CardTitle>
-            <CardDescription>
+            <CardContent>
               <div className=" flex justify-between pb-3 pt-2">
                 <div className="right-64 grid-cols-6">
                   <div className="grid-cols-6">
@@ -213,10 +209,13 @@ export default function Booking(props: {
                 {sizes?.map((size: Size) => {
                   if (getSizeNameById(size.id!)) {
                     return (
-                      <div className="flex justify-between gap-10 pr-28 ">
+                      <div
+                        className="flex justify-between gap-10 pr-28 "
+                        key={size.id}
+                      >
                         <div className=" pt-2">
                           <Title className=" font-bold">
-                            Taquilla {getSizeNameById(size.id!)}
+                            Locker {getSizeNameById(size.id!)}
                           </Title>
                         </div>
                         <div className="flex-col pt-2">
@@ -224,16 +223,18 @@ export default function Booking(props: {
                             (reserve) => reserve.IdSize === size.id,
                           )?.Cantidad == 1
                             ? "1 unidad"
-                            : `${props.reserves.find(
-                                (reserve) => reserve.IdSize === size.id,
-                              )?.Cantidad} unidades`}
+                            : `${
+                                props.reserves.find(
+                                  (reserve) => reserve.IdSize === size.id,
+                                )?.Cantidad
+                              } unidades`}
                         </div>
                       </div>
                     );
                   }
                 })}
               </div>
-            </CardDescription>
+            </CardContent>
           </CardHeader>
         </Card>
       </div>
@@ -241,9 +242,9 @@ export default function Booking(props: {
         {sizes?.map((size: Size) => {
           if (getSizeNameById(size.id!)) {
             return (
-              <div className="pb-5">
+              <div className="pb-5" key={size.id}>
                 <Title className="pb-2 font-bold">
-                  Taquilla {getSizeNameById(size.id!)}
+                  Locker {getSizeNameById(size.id!)}
                 </Title>
                 {getDays(size)}
               </div>
@@ -261,7 +262,7 @@ export default function Booking(props: {
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
                 <Label>
-                  {subTotal} {props.coin}
+                  {subTotal} {props.coin?.description}
                 </Label>
               </div>
             </div>
@@ -278,7 +279,7 @@ export default function Booking(props: {
             <div className="grid-cols-6  items-end">
               <div className="grid-cols-6">
                 <Label>
-                  {props.total} {props.coin}
+                  {props.total} {props.coin?.description}
                 </Label>
               </div>
             </div>

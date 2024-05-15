@@ -43,7 +43,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
   const [loading, setLoading] = useState(false);
   const [serieLocker, setSerieLocker] = useState("");
   const [address, setAddress] = useState("");
-
+  const [organizationName, setOrganizationName] = useState("");
   const router = useRouter();
 
   async function handleCreate() {
@@ -53,6 +53,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
         image,
         cityId,
         address,
+        organizationName,
       });
 
       toast.success("Local creado correctamente");
@@ -82,7 +83,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
             <Label htmlFor="name">Nombre del local</Label>
             <Input
               id="name"
-              placeholder="ej: efectivo"
+              placeholder="ej: BuenosAires-1"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -144,6 +145,14 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
               placeholder="ej: Rivadavia 123"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="name">Nombre de organización</Label>
+            <Input
+              id="orgname"
+              value={organizationName!}
+              onChange={(e) => setOrganizationName(e.target.value)}
             />
           </div>
           <div>

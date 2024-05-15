@@ -5,7 +5,7 @@ import { createId } from "~/lib/utils";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
-import { clients } from "~/server/db/schema";
+import { clients, users } from "~/server/db/schema";
 
 export const clientsRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {

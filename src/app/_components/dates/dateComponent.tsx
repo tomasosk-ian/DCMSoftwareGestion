@@ -43,7 +43,7 @@ export default function DateComponent(props: {
       {!props.endDate && (
         <div className="container flex flex-col items-center justify-center gap-6 ">
           <h2 className="text-3xl font-semibold">
-            ¿Qué días necesitas tu taquilla?
+            ¿Qué días necesitas tu Locker?
           </h2>
           <div className="justify-center">
             <div>
