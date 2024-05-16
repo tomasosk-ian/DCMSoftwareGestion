@@ -66,7 +66,7 @@ export default function RolePage({ role }: { role: Role }) {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Modificar ciudad</Title>
+          <Title>Modificar rol</Title>
           <Button disabled={loading} onClick={handleChange}>
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
