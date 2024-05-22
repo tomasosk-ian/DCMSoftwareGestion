@@ -124,7 +124,7 @@ export const authOptions: NextAuthOptions = {
     AzureProvider({
       clientId: env.AZURE_CLIENT_ID,
       clientSecret: env.AZURE_CLIENT_SECRET,
-      tenantId: env.AZURE_TENANT_ID,
+      // tenantId: env.AZURE_TENANT_ID,
     }),
   ],
 
