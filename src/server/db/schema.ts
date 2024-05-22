@@ -1,4 +1,5 @@
 import { relations, sql } from "drizzle-orm";
+import { timestamp } from "drizzle-orm/mysql-core";
 import {
   text,
   index,
@@ -231,9 +232,12 @@ export const users = sqliteTable(
     id: text("id", { length: 255 }).notNull().primaryKey(),
     name: text("name", { length: 255 }),
     email: text("email", { length: 255 }).notNull(),
+    createdAt: integer("createdAt").default(sql`(CURRENT_DATE)`),
+    updatedAt: integer("updatedAt").default(sql`(CURRENT_DATE)`),
     emailVerified: text("emailVerified").default(sql`(CURRENT_DATE)`),
     image: text("image", { length: 255 }),
     role: text("role", { length: 255 }),
+    state: text("state", { length: 255 }).default("Activo"),
   },
   (user) => ({
     roleIdx: index("role_idx").on(user.id),
@@ -286,21 +290,71 @@ export const verificationTokens = sqliteTable(
   }),
 );
 
+// export const permissionsRelations = relations(roles, ({ many }) => ({
+//   roles: many(roles),
+// }));
+
+// many to mant, necesito hacer permissionsToRoles y jugar con eso.
+// https://orm.drizzle.team/docs/rqb#many-to-many
+
 export const roles = sqliteTable(
   "roles",
   {
     id: text("identifier", { length: 255 }).notNull(),
-    description: text("desription", { length: 255 }).notNull(),
-    access: text("access", { mode: "json" })
-      .notNull()
-      .$type<string[]>()
-      .default(sql`'[]'`),
+    description: text("desription", { length: 255 }),
+    createdAt: integer("createdAt").default(sql`(CURRENT_DATE)`),
+    updatedAt: integer("updatedAt").default(sql`(CURRENT_DATE)`),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.id),
   }),
 );
 
-export const rolesRelations = relations(roles, ({ one }) => ({
+export const rolesRelations = relations(roles, ({ one, many }) => ({
   user: one(users, { fields: [roles.id], references: [users.role] }),
+  rolesToPermissions: many(rolesToPermissions),
 }));
+
+export const permissions = sqliteTable(
+  "permissions",
+  {
+    id: text("identifier", { length: 255 }).notNull(),
+    description: text("desription", { length: 255 }).notNull(),
+    type: text("type", { length: 255 }).notNull(),
+    access: text("access", { length: 255 }),
+    createdAt: integer("createdAt").default(sql`(CURRENT_DATE)`),
+    updatedAt: integer("updatedAt").default(sql`(CURRENT_DATE)`),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.id),
+  }),
+);
+
+export const permissionsRelations = relations(permissions, ({ many }) => ({
+  rolesToPermissions: many(rolesToPermissions),
+}));
+
+export const rolesToPermissions = sqliteTable(
+  "roles_to_permissions",
+  {
+    roleId: text("roleId").references(() => roles.id),
+    permissionId: text("permissionId").references(() => permissions.id),
+  },
+  (t) => ({
+    compoundKey: primaryKey(t.roleId, t.permissionId),
+  }),
+);
+
+export const rolesToPermissionsRelations = relations(
+  rolesToPermissions,
+  ({ one }) => ({
+    permissions: one(permissions, {
+      fields: [rolesToPermissions.permissionId],
+      references: [permissions.id],
+    }),
+    roles: one(roles, {
+      fields: [rolesToPermissions.roleId],
+      references: [roles.id],
+    }),
+  }),
+);

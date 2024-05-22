@@ -8,7 +8,6 @@ import SizeSelector from "./sizes/selector";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import DateComponent from "./dates/dateComponent";
-import UserForm from "./user/userForm";
 import Booking from "./booking/booking";
 import {
   AlertDialog,
@@ -26,6 +25,7 @@ import { Badge } from "~/components/ui/badge";
 import Payment from "./payment/page";
 import { Coin } from "~/server/api/routers/coin";
 import { useState } from "react";
+import UserForm from "./user/userForm";
 
 export const Icons = {
   spinner: Loader2,

@@ -7,7 +7,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { roles } from "~/server/db/schema";
+import { permissions, roles } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 
@@ -16,6 +16,7 @@ export const roleRouter = createTRPCRouter({
     ctx.db.select().from(roles);
     const result = ctx.db.query.roles.findMany({
       orderBy: (roles, { desc }) => [desc(roles.id)],
+      with: { rolesToPermissions: { with: { permissions: true } } },
     });
     return result;
   }),
@@ -28,7 +29,7 @@ export const roleRouter = createTRPCRouter({
   create: publicProcedure
     .input(
       z.object({
-        description: z.string().min(0).max(1023),
+        description: z.string().min(0).max(1023).nullable().optional(),
         access: z.array(z.string()).min(0).max(1023),
       }),
     )
@@ -40,7 +41,6 @@ export const roleRouter = createTRPCRouter({
       await db.insert(schema.roles).values({
         id,
         description: input.description,
-        access: input.access,
       });
 
       return { id };
@@ -54,6 +54,7 @@ export const roleRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const channel = await db.query.roles.findFirst({
         where: eq(schema.roles.id, input.roleId),
+        with: { rolesToPermissions: { with: { permissions: true } } },
       });
 
       return channel;
@@ -67,22 +68,22 @@ export const roleRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const channel = await db.query.roles.findFirst({
         where: eq(schema.roles.id, input.roleId),
+        with: { rolesToPermissions: { with: { permissions: true } } },
       });
 
-      return channel?.access;
+      return channel?.rolesToPermissions.values;
     }),
   change: publicProcedure
     .input(
       z.object({
         identifier: z.string(),
-        description: z.string(),
-        access: z.array(z.string()).min(0).max(1023),
+        description: z.string().nullable(),
       }),
     )
     .mutation(({ ctx, input }) => {
       return ctx.db
         .update(roles)
-        .set({ description: input.description, access: input.access })
+        .set({ description: input.description, updatedAt: Date.now() })
         .where(eq(roles.id, input.identifier));
     }),
 

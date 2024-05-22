@@ -2,17 +2,13 @@
 
 import { AxeIcon, CheckIcon, Loader2, X } from "lucide-react";
 import { MouseEventHandler, useState } from "react";
-import AppSidenav from "~/components/app-sidenav";
-import AppLayout from "~/components/applayout";
+
 import LayoutContainer from "~/components/layout-container";
-import { List, ListTile } from "~/components/list";
-import { NavUserData } from "~/components/nav-user-section";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
-import { RouterOutputs } from "~/trpc/shared";
 import {
   Accordion,
   AccordionContent,
@@ -42,39 +38,35 @@ import {
 } from "~/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { UploadButton } from "~/utils/uploadthing";
-import { Role } from "~/server/api/routers/roles";
 import { Badge } from "~/components/ui/badge";
-import { routeModule } from "next/dist/build/templates/app-page";
 import { Permission } from "~/server/api/routers/permissions";
 
-export default function RolePage(props: {
-  role: Role;
-  permissions: Permission[];
+export default function PermissionPage({
+  permission,
+}: {
+  permission: Permission;
 }) {
-  const [permissions, setPermissions] = useState(props.permissions);
-  const [description, setDescription] = useState(props.role!.description);
-  const [permission, setPermission] = useState<string>();
+  const [access, setAccess] = useState<string>(permission!.access ?? "");
+  const [type, setType] = useState<string>(permission!.type);
+  const [types, setTypes] = useState(["Ruta", "UX", "Otro"]);
+
+  const [description, setDescription] = useState(permission!.description);
+  const [route, setRoute] = useState("");
   const [loading, setLoading] = useState(false);
-  const { mutateAsync: renameRole, isLoading } = api.roles.change.useMutation();
-  const { mutateAsync: addPermissionToRole } =
-    api.permissions.permissionToRole.useMutation();
-  const [rolesPermissions, setRolesPermissions] = useState<string[]>([]);
+  const { mutateAsync: renamePermission, isLoading } =
+    api.permissions.change.useMutation();
+  const [image, setImage] = useState<string>("");
   const router = useRouter();
 
   async function handleChange() {
     try {
-      await renameRole({
-        identifier: props.role!.id,
+      await renamePermission({
+        id: permission.id!,
         description,
+        type,
+        access,
       });
-      if (rolesPermissions) {
-      }
-      addPermissionToRole({
-        roleId: props.role.id,
-        permissions: rolesPermissions,
-      });
-      toast.success("Se ha modificado el rol.");
+      toast.success("Se ha modificado el permiso.");
       router.refresh();
     } catch {
       toast.error("Error");
@@ -86,8 +78,14 @@ export default function RolePage(props: {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Modificar rol</Title>
-          <Button disabled={loading} onClick={handleChange}>
+          <Title>Modificar permiso</Title>
+          <Button
+            disabled={
+              loading ||
+              (type == "Ruta" && (access == "" || !access.startsWith("/")))
+            }
+            onClick={handleChange}
+          >
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
@@ -100,91 +98,86 @@ export default function RolePage(props: {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-2">
             <AccordionTrigger>
-              <h2 className="text-md">Info. del rol</h2>
+              <h2 className="text-md">Info. del permiso</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div>
+                <div className="flex w-full gap-4 pb-5">
+                  <div className="w-1/2">
                     <Label htmlFor="name">Descripción</Label>
                     <Input
+                      // className="w-1/2"
                       id="name"
-                      value={description!}
+                      value={description}
                       onChange={(e) => setDescription(e.target.value)}
                     />
                   </div>
-                  <div className="">
-                    <Label htmlFor="name">Permisos</Label>
-                    <div className="flex w-full max-w-sm items-center space-x-2">
+                  {/* <div className="w-1/2">
+                    <Label htmlFor="name">Descripción</Label>
+                    <Input
+                      // className="w-1/2"
+                      id="name"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div> */}
+                </div>
+                <div>
+                  <div className="flex gap-10">
+                    <div className="w-1/2 gap-10 pb-5">
+                      <Label>Tipo de rol</Label>
                       <Select
                         onValueChange={(value: string) => {
-                          // setRole(value);
-                          setPermission(value);
-                          console.log(value);
+                          setType(value);
                         }}
                       >
                         <SelectTrigger className="w-[180px]">
                           <SelectValue
-                          // placeholder={permissions}
+                            placeholder={type ? type : "Seleccione un tipo"}
                           />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectLabel>Seleccione un permiso</SelectLabel>
+                            <SelectLabel>Seleccione un tipo</SelectLabel>
 
-                            {permissions?.map((e) => {
+                            {types?.map((e) => {
                               return (
-                                <SelectItem
-                                  key={e.id}
-                                  value={e.id!}
-                                  disabled={rolesPermissions.includes(e.id)}
-                                >
-                                  {e.description}
+                                <SelectItem key={e} value={e}>
+                                  {e}
                                 </SelectItem>
                               );
                             })}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      <Button
-                        variant="secondary"
-                        onClick={(e) => {
-                          if (permission) {
-                            setRolesPermissions([
-                              ...rolesPermissions,
-                              permission,
-                            ]);
-                          }
-                        }}
-                      >
-                        Agregar permiso
-                      </Button>
                     </div>
-
-                    <div className="flex w-full flex-wrap pt-3">
-                      {permissions?.map((path, index) => (
-                        <div
-                          key={path}
-                          className="mb-2 flex items-center gap-3"
-                        >
-                          <Badge className="mr-2">
-                            {path}
-                            <X
-                              color="red"
-                              className="pl-2"
-                              onClick={() => {
-                                console.log(access.includes(path));
-                                // if (access.(path)) {
-                                //   toast.success("Ya contiene esta ruta");
-                                // } else {
-                                //   console.log(access.filter((x) => x != path));
-                                setAccess(access.filter((x) => x != path));
-                                // }
-                              }}
-                            ></X>
-                          </Badge>
+                    <div className="w-1/2 gap-4 pb-5">
+                      {type == "Ruta" && (
+                        <div className="gap-4 p-2">
+                          <div>
+                            <Label htmlFor="name">Acceso</Label>
+                            <Input
+                              className="p-2"
+                              id="name"
+                              value={access}
+                              onChange={(e) => setAccess(e.target.value)}
+                            />
+                          </div>
                         </div>
-                      ))}
+                      )}
+                      {type == "UX" && (
+                        <div className="gap-4 p-2">
+                          <div>
+                            <Label htmlFor="name">Código</Label>
+                            <Input
+                              className="p-2"
+                              id="name"
+                              value={access}
+                              onChange={(e) => setAccess(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -194,11 +187,11 @@ export default function RolePage(props: {
 
           <AccordionItem value="item-4" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar rol</h2>
+              <h2 className="text-md">Eliminar permiso</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
-                <DeleteChannel roleId={props.role.id} />
+                <DeleteChannel permissionId={permission.id} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -208,16 +201,16 @@ export default function RolePage(props: {
   );
 }
 
-function DeleteChannel(props: { roleId: string }) {
+function DeleteChannel(props: { permissionId: string }) {
   const { mutateAsync: deleteChannel, isLoading } =
-    api.roles.delete.useMutation();
+    api.permissions.delete.useMutation();
 
   const router = useRouter();
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
-    deleteChannel({ id: props.roleId }).then(() => {
-      toast.success("Se ha eliminado el rol");
+    deleteChannel({ id: props.permissionId }).then(() => {
+      toast.success("Se ha eliminado el permiso");
       router.push("../");
     });
   };
@@ -225,16 +218,16 @@ function DeleteChannel(props: { roleId: string }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-[160px]">
-          Eliminar rol
+          Eliminar permiso
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar la rol?
+            ¿Estás seguro que querés eliminar la permiso?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Eliminar rol permanentemente.
+            Eliminar permiso permanentemente.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

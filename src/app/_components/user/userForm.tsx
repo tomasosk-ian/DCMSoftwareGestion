@@ -1,6 +1,5 @@
 "use client";
 
-import { Title } from "@radix-ui/react-toast";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -16,6 +15,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Client } from "~/server/api/routers/clients";
 import { continents, countries, languages } from "countries-list";
+import { Checkbox } from "~/components/ui/checkbox";
 
 export default function UserForm(props: {
   client: Client;
@@ -42,7 +42,11 @@ export default function UserForm(props: {
 
     Object.entries(countries).forEach(([countryCode, countryData]) => {
       const { phone } = countryData;
-      phoneNumbers.push({ [countryCode]: phone[0]! });
+      if (countryCode == "AR") {
+        phoneNumbers.unshift({ [countryCode]: phone[0]! });
+      } else {
+        phoneNumbers.push({ [countryCode]: phone[0]! });
+      }
     }, []);
 
     setPhones(phoneNumbers);
@@ -81,20 +85,7 @@ export default function UserForm(props: {
         onChange={handleChange}
       />
       <span className="col-span-12 text-red-500">{props.errors.email}</span>
-
-      {/* <Input
-        className="col-span-4 border-4 border-indigo-300/50"
-        placeholder={"Prefijo"}
-        name="prefijo"
-        value={props.client.prefijo!}
-        onChange={(e) => {
-          const { name, value } = e.target;
-          props.setClient({ ...props.client, [name]: parseInt(value) });
-          props.setErrors({ ...props.errors, [name]: "" });
-        }}
-      /> */}
-
-      <div className="col-span-4 border-4 border-indigo-300/50">
+      <div className="col-span-4 max-h-60 border-4 border-indigo-300/50">
         <Select
           onValueChange={(value: string) => {
             props.setClient({
@@ -107,7 +98,7 @@ export default function UserForm(props: {
           <SelectTrigger className="w-full">
             <SelectValue placeholder={"Elija un prefijo"} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-h-60 overflow-auto">
             <SelectGroup>
               <SelectLabel>Prefijos</SelectLabel>
               {phones?.map((item) => {
@@ -155,17 +146,37 @@ export default function UserForm(props: {
       <Label className="col-span-12 p-3 text-xs italic text-red-500">
         Añade tu codigo de descuento
       </Label>
-
-      <div className="flex">
-        <div dir="ltr">
-          <div className="col-span-4 w-96 rounded-s-lg px-2">
-            <Input placeholder={"Aplicar cupón de descuento"}></Input>
+      <div className="col-12">
+        <div className="flex">
+          <div dir="ltr">
+            <div className="col-span-4 w-96 rounded-s-lg px-2">
+              <Input placeholder={"Aplicar cupón de descuento"}></Input>
+            </div>
+          </div>
+          <div dir="rtl">
+            <div>
+              <Button className="col-span-4 p-2">Aplicar</Button>
+            </div>
           </div>
         </div>
-        <div dir="rtl">
-          <div>
-            <Button className="col-span-4 p-2">Aplicar</Button>
-          </div>
+      </div>
+      <div className="col-span-12">
+        <div className="flex items-center space-x-2 py-4">
+          <Checkbox id="terms" />
+          <label
+            htmlFor="terms"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Aceptar los{" "}
+            <i>
+              <u>términos y condiciones</u>
+            </i>
+          </label>
+        </div>
+        <div className="content-center pt-4">
+          <label htmlFor="terms" className="text-sm">
+            <strong>¿Necesitas ayuda? Llámanos al +34 919 03 76 40</strong>
+          </label>
         </div>
       </div>
     </div>

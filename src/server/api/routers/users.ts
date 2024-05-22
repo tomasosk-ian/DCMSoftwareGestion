@@ -7,16 +7,19 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { users } from "~/server/db/schema";
+import { permissions, users } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 
 export const userRouter = createTRPCRouter({
   get: publicProcedure.query(({ ctx }) => {
-    ctx.db.select().from(users);
     const result = ctx.db.query.users.findMany({
       orderBy: (users, { desc }) => [desc(users.id)],
-      with: { roles: true },
+      with: {
+        roles: {
+          with: { rolesToPermissions: { with: { permissions: true } } },
+        },
+      },
     });
     return result;
   }),
@@ -72,7 +75,7 @@ export const userRouter = createTRPCRouter({
     .mutation(({ ctx, input }) => {
       return ctx.db
         .update(users)
-        .set({ role: input.role })
+        .set({ role: input.role, updatedAt: Date.now() })
         .where(eq(users.id, input.identifier));
     }),
 
