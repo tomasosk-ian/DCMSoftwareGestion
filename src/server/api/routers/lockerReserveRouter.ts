@@ -61,9 +61,7 @@ export const lockerReserveRouter = createTRPCRouter({
           body: JSON.stringify(input),
         },
       );
-      console.log("-------------------------------------");
 
-      console.log(reservationResponse);
       const client = await getClientByEmail(input.client!);
       const identifier = createId();
       await db.insert(schema.reservas).values({
@@ -91,7 +89,6 @@ export const lockerReserveRouter = createTRPCRouter({
         // Throw an error or return the error message
         return errorResponse.message || "Unknown error";
       } else {
-        console.log("SAD");
       }
 
       const reservedBoxData = await reservationResponse.json();

@@ -141,23 +141,6 @@ export default function SizeSelector(props: {
             ...reserve,
           };
           setUpdatedReserve((prevReserves) => [...prevReserves, test]);
-
-          // const response = parseInt(await reservarBox(reserve));
-          // console.log(reserve);
-          // console.log(await reservarBox(reserve));
-          // if (!isNaN(response)) {
-          //   console.log("isnotnan");
-          //   const test = {
-          //     ...reserve,
-          //     IdTransaction: response ? response : undefined,
-          //   };
-          //   console.log("reserveupdated");
-          //   setReservesUpdate(true);
-          //   setUpdatedReserve((prevReserves) => [...prevReserves, test]);
-          // } else {
-          //   console.log();
-          //   props.setFailedResponse(true);
-          // }
         } catch (e) {
           console.log(e);
         }
@@ -176,7 +159,6 @@ export default function SizeSelector(props: {
         };
         setUpdatedReserveWithToken((prevReserves) => [...prevReserves, test]);
       } else {
-        console.log();
         props.setFailedResponse(true);
       }
     });

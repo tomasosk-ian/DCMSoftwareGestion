@@ -98,12 +98,9 @@ export const emailRouter = createTRPCRouter({
             console.log("Email sent");
           })
           .catch((e: any) => {
-            console.log("a");
             console.log(e);
           });
       } catch (error: any) {
-        console.log("ab");
-
         console.log(error);
       }
     }),

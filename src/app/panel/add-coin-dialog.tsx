@@ -47,7 +47,7 @@ export function AddCoinDialog() {
         value,
       });
 
-      toast.success("Ciudad creada correctamente");
+      toast.success("Moneda creada correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {

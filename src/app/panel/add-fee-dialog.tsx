@@ -55,7 +55,7 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
         discount,
       });
 
-      toast.success("Local creado correctamente");
+      toast.success("Tarifa creada correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {

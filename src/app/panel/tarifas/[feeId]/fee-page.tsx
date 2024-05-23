@@ -74,7 +74,7 @@ export default function FeePage(props: {
         size,
         discount,
       });
-      toast.success("Se ha modificado el tarifa.");
+      toast.success("Se ha modificado la tarifa.");
       router.refresh();
     } catch {
       toast.error("Error");
@@ -252,7 +252,7 @@ function DeleteStore(props: { storeId: string }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar el tarifa?
+            ¿Estás seguro que querés eliminar la tarifa?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar tarifa permanentemente.
