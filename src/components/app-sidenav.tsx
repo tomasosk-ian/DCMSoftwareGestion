@@ -31,15 +31,6 @@ export default function AppSidenav() {
       <SidenavItem icon={<Settings2Icon />} href="/panel/global">
         Global
       </SidenavItem>
-      <SidenavItem icon={<UserIcon />} href="/panel/users">
-        Usuarios
-      </SidenavItem>
-      <SidenavItem icon={<DnaIcon />} href="/panel/roles">
-        Roles
-      </SidenavItem>{" "}
-      <SidenavItem icon={<CogIcon />} href="/panel/permissions">
-        Permisos
-      </SidenavItem>
       <SidenavItem icon={<CloudIcon />} href="/panel/ciudades">
         Ciudades
       </SidenavItem>
