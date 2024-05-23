@@ -1,7 +1,6 @@
 import { MenuIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { SidenavSheet } from "./sidenav-sheet";
-import NavUserSection, { NavUserData } from "./nav-user-section";
 import { UserButton } from "@clerk/nextjs";
 
 export type AppLayoutProps = {

@@ -2,18 +2,12 @@
 
 import { CheckIcon, Loader2 } from "lucide-react";
 import { MouseEventHandler, useState } from "react";
-import AppSidenav from "~/components/app-sidenav";
-import AppLayout from "~/components/applayout";
 import LayoutContainer from "~/components/layout-container";
-import { List, ListTile } from "~/components/list";
-import { NavUserData } from "~/components/nav-user-section";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
-import { RouterOutputs } from "~/trpc/shared";
 import {
   Accordion,
   AccordionContent,
@@ -33,20 +27,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import { City } from "~/server/api/routers/city";
 import { toast } from "sonner";
-import { UploadButton } from "~/utils/uploadthing";
-import { Store } from "~/server/api/routers/store";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { Locker } from "~/server/api/routers/lockers";
 import { Coin } from "~/server/api/routers/coin";
 
 export default function CoinPage(props: { coin: Coin }) {
