@@ -1,22 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { RouterOutputs } from "~/trpc/shared";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card } from "~/components/ui/card";
 import { Size } from "~/server/api/routers/sizes";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { differenceInDays, format } from "date-fns";
-import { Car } from "lucide-react";
-import styles from "selector.module.css";
 import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
 
@@ -37,7 +27,6 @@ export default function SizeSelector(props: {
   setFailedResponse: (failedResponse: boolean) => void;
   failedResponse: boolean;
 }) {
-  // const [reservas, setReservas] = useState<Reserve[]>();
   const [values, setValues] = useState<Record<string, number>>({});
   const [price, setPrice] = useState<number>(0);
   const { data: fees } = api.fee.get.useQuery();
@@ -146,31 +135,12 @@ export default function SizeSelector(props: {
   }
   useEffect(() => {
     props.reserves?.map(async (reserve: Reserve) => {
-      console.log(3);
-
       for (var i = 0; i < reserve.Cantidad!; i++) {
         try {
           const test = {
             ...reserve,
           };
           setUpdatedReserve((prevReserves) => [...prevReserves, test]);
-
-          // const response = parseInt(await reservarBox(reserve));
-          // console.log(reserve);
-          // console.log(await reservarBox(reserve));
-          // if (!isNaN(response)) {
-          //   console.log("isnotnan");
-          //   const test = {
-          //     ...reserve,
-          //     IdTransaction: response ? response : undefined,
-          //   };
-          //   console.log("reserveupdated");
-          //   setReservesUpdate(true);
-          //   setUpdatedReserve((prevReserves) => [...prevReserves, test]);
-          // } else {
-          //   console.log();
-          //   props.setFailedResponse(true);
-          // }
         } catch (e) {
           console.log(e);
         }
@@ -183,15 +153,12 @@ export default function SizeSelector(props: {
       const response = parseInt(await reservarBox(reserve));
 
       if (!isNaN(response)) {
-        console.log("isnotnan");
         const test = {
           ...reserve,
           IdTransaction: response ? response : undefined,
         };
-        console.log("reserveupdated");
         setUpdatedReserveWithToken((prevReserves) => [...prevReserves, test]);
       } else {
-        console.log();
         props.setFailedResponse(true);
       }
     });
@@ -199,7 +166,6 @@ export default function SizeSelector(props: {
 
   useEffect(() => {
     if (updatedReserveWithToken.length > 0) {
-      console.log("OK");
       props.setReserves1(updatedReserveWithToken);
       props.setSizeSelected(true);
     }
@@ -217,9 +183,6 @@ export default function SizeSelector(props: {
     }
   }, [values]);
 
-  function getPrice() {
-    return 0;
-  }
   return (
     <main className="flex  justify-center">
       {!props.sizeSelected && (
@@ -233,61 +196,6 @@ export default function SizeSelector(props: {
             {!isLoading &&
               sizes.map((size: Size) => {
                 return (
-                  // <div key={size.id}>
-                  //   <Card
-                  //     className="grid w-[45vh] overflow-hidden shadow-xl"
-                  //     key={size.id}
-                  //   >
-                  //     <CardHeader>
-                  //       <CardTitle> {size.nombre}</CardTitle>
-                  //     </CardHeader>
-                  //     <img
-                  //       className="aspect-auto object-cover"
-                  //       src={size.image ? size.image! : "/placeholder.svg"}
-                  //     ></img>
-                  //     <CardFooter className="bg-green-100 backdrop-blur-sm">
-                  //       <div className="flex pt-5">
-                  //         <div className="">Número de Lockers</div>
-                  //         <div className="float-end inline-flex">
-                  //           <button
-                  //             disabled={(values[size.id] || 0) == 0}
-                  //             onClick={() =>
-                  //               setValues({
-                  //                 ...values,
-                  //                 [size.id]: (values[size.id] || 0) - 1,
-                  //               })
-                  //             }
-                  //             className="w-10 rounded-l bg-orange-500 font-bold text-gray-800 hover:bg-gray-400"
-                  //           >
-                  //             -
-                  //           </button>
-                  //           <Input
-                  //             className="flex w-10 rounded-l rounded-r bg-gray-300 text-black"
-                  //             disabled={true}
-                  //             value={`${
-                  //               values[size.id || 0] ? values[size.id]! : 0
-                  //             }`}
-                  //           ></Input>
-                  //           <button
-                  //             disabled={
-                  //               (values[size.id] || 0) == size.cantidad!
-                  //             }
-                  //             onClick={() =>
-                  //               setValues({
-                  //                 ...values,
-                  //                 [size.id]: (values[size.id] || 0) + 1,
-                  //               })
-                  //             }
-                  //             className="w-10 rounded-r bg-orange-500  font-bold text-gray-800 hover:bg-gray-400"
-                  //           >
-                  //             +
-                  //           </button>
-                  //         </div>
-                  //         {/* <Button className="bg-orange-500	">+</Button> */}
-                  //       </div>
-                  //     </CardFooter>
-                  //   </Card>
-                  // </div>
                   <div key={size.id} className="h-full px-5 pb-5">
                     <Card className="  h-96 w-72  overflow-hidden bg-emerald-100 backdrop-blur-sm">
                       <Card
@@ -327,44 +235,53 @@ export default function SizeSelector(props: {
                           {coin?.description}
                         </p>
                       </div>
-                      <div className="flex gap-4">
-                        <div className="px-1 text-slate-500">
-                          Número de Lockers
+                      {size.cantidad != 0 && (
+                        <div className="flex gap-4">
+                          <div className="px-1 text-slate-500">
+                            Número de Lockers
+                          </div>
+                          <div className=" inline-flex pb-5">
+                            <button
+                              disabled={(values[size.id] || 0) == 0}
+                              onClick={() =>
+                                setValues({
+                                  ...values,
+                                  [size.id]: (values[size.id] || 0) - 1,
+                                })
+                              }
+                              className="w-10 rounded-l bg-orange-500 font-bold text-gray-800 hover:bg-gray-400"
+                            >
+                              -
+                            </button>
+                            <Input
+                              className="flex w-10 rounded-l rounded-r bg-gray-300 text-black"
+                              disabled={true}
+                              value={`${
+                                values[size.id || 0] ? values[size.id]! : 0
+                              }`}
+                            ></Input>
+                            <button
+                              disabled={
+                                (values[size.id] || 0) == size.cantidad!
+                              }
+                              onClick={() =>
+                                setValues({
+                                  ...values,
+                                  [size.id]: (values[size.id] || 0) + 1,
+                                })
+                              }
+                              className="w-10 rounded-r bg-orange-500  font-bold text-gray-800 hover:bg-gray-400"
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
-                        <div className=" inline-flex pb-5">
-                          <button
-                            disabled={(values[size.id] || 0) == 0}
-                            onClick={() =>
-                              setValues({
-                                ...values,
-                                [size.id]: (values[size.id] || 0) - 1,
-                              })
-                            }
-                            className="w-10 rounded-l bg-orange-500 font-bold text-gray-800 hover:bg-gray-400"
-                          >
-                            -
-                          </button>
-                          <Input
-                            className="flex w-10 rounded-l rounded-r bg-gray-300 text-black"
-                            disabled={true}
-                            value={`${
-                              values[size.id || 0] ? values[size.id]! : 0
-                            }`}
-                          ></Input>
-                          <button
-                            disabled={(values[size.id] || 0) == size.cantidad!}
-                            onClick={() =>
-                              setValues({
-                                ...values,
-                                [size.id]: (values[size.id] || 0) + 1,
-                              })
-                            }
-                            className="w-10 rounded-r bg-orange-500  font-bold text-gray-800 hover:bg-gray-400"
-                          >
-                            +
-                          </button>
+                      )}
+                      {size.cantidad == 0 && (
+                        <div className="flex gap-4 text-red-600">
+                          No hay lockers disponibles
                         </div>
-                      </div>
+                      )}
                     </Card>
                   </div>
                 );

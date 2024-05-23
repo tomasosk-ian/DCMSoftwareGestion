@@ -33,10 +33,10 @@ export const emailRouter = createTRPCRouter({
         }[] = [];
         await Promise.all(
           input.token.map(async (token, index) => {
-            console.log(token[index]);
             const img = await QRCode.toDataURL(token[0]!.toString(), {
               type: "png",
             });
+
             const qrCode = img.split(";base64,").pop();
             if (qrCode) {
               attachments.push({
@@ -49,7 +49,6 @@ export const emailRouter = createTRPCRouter({
             }
           }),
         );
-        console.log(attachments);
         const sgMail = require("@sendgrid/mail");
         sgMail.setApiKey(env.SENDGRID_API_KEY);
         const msg = {
@@ -87,7 +86,7 @@ export const emailRouter = createTRPCRouter({
 
           
           <p>Atentamente,</p>
-          <p><strong>M: +54 9 294 480 1780</strong></p>
+          <p><strong>M: +54 9 294 492-7340</strong></p>
           <p><img src="https://utfs.io/f/4993f452-6f46-4f15-9c4b-bd63722923d8-i5bkwc.jpg"/></p>
           
         </body>`,
@@ -99,12 +98,9 @@ export const emailRouter = createTRPCRouter({
             console.log("Email sent");
           })
           .catch((e: any) => {
-            console.log("a");
             console.log(e);
           });
       } catch (error: any) {
-        console.log("ab");
-
         console.log(error);
       }
     }),

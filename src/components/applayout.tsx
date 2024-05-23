@@ -1,13 +1,12 @@
 import { MenuIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { SidenavSheet } from "./sidenav-sheet";
-import NavUserSection, { NavUserData } from "./nav-user-section";
+import { UserButton } from "@clerk/nextjs";
 
 export type AppLayoutProps = {
   children: React.ReactNode;
   title?: React.ReactNode;
   sidenav?: React.ReactNode;
-  user?: NavUserData;
 };
 
 export default function AppLayout(props: AppLayoutProps) {
@@ -23,7 +22,7 @@ export default function AppLayout(props: AppLayoutProps) {
           content={props.sidenav}
         />
         <div className="w-full">{props.title}</div>
-        {props.user && <NavUserSection user={props.user} />}
+        <UserButton />{" "}
       </header>
       <aside className="fixed bottom-0 left-0 top-[70px] hidden max-h-full w-[250px] overflow-y-auto border-r md:block">
         {props.sidenav}

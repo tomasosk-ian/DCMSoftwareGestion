@@ -90,7 +90,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
           </div>
           <div className="flex">
             <div className="col-6 pr-4">
-              <Label className="text-right">Ciudad</Label>
+              <Label className="text-right">Local</Label>
               <Select
                 onValueChange={(value: string) => {
                   setCity(value);
@@ -101,7 +101,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Ciudades</SelectLabel>
+                    <SelectLabel>Locales</SelectLabel>
                     {props.cities.map((e) => {
                       return (
                         <SelectItem key={e.identifier} value={e.identifier}>

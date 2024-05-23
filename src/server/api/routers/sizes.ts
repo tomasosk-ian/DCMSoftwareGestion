@@ -67,51 +67,54 @@ export const sizeRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const sizeResponse = await fetch(
-        `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
-      );
+      try {
+        const sizeResponse = await fetch(
+          `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
+        );
 
-      // Handle the response from the external API
-      if (!sizeResponse.ok) {
-        // Extract the error message from the response
-        const errorResponse = await sizeResponse.json();
-        // Throw an error or return the error message
-        return errorResponse.message || "Unknown error";
-      }
+        // Handle the response from the external API
+        if (!sizeResponse.ok) {
+          const errorResponse = await sizeResponse.json();
+          // Throw an error or return the error message
+          return errorResponse.message || "Unknown error";
+        }
 
-      const reservedBoxData = await sizeResponse.json();
+        const reservedBoxData = await sizeResponse.json();
 
-      const validatedData = responseValidator.parse(reservedBoxData);
-      await Promise.all(
-        validatedData.map(async (v) => {
-          const fee = await db.query.feeData.findFirst({
-            where: eq(schema.feeData.size, v.id),
-          });
-          v.tarifa = fee?.identifier;
-
-          const existingSize = await db.query.sizes.findFirst({
-            where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
-          });
-
-          if (existingSize) {
-            // Si el tamaño ya existe, actualiza los datos
-            await db
-              .update(schema.sizes)
-              .set({
-                ...v,
-              })
-              .where(eq(schema.sizes.id, v.id));
-            v.image = existingSize.image;
-          } else {
-            // Si el tamaño no existe, insértalo
-            await db.insert(schema.sizes).values({
-              ...v,
+        const validatedData = responseValidator.parse(reservedBoxData);
+        await Promise.all(
+          validatedData.map(async (v) => {
+            const fee = await db.query.feeData.findFirst({
+              where: eq(schema.feeData.size, v.id),
             });
-          }
-        }),
-      );
+            v.tarifa = fee?.identifier;
 
-      return validatedData.filter((s) => s.tarifa != null);
+            const existingSize = await db.query.sizes.findFirst({
+              where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
+            });
+
+            if (existingSize) {
+              // Si el tamaño ya existe, actualiza los datos
+              await db
+                .update(schema.sizes)
+                .set({
+                  ...v,
+                })
+                .where(eq(schema.sizes.id, v.id));
+              v.image = existingSize.image;
+            } else {
+              // Si el tamaño no existe, insértalo
+              await db.insert(schema.sizes).values({
+                ...v,
+              });
+            }
+          }),
+        );
+
+        return validatedData.filter((s) => s.tarifa != null);
+      } catch (e) {
+        return e;
+      }
     }),
 
   getById: publicProcedure

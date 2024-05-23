@@ -11,8 +11,6 @@ import { clientsRouter } from "./routers/clients";
 import { lockerReserveRouter } from "./routers/lockerReserveRouter";
 import { emailRouter } from "./routers/email";
 import { mobbexRouter } from "./routers/mobbex";
-import { userRouter } from "./routers/users";
-import { roleRouter } from "./routers/roles";
 
 /**
  * This is the primary router for your server.
@@ -32,8 +30,6 @@ export const appRouter = createTRPCRouter({
   lockerReserve: lockerReserveRouter,
   email: emailRouter,
   mobbex: mobbexRouter,
-  user: userRouter,
-  roles: roleRouter,
 });
 
 // export type definition of API

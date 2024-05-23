@@ -6,6 +6,7 @@ import {
   AlignStartVerticalIcon,
   BanknoteIcon,
   CloudIcon,
+  CogIcon,
   DnaIcon,
   DollarSignIcon,
   DotIcon,
@@ -29,12 +30,6 @@ export default function AppSidenav() {
       <SidenavSeparator>Administración</SidenavSeparator>
       <SidenavItem icon={<Settings2Icon />} href="/panel/global">
         Global
-      </SidenavItem>
-      <SidenavItem icon={<UserIcon />} href="/panel/users">
-        Usuarios
-      </SidenavItem>
-      <SidenavItem icon={<DnaIcon />} href="/panel/roles">
-        Roles
       </SidenavItem>
       <SidenavItem icon={<CloudIcon />} href="/panel/ciudades">
         Ciudades
