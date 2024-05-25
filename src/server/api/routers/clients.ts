@@ -14,6 +14,25 @@ export const clientsRouter = createTRPCRouter({
     });
     return result;
   }),
+  getByEmail: publicProcedure.query(async ({ ctx }) => {
+    const clients = await ctx.db.query.clients.findMany({
+      orderBy: (client, { desc }) => [desc(client.identifier)],
+    });
+
+    // Group by email using JavaScript
+    const groupedByEmail = clients.reduce(
+      (acc, client) => {
+        if (!acc[client.email!]) {
+          acc[client.email!] = [];
+        }
+        acc[client.email!]!.push(client);
+        return acc;
+      },
+      {} as Record<string, typeof clients>,
+    );
+    console.log(groupedByEmail);
+    return groupedByEmail;
+  }),
   create: publicProcedure
     .input(
       z.object({

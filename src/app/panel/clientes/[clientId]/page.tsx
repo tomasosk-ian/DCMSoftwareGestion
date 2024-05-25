@@ -2,9 +2,9 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import ClientPage from "./client-page";
 
-export default async function Channel(props: { params: { clientId: number } }) {
+export default async function Channel(props: { params: { clientId: string } }) {
   const client = await api.client.getById.query({
-    identifier: props.params.clientId,
+    identifier: parseInt(props.params.clientId),
   });
 
   if (!client) {

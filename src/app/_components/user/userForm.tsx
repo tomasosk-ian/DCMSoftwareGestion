@@ -81,7 +81,7 @@ export default function UserForm(props: {
         className="col-span-12 border-4 border-indigo-300/50"
         placeholder={"Email"}
         name="email"
-        value={props.client.email!}
+        value={props.client.email!.toLowerCase()}
         onChange={handleChange}
       />
       <span className="col-span-12 text-red-500">{props.errors.email}</span>

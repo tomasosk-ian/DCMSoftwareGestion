@@ -60,6 +60,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   });
 
   const { mutateAsync: createClient } = api.client.create.useMutation();
+  const { mutateAsync: assignClientToReserve } =
+    api.lockerReserve.assignClientToReserve.useMutation();
   const [total, setTotal] = useState<number>(0);
   const [coin, setCoin] = useState<Coin>();
   const { mutateAsync: test } = api.mobbex.test.useMutation();

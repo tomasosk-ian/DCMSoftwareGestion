@@ -5,8 +5,7 @@ import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 
-const pokeApiUrl = "https://pokeapi.co";
-
+z;
 const getClientByEmail = async (email: string) => {
   const client = await db.query.clients.findFirst({
     where: eq(schema.clients.email, email),
@@ -125,6 +124,20 @@ export const lockerReserveRouter = createTRPCRouter({
       }
       const reservedBoxData = await reservationResponse.json();
       return reservedBoxData;
+    }),
+  assignClientToReserve: publicProcedure
+    .input(
+      z.object({
+        idReserve: z.string(),
+        idClient: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const response = ctx.db
+        .update(schema.reservas)
+        .set({ client: input.idClient })
+        .where(eq(schema.reservas.identifier, input.idReserve));
+      return response;
     }),
 });
 
