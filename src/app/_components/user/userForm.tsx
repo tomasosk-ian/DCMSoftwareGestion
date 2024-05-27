@@ -197,7 +197,7 @@ export default function UserForm(props: {
         </div>
         <div className="content-center pt-4">
           <label htmlFor="terms" className="text-sm">
-            <strong>¿Necesitas ayuda? Llámanos al +34 919 03 76 40</strong>
+            <strong>¿Necesitas ayuda? Llámanos al +54 9 294 492-7340</strong>
           </label>
         </div>
       </div>
