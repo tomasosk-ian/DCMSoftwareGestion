@@ -26,7 +26,7 @@ export const mobbexRouter = createTRPCRouter({
       const checkout = {
         total: input.amount!,
         currency: "ARS",
-        reference: `${input.reference}`,
+        reference: `REF${input.reference}`,
         description: "Descripción de la Venta",
         test: true,
         customer: {
@@ -47,6 +47,7 @@ export const mobbexRouter = createTRPCRouter({
         return_url: "https://mobbex.com/sale/return?session=56789",
         webhook: "https://mobbex.com/sale/webhook?user=1234",
       };
+
       let checkoutNumber;
       const a = await mobbex.checkout
         .create(checkout)
@@ -54,6 +55,7 @@ export const mobbexRouter = createTRPCRouter({
           checkoutNumber = result.data.id;
         })
         .catch((error) => console.log(error));
+
       return checkoutNumber;
     }),
 });
