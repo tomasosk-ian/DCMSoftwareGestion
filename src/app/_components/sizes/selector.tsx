@@ -20,7 +20,6 @@ export default function SizeSelector(props: {
   sizeSelected: boolean;
   reserves: Reserve[] | null;
   setReserves: (reserves: Reserve[]) => void;
-  setReserves1: (reserves: Reserve[]) => void;
   startDate: string;
   endDate: string;
   coins: Coin[];
@@ -104,22 +103,24 @@ export default function SizeSelector(props: {
   function applyReserve() {
     try {
       if (values) {
-        const newReserves: Reserve[] = Object.entries(values).map(
-          ([id, cantidad]) => ({
-            IdLocker: null,
-            NroSerie: props.nroSerieLocker,
-            IdSize: parseInt(id),
-            IdBox: null,
-            Token1: null,
-            FechaCreacion: format(Date.now(), "yyyy-MM-dd'T'00:00:00"),
-            FechaInicio: props.startDate!,
-            FechaFin: props.endDate!,
-            Contador: -1,
-            Confirmado: false,
-            Modo: "Por fecha",
-            Cantidad: cantidad,
-            client: null,
-          }),
+        const newReserves: Reserve[] = Object.entries(values).flatMap(
+          ([id, cantidad]) => {
+            return Array.from({ length: cantidad }, () => ({
+              IdLocker: null,
+              NroSerie: props.nroSerieLocker,
+              IdSize: parseInt(id),
+              IdBox: null,
+              Token1: null,
+              FechaCreacion: format(Date.now(), "yyyy-MM-dd'T'00:00:00"),
+              FechaInicio: props.startDate!,
+              FechaFin: props.endDate!,
+              Contador: -1,
+              Confirmado: false,
+              Modo: "Por fecha",
+              Cantidad: 1,
+              client: null,
+            }));
+          },
         );
 
         const updatedReserves = props.reserves
@@ -162,12 +163,6 @@ export default function SizeSelector(props: {
     // });
   }, [updatedReserve]);
 
-  useEffect(() => {
-    if (updatedReserveWithToken.length > 0) {
-      props.setReserves1(updatedReserveWithToken);
-      props.setSizeSelected(true);
-    }
-  }, [updatedReserveWithToken]);
   useEffect(() => {
     const filteredValues: Record<string, number> = {};
     Object.entries(values).forEach(([key, value]) => {

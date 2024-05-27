@@ -46,7 +46,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     api.lockerReserve.reserveBox.useMutation();
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
-  const [reserves1, setReserves1] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failedResponse, setFailedResponse] = useState<boolean>(false);
 
@@ -157,7 +156,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             setSizeSelected={setsizeSelected}
             reserves={reserves}
             setReserves={setReserves}
-            setReserves1={setReserves1}
             startDate={startDate!}
             endDate={endDate!}
             coins={coins!}
@@ -255,9 +253,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 endDate={endDate!}
                 startDate={startDate!}
                 nReserve={nReserve}
-                reserves={reserves1}
+                reserves={reserves}
                 setPagoOk={setPagoOk}
-                setReserves={setReserves1}
+                setReserves={setReserves}
                 sizes={props.sizes}
                 store={store!}
                 total={total}
@@ -269,7 +267,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
           <div>
             <div>
               <Success
-                reserves={reserves1}
+                reserves={reserves}
                 store={store!}
                 nReserve={nReserve!}
                 total={total}
