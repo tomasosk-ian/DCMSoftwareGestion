@@ -26,6 +26,7 @@ import Payment from "./payment/page";
 import { Coin } from "~/server/api/routers/coin";
 import { useState } from "react";
 import UserForm from "./user/userForm";
+import { env } from "process";
 
 export const Icons = {
   spinner: Loader2,
@@ -41,7 +42,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [reserva, setReserva] = useState<boolean>(false);
   const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [days, setDays] = useState<number>(0);
-
+  const { mutateAsync: reservarBox } =
+    api.lockerReserve.reserveBox.useMutation();
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [reserves1, setReserves1] = useState<Reserve[]>([]);
@@ -121,7 +123,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   }
   return (
     <div className="container absolute">
-      {failedResponse && <AlertFailedResponse />}
+      <Badge>TESTING</Badge> {failedResponse && <AlertFailedResponse />}
       <div className="grid grid-cols-3 justify-items-center gap-4	"></div>
       <div className="flex flex-col items-center justify-center pt-2">
         <StoreSelector
@@ -191,7 +193,29 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                     onClick={async () => {
                       try {
                         if (handleSubmit()) {
-                          const clientResponse = await createClient(client);
+                          const clientResponse = await createClient(
+                            client,
+                          ).then((res) => {
+                            console.log("-------------");
+                            console.log(client);
+                            reserves.map(async (reserve: Reserve) => {
+                              reserve.client = client.email;
+                              console.log(reserve);
+                              const response = parseInt(
+                                await reservarBox(reserve),
+                              );
+                              if (!isNaN(response)) {
+                                const test = {
+                                  ...reserve,
+                                  IdTransaction: response
+                                    ? response
+                                    : undefined,
+                                };
+                              } else {
+                              }
+                            });
+                            return res;
+                          });
                           setNReserve(clientResponse.id);
                           setReserva(true);
                           let checkoutNumber = await test({

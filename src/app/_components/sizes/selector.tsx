@@ -31,8 +31,8 @@ export default function SizeSelector(props: {
   const [price, setPrice] = useState<number>(0);
   const { data: fees } = api.fee.get.useQuery();
   const [coin, setCoin] = useState<Coin>();
-  const { mutateAsync: reservarBox } =
-    api.lockerReserve.reserveBox.useMutation();
+  // const { mutateAsync: reservarBox } =
+  //   api.lockerReserve.reserveBox.useMutation();
   const [updatedReserve, setUpdatedReserve] = useState<Reserve[]>([]);
   const [updatedReserveWithToken, setUpdatedReserveWithToken] = useState<
     Reserve[]
@@ -42,8 +42,6 @@ export default function SizeSelector(props: {
     inicio: props.inicio!,
     fin: props.fin!,
   });
-  const [reservesUpdate, setReservesUpdate] = useState<boolean>(false);
-
   useEffect(() => {
     try {
       if (values) {
@@ -61,7 +59,7 @@ export default function SizeSelector(props: {
             Confirmado: false,
             Modo: "Por fecha",
             Cantidad: cantidad,
-            client: "ansel",
+            client: null,
           }),
         );
 
@@ -120,7 +118,7 @@ export default function SizeSelector(props: {
             Confirmado: false,
             Modo: "Por fecha",
             Cantidad: cantidad,
-            client: "ansel",
+            client: null,
           }),
         );
 
@@ -128,6 +126,7 @@ export default function SizeSelector(props: {
           ? [...props.reserves, ...newReserves]
           : [...newReserves];
         props.setReserves(updatedReserves);
+        props.setSizeSelected(true);
       }
     } catch (error) {
       // Manejar errores aquí
@@ -149,19 +148,18 @@ export default function SizeSelector(props: {
   }, [props.reserves]);
 
   useEffect(() => {
-    updatedReserve.map(async (reserve: Reserve) => {
-      const response = parseInt(await reservarBox(reserve));
-
-      if (!isNaN(response)) {
-        const test = {
-          ...reserve,
-          IdTransaction: response ? response : undefined,
-        };
-        setUpdatedReserveWithToken((prevReserves) => [...prevReserves, test]);
-      } else {
-        props.setFailedResponse(true);
-      }
-    });
+    // updatedReserve.map(async (reserve: Reserve) => {
+    //   const response = parseInt(await reservarBox(reserve));
+    //   if (!isNaN(response)) {
+    //     const test = {
+    //       ...reserve,
+    //       IdTransaction: response ? response : undefined,
+    //     };
+    //     setUpdatedReserveWithToken((prevReserves) => [...prevReserves, test]);
+    //   } else {
+    //     props.setFailedResponse(true);
+    //   }
+    // });
   }, [updatedReserve]);
 
   useEffect(() => {
