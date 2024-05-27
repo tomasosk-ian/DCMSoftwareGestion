@@ -68,6 +68,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [coin, setCoin] = useState<Coin>();
   const { mutateAsync: test } = api.mobbex.test.useMutation();
   const { data: coins } = api.coin.get.useQuery();
+  const [terms, setTerms] = useState<boolean>();
 
   const [errors, setErrors] = useState({
     name: "",
@@ -75,6 +76,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     email: "",
     prefijo: "",
     telefono: "",
+    terms: "",
   });
   const isValidEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,6 +89,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       email: isValidEmail(client.email!) ? "" : "Correo electrónico no válido",
       prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
       telefono: client.telefono ? "" : "Telefono es obligatorio",
+      terms: terms ? "" : "Debe aceptar los términos y condiciones",
     };
 
     if (Object.values(newErrors).some((error) => error)) {
@@ -172,6 +175,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   setClient={setClient}
                   errors={errors}
                   setErrors={setErrors}
+                  terms={terms!}
+                  setTerms={setTerms}
                 />
               </div>
               <div>

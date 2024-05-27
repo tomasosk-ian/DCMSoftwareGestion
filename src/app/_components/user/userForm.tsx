@@ -26,6 +26,7 @@ export default function UserForm(props: {
     email: string;
     prefijo: string;
     telefono: string;
+    terms: string;
   };
   setErrors: (errors: {
     name: string;
@@ -33,7 +34,10 @@ export default function UserForm(props: {
     email: string;
     prefijo: string;
     telefono: string;
+    terms: string;
   }) => void;
+  terms: boolean;
+  setTerms: (terms: boolean) => void;
 }) {
   const [phones, setPhones] = useState<Record<string, number>[]>();
 
@@ -162,16 +166,34 @@ export default function UserForm(props: {
       </div>
       <div className="col-span-12">
         <div className="flex items-center space-x-2 py-4">
-          <Checkbox id="terms" />
+          <Checkbox
+            id="terms"
+            onCheckedChange={(e: boolean) => {
+              props.setTerms(e);
+            }}
+          />
           <label
             htmlFor="terms"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Aceptar los{" "}
-            <i>
-              <u>términos y condiciones</u>
+            <i
+              className="hover:underline"
+              onClick={() => {
+                open(
+                  "https://lockersurbanos.com.ar/wp-content/uploads/2024/05/Terminos-y-condiciones-Lockers-Urbanos.pdf",
+                );
+              }}
+            >
+              términos y condiciones
             </i>
           </label>
+          <br></br>
+          <div className="col-span-4 ">
+            <span className="col-span-6 w-full text-red-500">
+              {props.errors.terms}
+            </span>
+          </div>
         </div>
         <div className="content-center pt-4">
           <label htmlFor="terms" className="text-sm">
