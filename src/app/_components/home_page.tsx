@@ -199,21 +199,13 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                           const clientResponse = await createClient(
                             client,
                           ).then((res) => {
-                            console.log("-------------");
-                            console.log(client);
                             reserves.map(async (reserve: Reserve) => {
                               reserve.client = client.email;
-                              console.log(reserve);
                               const response = parseInt(
                                 await reservarBox(reserve),
                               );
                               if (!isNaN(response)) {
-                                const test = {
-                                  ...reserve,
-                                  IdTransaction: response
-                                    ? response
-                                    : undefined,
-                                };
+                                reserve.IdTransaction = response;
                               } else {
                               }
                             });
