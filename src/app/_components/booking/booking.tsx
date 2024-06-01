@@ -35,28 +35,26 @@ export default function Booking(props: {
   const { data: sizes } = api.size.get.useQuery();
   const { data: fees } = api.fee.get.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
-  const [reserveGroupBySize, setReserveGroupBySize] = useState<
-    Record<number, Reserve>
-  >({});
   const [prices, setPrices] = useState<Record<number, number>>({});
-  const [count, setCount] = useState<Record<number, number>>({});
+  const [counts, setCounts] = useState<Record<number, number>>([]);
   useEffect(() => {
-    const counts: Record<number, number> = {};
-
-    props.reserves.forEach((reserve) => {
-      if (reserve.IdSize !== undefined) {
-        counts[reserve.IdSize!] = (counts[reserve.IdSize!] || 0) + 1;
-      }
-    }, []);
-
-    setCount(counts);
+    const counts = props.reserves.reduce(
+      (acc: Record<number, number>, reserve) => {
+        if (reserve.IdSize !== null && reserve.IdSize !== undefined) {
+          acc[reserve.IdSize] = (acc[reserve.IdSize] || 0) + 1;
+        }
+        return acc;
+      },
+      {},
+    );
+    setCounts(counts);
   }, [props.reserves]);
+
   useEffect(() => {
     const groupedReserves: Record<number, Reserve> = {};
     props.reserves.forEach((reserve) => {
       groupedReserves[reserve.IdSize!] = reserve;
     });
-    setReserveGroupBySize(groupedReserves);
   }, [props.reserves]);
 
   useEffect(() => {
@@ -219,15 +217,8 @@ export default function Booking(props: {
                           </Title>
                         </div>
                         <div className="flex-col pt-2">
-                          {props.reserves.find(
-                            (reserve) => reserve.IdSize === size.id,
-                          )?.Cantidad == 1
-                            ? "1 unidad"
-                            : `${
-                                props.reserves.find(
-                                  (reserve) => reserve.IdSize === size.id,
-                                )?.Cantidad
-                              } unidades`}
+                          {counts[size.id]}{" "}
+                          {counts[size.id] === 1 ? " unidad" : " unidades"}
                         </div>
                       </div>
                     );
