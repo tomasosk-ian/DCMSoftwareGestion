@@ -28,14 +28,14 @@ export default function storeSelector(props: {
               {props.stores?.map((store) => {
                 return (
                   <Card
-                    className="grid w-[35vh] overflow-hidden shadow-xl"
+                    className="grid w-[35vh] space-y-0 overflow-hidden p-0 shadow-xl"
                     onClick={() => {
                       props.setStore(store);
                     }}
                     key={store.identifier}
                   >
-                    <CardHeader>
-                      <CardTitle> {store.name}</CardTitle>
+                    <CardHeader className="space-y-0 p-2">
+                      <CardTitle className="text-2xl">{store.name}</CardTitle>
                       <CardDescription>{store.address}</CardDescription>
                     </CardHeader>
                     <img

@@ -1,17 +1,4 @@
 "use client";
-
-import { Title } from "@radix-ui/react-toast";
-import { differenceInDays, format } from "date-fns";
-import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
 import { Store } from "~/server/api/routers/store";
 import { es } from "date-fns/locale";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
@@ -20,266 +7,205 @@ import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
-
+import { format } from "date-fns";
+interface GroupedItem {
+  IdSize: number;
+  Cantidad: number;
+  Days?: number;
+  FirstDayTotal?: number;
+  RestDaysTotal?: number;
+  Total?: number;
+  Fee: Fee;
+}
 export default function Booking(props: {
   store: Store;
   startDate: string;
   endDate: string;
   reserves: Reserve[];
   total: number;
-  setTotal: (total: number) => void;
   coin: Coin;
   setCoin: (coin: Coin) => void;
   coins: Coin[];
+  sizes: Size[];
 }) {
-  const { data: sizes } = api.size.get.useQuery();
-  const { data: fees } = api.fee.get.useQuery();
+  const fees = api.fee.get.useQuery();
+
   const [subTotal, setSubTotal] = useState<number>(0);
-  const [prices, setPrices] = useState<Record<number, number>>({});
-  const [counts, setCounts] = useState<Record<number, number>>([]);
-  useEffect(() => {
-    const counts = props.reserves.reduce(
-      (acc: Record<number, number>, reserve) => {
-        if (reserve.IdSize !== null && reserve.IdSize !== undefined) {
-          acc[reserve.IdSize] = (acc[reserve.IdSize] || 0) + 1;
-        }
-        return acc;
-      },
-      {},
-    );
-    setCounts(counts);
-  }, [props.reserves]);
+  const [total, setTotal] = useState<number>(0);
+  const [groupedItems, setGroupedItems] = useState<GroupedItem[]>();
 
   useEffect(() => {
-    const groupedReserves: Record<number, Reserve> = {};
-    props.reserves.forEach((reserve) => {
-      groupedReserves[reserve.IdSize!] = reserve;
-    });
-  }, [props.reserves]);
+    const grouped = props.reserves.reduce((acc, item) => {
+      if (item.Cantidad === 1) {
+        const existing = acc.find((group) => group.IdSize === item.IdSize);
+        const days = daysBetweenDates(item.FechaInicio!, item.FechaFin!);
+        const fee = fees.data!.find((f: Fee) => f.size == item.IdSize)!;
+        const coin = props.coins.find((c: Coin) => c.identifier == fee.coin)!;
+        props.setCoin(coin);
 
-  useEffect(() => {
-    if (fees) {
-      let totalPrice = 0; // Variable local para llevar un seguimiento de la suma total
-
-      const prices: Record<number, number> = {};
-      props.reserves.forEach((reserve) => {
-        const days = differenceInDays(
-          reserve?.FechaFin!,
-          reserve?.FechaCreacion!,
-        );
-
-        const price = fees?.find((s: Fee) => s.size === reserve.IdSize)?.value!;
-        const discount = fees?.find(
-          (s: Fee) => s.size === reserve.IdSize,
-        )?.discount!;
-        if (props.coins) {
-          props.setCoin(
-            props.coins?.find(
-              (s: Coin) =>
-                s.identifier ===
-                fees?.find((s: Fee) => s.size === reserve.IdSize)?.coin!,
-            )!,
-          );
-        }
-
-        prices[reserve.IdSize!] = price;
-        if (days >= 1) {
-          totalPrice +=
-            price * reserve.Cantidad! +
-            (price * reserve.Cantidad! * days * (100 - discount)) / 100; // Sumar al total local
+        if (existing) {
+          existing.Cantidad += item.Cantidad;
         } else {
-          totalPrice += price * reserve.Cantidad!;
+          acc.push({
+            IdSize: item.IdSize!,
+            Cantidad: item.Cantidad,
+            Days: days,
+            Fee: fee,
+            FirstDayTotal: fee.value!,
+            RestDaysTotal:
+              ((days - 1) * fee.value! * (100 - fee.discount!)) / 100,
+          });
         }
-      });
-      totalPrice = parseFloat(totalPrice.toFixed(2));
-      if (totalPrice != 0) {
-        props.setTotal(totalPrice);
       }
-      setSubTotal(totalPrice);
+      return acc;
+    }, [] as GroupedItem[]);
 
-      setPrices(prices);
-    }
-  }, [props.reserves]);
+    const updatedItems = grouped!.map((item) => {
+      const updatedFirstDayTotal = item.FirstDayTotal! * item.Cantidad;
+      const updatedRestDaysTotal = item.RestDaysTotal! * item.Cantidad;
+      const updatedTotal = updatedFirstDayTotal + updatedRestDaysTotal;
+      return {
+        ...item,
+        Total: updatedTotal,
+        FirstDayTotal: updatedFirstDayTotal,
+        RestDaysTotal: updatedRestDaysTotal,
+      };
+    });
 
+    const newTotal = updatedItems.reduce((acc, item) => acc + item.Total, 0);
+    setTotal(newTotal);
+    setSubTotal(newTotal);
+    setGroupedItems(updatedItems);
+  }, []);
+
+  function daysBetweenDates(date1: string, date2: string): number {
+    const startDate = new Date(date1);
+    const endDate = new Date(date2);
+
+    const differenceInTime = endDate.getTime() - startDate.getTime();
+
+    const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+    return Math.round(differenceInDays);
+  }
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM", { locale: es });
     return formattedDate;
   }
-
-  function getSizeNameById(id: number) {
-    if (sizes) {
-      const size = sizes?.find((s: Size) => s.id === id);
-      const reserve = props.reserves.find((reserve) => reserve.IdSize === id);
-      if (reserve) {
-        return size ? size.nombre : "Tamaño no encontrado";
-      }
-    }
-  }
-
-  function getDays(size: Size) {
-    const reserve = props.reserves.find(
-      (reserve) => reserve.IdSize === size.id,
-    );
-    const days = differenceInDays(reserve?.FechaFin!, reserve?.FechaCreacion!);
-    return (
-      <>
-        <div className="flex justify-between">
-          <div className="right-64 grid-cols-6">
-            <div className="grid-cols-6">
-              <Label>Primer día</Label>
-            </div>
-
-            {days >= 1 && (
-              <div className="grid-cols-6 gap-8">
-                <Label className="pr-5">Días adicionales: {days}</Label>
-                <Label className="text-red-500">
-                  -{fees?.find((s: Fee) => s.size === size.id)?.discount!}%
-                  aplicado
-                </Label>
-              </div>
-            )}
-          </div>
-          <div className="grid-cols-6 ">
-            <div className="grid-cols-6">
-              <Label>
-                {prices[size.id]!} {props.coin?.description!}
-              </Label>
-            </div>
-            {days >= 1 && (
-              <div className="grid-cols-6">
-                <Label>
-                  {parseFloat(
-                    (
-                      (prices[size.id]! *
-                        days *
-                        (100 -
-                          fees?.find((s: Fee) => s.size === size.id)
-                            ?.discount!!)) /
-                      100
-                    ).toFixed(2),
-                  )}{" "}
-                  {
-                    // coins?.data?.find(
-                    //   (s: Coin) =>
-                    //     s.identifier ===
-                    //     fees?.find((s: Fee) => s.size === size.id)?.coin!,
-                    // )?.description!
-
-                    props.coin?.description!
-                  }{" "}
-                </Label>
-              </div>
-            )}
-          </div>
-        </div>
-      </>
-    );
-  }
   return (
-    <div className="w-4/5 grid-cols-12 gap-4 bg-green-200 px-8 pt-3" id="root">
-      <Title className="text-2xl font-bold text-slate-400">Tu reserva</Title>
-      <div className="rounded py-5">
-        <Card className="rounded bg-gray-50 pl-5 pr-5 ">
-          <CardHeader className="">
-            <CardTitle className="text-2xl"> {props.store.name}</CardTitle>
-            <CardContent>
-              <div className=" flex justify-between pb-3 pt-2">
-                <div className="right-64 grid-cols-6">
-                  <div className="grid-cols-6">
-                    <Label>Entrega desde </Label>
-                  </div>
-                  <div className="grid-cols-6">
-                    <Label>Recogida hasta </Label>
-                  </div>
-                </div>
-                <div className="grid-cols-6  items-end">
-                  <div className="grid-cols-6">
-                    <Label>{formatDateToTextDate(props.startDate)}</Label>
-                  </div>
-                  <div className="grid-cols-6">
-                    <Label>{formatDateToTextDate(props.endDate)}</Label>
-                  </div>
-                </div>
+    <>
+      {groupedItems && (
+        <div className="w-96 overflow-hidden rounded-3xl bg-white shadow-md">
+          <div className="bg-[#848484] px-6 pb-1 pt-3">
+            <p className="text-lg font-bold text-white">Tu reserva</p>
+          </div>
+          <div className="flex items-baseline justify-between bg-gray-100 px-6 py-4">
+            <p className=" text-2xl font-bold text-orange-500">
+              {props.store.name}
+            </p>
+            <p className=" text-xs font-bold text-orange-500">
+              {props.store.address}
+            </p>
+          </div>
+          <div className="justify-between bg-[#e2f0e9] px-6  py-2">
+            <div className="flex justify-between  space-x-14 text-sm">
+              <div className="flex space-x-2">
+                <svg
+                  className="h-5 w-5 text-gray-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2h-4l-4 4v-4H4a2 2 0 01-2-2V5z"></path>
+                </svg>
+                <p>Entrega</p>
               </div>
-              <hr className=" h-1 w-full rounded border-0 bg-gray-400 dark:bg-gray-700 md:my-1" />
-              <div>
-                {sizes?.map((size: Size) => {
-                  if (getSizeNameById(size.id!)) {
-                    return (
-                      <div
-                        className="flex justify-between gap-10 pr-28 "
-                        key={size.id}
-                      >
-                        <div className=" pt-2">
-                          <Title className=" font-bold">
-                            Locker {getSizeNameById(size.id!)}
-                          </Title>
-                        </div>
-                        <div className="flex-col pt-2">
-                          {counts[size.id]}{" "}
-                          {counts[size.id] === 1 ? " unidad" : " unidades"}
-                        </div>
+              <p className="font-semibold">
+                {formatDateToTextDate(props.startDate)}
+              </p>
+            </div>
+            <div className="flex justify-between  space-x-14 text-sm">
+              <div className="flex space-x-2">
+                <svg
+                  className="h-5 w-5 text-gray-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2h-4l-4 4v-4H4a2 2 0 01-2-2V5z"></path>
+                </svg>
+                <p>Recogida</p>
+              </div>
+              <p className="font-semibold">
+                {formatDateToTextDate(props.endDate)}
+              </p>
+            </div>
+            <div className="flex justify-center py-2">
+              <hr className="border-1  w-3/4 border-[#848484]" />
+            </div>
+            {groupedItems.map((size) => {
+              return (
+                <div
+                  key={size.IdSize}
+                  className="flex justify-between  space-x-14 text-sm"
+                >
+                  <p>
+                    LOCKER{" "}
+                    {
+                      props.sizes.find((s: Size) => s.id === size.IdSize)
+                        ?.nombre
+                    }
+                  </p>
+                  <p className="font-semibold">
+                    {size.Cantidad}{" "}
+                    {size.Cantidad === 1 ? "unidad" : "unidades"}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="border-t bg-gray-100 ">
+            <div className="px-4 py-2">
+              {groupedItems.map((size) => {
+                return (
+                  <div key={size.IdSize} className="justify-between pb-3">
+                    <span>
+                      Locker{" "}
+                      {
+                        props.sizes.find((s: Size) => s.id === size.IdSize)
+                          ?.nombre
+                      }
+                    </span>
+                    <div className="flex justify-between pt-1 text-sm">
+                      <span>Primer día</span>
+                      <span>{size.FirstDayTotal}</span>
+                    </div>
+                    {size.Days! > 1 && (
+                      <div className="flex justify-between text-sm">
+                        <span>Días adicionales {size.Days! - 1}</span>
+                        <span className="text-red-500">
+                          -{size.Fee.discount}% aplicado
+                        </span>
+                        <span>{size.RestDaysTotal ?? 0}</span>
                       </div>
-                    );
-                  }
-                })}
-              </div>
-            </CardContent>
-          </CardHeader>
-        </Card>
-      </div>
-      <div>
-        {sizes?.map((size: Size) => {
-          if (getSizeNameById(size.id!)) {
-            return (
-              <div className="pb-5" key={size.id}>
-                <Title className="pb-2 font-bold">
-                  Locker {getSizeNameById(size.id!)}
-                </Title>
-                {getDays(size)}
-              </div>
-            );
-          }
-        })}
-        <hr className=" h-1 w-full rounded border-0 bg-gray-400 dark:bg-gray-700 md:my-3" />
-        <div className="grid-cols-12">
-          <div className=" flex justify-between">
-            <div className="right-64 grid-cols-6">
-              <div className="grid-cols-6">
-                <Label className="text-xl text-slate-400">Subtotal </Label>
-              </div>
-            </div>
-            <div className="grid-cols-6  items-end">
-              <div className="grid-cols-6">
-                <Label>
-                  {subTotal} {props.coin?.description}
-                </Label>
+                    )}
+                  </div>
+                );
+              })}
+
+              <div className="flex justify-between pt-2">
+                <span>Subtotal</span>
+                <span>{subTotal}</span>
               </div>
             </div>
           </div>
-        </div>
-        <hr className=" h-1 w-full rounded border-0 bg-gray-400 dark:bg-gray-700 md:my-3" />
-        <div className="grid-cols-12 pb-2">
-          <div className=" flex justify-between">
-            <div className="right-64 grid-cols-6">
-              <div className="grid-cols-6">
-                <Label className="text-xl font-bold">Total </Label>
-              </div>
-            </div>
-            <div className="grid-cols-6  items-end">
-              <div className="grid-cols-6">
-                <Label>
-                  {props.total} {props.coin?.description}
-                </Label>
-              </div>
+          <div className="flex justify-between bg-[#e2f0e9] p-4 text-right">
+            <p className="font-bold text-black">Total</p>
+            <div className="flex items-baseline">
+              <p className="text-xs font-bold text-black"> ARS </p>
+              <p className=" font-bold text-black">{total}</p>
             </div>
           </div>
         </div>
-      </div>
-      <div className="relative">
-        <div className="h-4 border-b-2 border-gray-400 bg-gray-300"></div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

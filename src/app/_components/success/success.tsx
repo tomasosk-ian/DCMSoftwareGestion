@@ -1,22 +1,10 @@
 "use client";
 
-import { Title } from "@radix-ui/react-toast";
+import { CheckCircle, DownloadIcon, XCircle } from "lucide-react";
+import { useRef } from "react";
 import { usePDF } from "react-to-pdf";
-import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
+import ButtonCustomComponent from "~/components/buttonCustom";
+
 import { Coin } from "~/server/api/routers/coin";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
@@ -28,76 +16,105 @@ export default function Success(props: {
   store: Store;
   nReserve: number;
   total: number;
-  coin: Coin;
+  coin?: Coin;
   checkoutNumber: string;
+  sizes: Size[];
 }) {
   const { toPDF, targetRef } = usePDF({
     filename: `comprobante${props.checkoutNumber ? props.checkoutNumber : ""}.pdf`,
   });
-  const { data: sizes, isLoading } = api.size.get.useQuery();
+  const ref = useRef();
   function getSize(idSize: number) {
-    const size = sizes!.find((s: Size) => s.id === idSize);
-    return size.nombre;
+    console.log("--------------------------------------------");
+    console.log(props.sizes);
+    console.log(idSize);
+    const size = props.sizes!.find((s: Size) => s.id === idSize);
+    return size!.nombre;
   }
   return (
     <main className="flex justify-center pb-5">
       {props.reserves && (
-        <div>
-          <div ref={targetRef}>
-            <div className="flex justify-center rounded-t-lg border border-black bg-green-200">
-              <Title className="p-5 text-xl font-bold">
-                Su pago se ha completado correctamente.
-              </Title>
+        <div className="">
+          <div
+            ref={targetRef}
+            className="w-96 overflow-hidden rounded-3xl bg-white shadow-md"
+          >
+            <div className="justify-between bg-[#e2f0e9] px-6  py-2">
+              <div className="flex justify-center  space-x-14 text-sm ">
+                <CheckCircle
+                  color="#FF813A"
+                  className="border-buttonPick h-auto w-1/2"
+                />
+              </div>
+              <div className="flex justify-center space-x-14 pt-4 text-sm font-bold text-[#848484]">
+                <p>Su pago se ha completado exitosamente.</p>
+              </div>
             </div>
-            <div className="max-w-lg rounded-b-lg border border-black py-2">
-              <div className="gap-4">
-                <div className="flex justify-between gap-4 px-5 py-2">
-                  <div className="font-bold">Local</div>
-                  <div className="font-bold">{props.store.name}</div>
+            <div className=" bg-gray-100 px-8 py-5 ">
+              <div className=" space-y-1">
+                <div className=" flex justify-between text-sm">
+                  <p>Local</p>
+                  <p className="text-[#848484]">{props.store.name}</p>
                 </div>
-                <div className="flex justify-between gap-4 px-5 py-2">
-                  <div className="font-bold">Número de orden</div>
-                  <div className="font-bold">{props.nReserve}</div>
+                <hr className="border-[#848484]" />
+
+                <div className=" flex justify-between text-sm">
+                  <p>Número de orden</p>
+                  <p className="text-[#848484]">{props.nReserve}</p>
                 </div>
-                <div className="flex justify-between gap-4 px-5 py-2">
-                  <div className="font-bold">Id organización</div>
-                  <div className="font-bold">
+                <hr className="border-[#848484]" />
+
+                <div className=" flex justify-between text-sm">
+                  <p>Id. Organización</p>
+                  <p className="text-[#848484]">
+                    {" "}
                     {props.store.organizationName}
-                  </div>
+                  </p>
                 </div>
-                <div className="flex justify-between gap-4 px-5 py-2">
-                  <div className="font-bold">Número de factura</div>
-                  <div className="font-bold">123456</div>
+                <hr className="border-[#848484]" />
+
+                <div className=" flex justify-between text-sm">
+                  <p>Número de factura</p>
+                  <p className="text-[#848484]">123465</p>
                 </div>
-                <div className="flex justify-between gap-4 px-5 py-2">
-                  <div className="font-bold">Precio total</div>
-                  <div className="font-bold">
-                    {props.total} {props.coin.description}
-                  </div>
+                <hr className="border-[#848484]" />
+
+                <div className=" flex justify-between text-sm">
+                  <p>Precio Total</p>
+                  <p className="text-[#848484]">
+                    {" "}
+                    {props.coin!.description} {props.total}
+                  </p>
                 </div>
+                <hr className="border-[#848484]" />
+
                 {props.reserves.map((r, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between gap-4 px-5 py-2"
-                  >
-                    <div className="">Token ({getSize(r.IdSize!)})</div>
-                    <div className="">{r.Token1}</div>
+                  <div>
+                    <div className=" flex justify-between text-sm">
+                      <p>Token ({getSize(r.IdSize!)})</p>
+                      <p className="text-[#848484]">{r.Token1}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>{" "}
+            </div>
           </div>
-
-          <div className=" pt-2">
-            <Button
-              onClick={async () => {
-                location.reload();
-              }}
-            >
-              Cerrar
-            </Button>
-            <div className="float-end ">
-              <Button onClick={() => toPDF()}>Descargar </Button>
+          <div className="flex justify-between space-x-2 pt-4">
+            <div className="w-full">
+              <ButtonCustomComponent
+                onClick={async () => {
+                  location.reload();
+                }}
+                text="Cerrar"
+                icon={<XCircle className="h-4 w-4 space-x-4" />}
+              />
+            </div>
+            <div className="w-full">
+              <ButtonCustomComponent
+                onClick={() => toPDF()}
+                text="Descargar"
+                icon={<DownloadIcon className="h-4 w-4 space-x-4" />}
+              />
             </div>
           </div>
         </div>

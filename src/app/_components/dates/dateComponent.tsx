@@ -4,6 +4,8 @@ import { differenceInDays, format, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
+import ButtonCustomComponent from "../../../components/buttonCustom";
+import { ChevronRightIcon } from "lucide-react";
 
 export default function DateComponent(props: {
   startDate: string;
@@ -46,7 +48,7 @@ export default function DateComponent(props: {
             ¿Qué días necesitas tu Locker?
           </h2>
           <div className="justify-center">
-            <div>
+            <div className="w-full">
               <Calendar
                 mode="range"
                 selected={range}
@@ -66,20 +68,16 @@ export default function DateComponent(props: {
                 initialFocus
               />
             </div>
-            <div className="flex flex-row-reverse pt-1">
-              <div className="px-1">
-                <Button
-                  className="text-sm"
+            <div className="flex flex-col pt-1 md:flex-row-reverse">
+              <div className="mb-2 px-1 md:mb-0 md:w-1/2 lg:w-1/4">
+                <ButtonCustomComponent
                   onClick={handleClick}
                   disabled={range?.to == undefined}
-                >
-                  APLICAR {props.days} DÍAS
-                </Button>
+                  text={`Aplicar ${props.days} días`}
+                />
               </div>
-              <div className="px-1">
-                <Button className="text-sm" onClick={onlyToday}>
-                  Solo hoy
-                </Button>
+              <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
+                <ButtonCustomComponent onClick={onlyToday} text={`Solo hoy`} />
               </div>
             </div>
           </div>

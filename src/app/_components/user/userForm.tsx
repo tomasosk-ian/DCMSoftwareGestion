@@ -14,7 +14,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Client } from "~/server/api/routers/clients";
-import { continents, countries, languages } from "countries-list";
+import { countries } from "countries-list";
 import { Checkbox } from "~/components/ui/checkbox";
 
 export default function UserForm(props: {
@@ -46,15 +46,16 @@ export default function UserForm(props: {
 
     Object.entries(countries).forEach(([countryCode, countryData]) => {
       const { phone } = countryData;
-      if (countryCode == "AR") {
+      if (countryCode === "AR") {
         phoneNumbers.unshift({ [countryCode]: phone[0]! });
       } else {
         phoneNumbers.push({ [countryCode]: phone[0]! });
       }
-    }, []);
+    });
 
     setPhones(phoneNumbers);
   }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     props.setClient({ ...props.client, [name]: value });
@@ -62,68 +63,72 @@ export default function UserForm(props: {
   };
 
   return (
-    <div className="grid h-10 grid-cols-12 gap-4 px-3">
+    <div className="grid grid-cols-1 gap-4 rounded-lg bg-[#F0F0F0] p-6 shadow-md md:grid-cols-12 md:px-3 md:py-6">
+      <h2 className="col-span-1 text-lg font-bold text-black md:col-span-12">
+        Completá tus datos
+      </h2>
       <Input
-        className="col-span-6 border-4 border-indigo-300/50"
-        placeholder={"Nombre"}
+        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-6"
+        placeholder="Nombre"
         name="name"
         value={props.client.name!}
         onChange={handleChange}
       />
       <Input
-        className="col-span-6 border-4 border-indigo-300/50"
-        placeholder={"Apellido"}
+        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-6"
+        placeholder="Apellido"
         name="surname"
         value={props.client.surname!}
         onChange={handleChange}
       />
-      <span className="col-span-6 text-red-500">{props.errors.name}</span>
-
-      <span className="col-span-6 text-red-500">{props.errors.surname}</span>
-
+      <span className="col-span-1 text-red-500 md:col-span-6">
+        {props.errors.name}
+      </span>
+      <span className="col-span-1 text-red-500 md:col-span-6">
+        {props.errors.surname}
+      </span>
       <Input
-        className="col-span-12 border-4 border-indigo-300/50"
-        placeholder={"Email"}
+        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-12"
+        placeholder="Email"
         name="email"
         value={props.client.email!.toLowerCase()}
         onChange={handleChange}
       />
-      <span className="col-span-12 text-red-500">{props.errors.email}</span>
-      <div className="col-span-4 max-h-60 border-4 border-indigo-300/50">
+      <span className="col-span-1 text-red-500 md:col-span-12">
+        {props.errors.email}
+      </span>
+      <div className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-4">
         <Select
           onValueChange={(value: string) => {
             props.setClient({
               ...props.client,
-              ["prefijo"]: parseInt(value),
+              prefijo: parseInt(value),
             });
-            props.setErrors({ ...props.errors, ["prefijo"]: "" });
+            props.setErrors({ ...props.errors, prefijo: "" });
           }}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder={"Elija un prefijo"} />
+            <SelectValue placeholder="Elija un prefijo" />
           </SelectTrigger>
           <SelectContent className="max-h-60 overflow-auto">
             <SelectGroup>
               <SelectLabel>Prefijos</SelectLabel>
-              {phones?.map((item) => {
-                return (
-                  <SelectItem
-                    key={Object.keys(item)[0]}
-                    value={item[Object.keys(item!)[0]!]!.toString()}
-                  >
-                    ({item[Object.keys(item!)[0]!]!.toString()}){" "}
-                    {Object.keys(item)[0]}
-                  </SelectItem>
-                );
-              })}
+              {phones?.map((item) => (
+                <SelectItem
+                  key={Object.keys(item)[0]}
+                  value={item[Object.keys(item)[0]!]!.toString()}
+                >
+                  ({item[Object.keys(item)[0]!]!.toString()}){" "}
+                  {Object.keys(item)[0]}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
       </div>
-
       <Input
-        className="col-span-8 border-4 border-indigo-300/50"
-        placeholder={"Telefono"}
+        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-8"
+        placeholder="Telefono"
         name="telefono"
         value={props.client.telefono ? props.client.telefono : 0}
         onChange={(e) => {
@@ -132,74 +137,60 @@ export default function UserForm(props: {
           props.setErrors({ ...props.errors, [name]: "" });
         }}
       />
-      <div className="col-span-4 ">
-        <span className="col-span-6 w-full text-red-500">
+      {props.errors.prefijo && (
+        <span className="col-span-1 text-red-500 md:col-span-4">
           {props.errors.prefijo}
         </span>
-      </div>
-
-      <div className="col-span-4  ">
-        <span className="col-span-6 w-full text-red-500">
+      )}
+      {props.errors.telefono && (
+        <span className="col-span-1 text-red-500 md:col-span-8">
           {props.errors.telefono}
         </span>
-      </div>
-
-      <Label className="col-span-12 p-3 text-xs italic">
-        Te enviaremos un código para que puedas abrir tu Locker.
+      )}
+      <Label className="col-span-1 text-xs italic text-gray-600 md:col-span-12">
+        Te enviaremos un código para que puedas abrir tu locker.
       </Label>
-      <Label className="col-span-12 p-3 text-xs italic text-red-500">
-        Añade tu codigo de descuento
+      <Label className="text-buttonPick col-span-1 text-xs md:col-span-12">
+        Añade tu código de descuento
       </Label>
-      <div className="col-12">
-        <div className="flex">
-          <div dir="ltr">
-            <div className="col-span-4 w-96 rounded-s-lg px-2">
-              <Input placeholder={"Aplicar cupón de descuento"}></Input>
-            </div>
-          </div>
-          <div dir="rtl">
-            <div>
-              <Button className="col-span-4 p-2">Aplicar</Button>
-            </div>
-          </div>
-        </div>
+      <div className="col-span-1 flex md:col-span-12">
+        <Input
+          className="border-buttonPick focus:border-buttonHover flex-grow rounded-l-md rounded-r-none border-2 border-r-0 px-2 focus:ring-0"
+          placeholder="Aplicar cupón de descuento"
+        />
+        <Button className="bg-buttonPick hover:bg-buttonHover border-buttonPick rounded-l-none rounded-r-md border-2 border-l-0 text-white">
+          Aplicar
+        </Button>
       </div>
-      <div className="col-span-12">
-        <div className="flex items-center space-x-2 py-4">
-          <Checkbox
-            id="terms"
-            onCheckedChange={(e: boolean) => {
-              props.setTerms(e);
+      <div className="col-span-1 flex items-center space-x-2 py-4 md:col-span-12">
+        <Checkbox
+          id="terms"
+          onCheckedChange={(e: boolean) => {
+            props.setTerms(e);
+          }}
+        />
+        <label
+          htmlFor="terms"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Aceptar los{" "}
+          <i
+            className="hover:underline"
+            onClick={() => {
+              open(
+                "https://lockersurbanos.com.ar/wp-content/uploads/2024/05/Terminos-y-condiciones-Lockers-Urbanos.pdf",
+              );
             }}
-          />
-          <label
-            htmlFor="terms"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Aceptar los{" "}
-            <i
-              className="hover:underline"
-              onClick={() => {
-                open(
-                  "https://lockersurbanos.com.ar/wp-content/uploads/2024/05/Terminos-y-condiciones-Lockers-Urbanos.pdf",
-                );
-              }}
-            >
-              términos y condiciones
-            </i>
-          </label>
-          <br></br>
-          <div className="col-span-4 ">
-            <span className="col-span-6 w-full text-red-500">
-              {props.errors.terms}
-            </span>
-          </div>
-        </div>
-        <div className="content-center pt-4">
-          <label htmlFor="terms" className="text-sm">
-            <strong>¿Necesitas ayuda? Llámanos al +54 9 294 492-7340</strong>
-          </label>
-        </div>
+            términos y condiciones
+          </i>
+        </label>
+        <span className="text-red-500">{props.errors.terms}</span>
+      </div>
+      <div className="col-span-1 text-center md:col-span-12">
+        <label htmlFor="terms" className="text-sm">
+          <strong>¿Necesitas ayuda? Llámanos al +54 9 294 492-7340</strong>
+        </label>
       </div>
     </div>
   );

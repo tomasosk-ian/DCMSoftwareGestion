@@ -13,7 +13,7 @@ export const emailRouter = createTRPCRouter({
         to: z.string(),
         token: z.array(z.tuple([z.number(), z.string()])),
         price: z.number(),
-        coin: z.string(),
+        coin: z.string().optional().nullable(),
         client: z.string(),
         local: z.string(),
         nReserve: z.number(),
@@ -82,7 +82,7 @@ export const emailRouter = createTRPCRouter({
 
           <hr>
 
-          <p><strong>Precio Total</strong>         ${input.coin} ${input.price}</p>
+          <p><strong>Precio Total</strong>         ${input.coin ?? ""} ${input.price}</p>
 
           
           <p>Atentamente,</p>

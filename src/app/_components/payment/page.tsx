@@ -93,7 +93,7 @@ export default function Payment(props: {
                 token,
                 client: props.client.name!,
                 price: props.total,
-                coin: props.coin.description!,
+                coin: props.coin.description,
                 local: props.store!.name!,
                 nReserve: props.nReserve,
                 from: formatDateToTextDate(props.startDate!),

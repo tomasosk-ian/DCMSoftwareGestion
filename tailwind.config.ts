@@ -55,6 +55,9 @@ export default {
         fontFamily: {
           sans: ["var(--font-sans)", ...fontFamily.sans],
         },
+        lockersUrbanos: "#e7eded",
+        buttonPick: "#ff813a",
+        buttonHover: "#fcab7e",
       },
       borderRadius: {
         lg: "var(--radius)",

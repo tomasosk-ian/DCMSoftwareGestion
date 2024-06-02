@@ -19,6 +19,8 @@ export const mobbexRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      const randomNum = Math.floor(Math.random() * 10000);
+      const fourDigitString = randomNum.toString().padStart(4, "0");
       mobbex.configurations.configure({
         apiKey: "MG6cQtZdWShlZ9MObv98AloWZKUVBv3WwYmpfzOS",
         accessToken: "a4a78473-14cb-4810-b716-02f003c183bb",
@@ -26,7 +28,7 @@ export const mobbexRouter = createTRPCRouter({
       const checkout = {
         total: input.amount!,
         currency: "ARS",
-        reference: `REF${input.reference}`,
+        reference: `REF${input.reference}${fourDigitString}`,
         description: "Descripción de la Venta",
         test: true,
         customer: {

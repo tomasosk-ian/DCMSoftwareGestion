@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { ChevronRightIcon, Loader2 } from "lucide-react";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
 import { Badge } from "~/components/ui/badge";
@@ -27,6 +27,7 @@ import { Coin } from "~/server/api/routers/coin";
 import { useState } from "react";
 import UserForm from "./user/userForm";
 import { env } from "process";
+import ButtonCustomComponent from "~/components/buttonCustom";
 
 export const Icons = {
   spinner: Loader2,
@@ -161,13 +162,15 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             coins={coins!}
             setFailedResponse={setFailedResponse}
             failedResponse={failedResponse}
+            total={total}
+            setTotal={setTotal}
           />
         )}
         {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
         {sizeSelected && !reserva && !loadingPay && (
           <div>
-            <div className="grid grid-cols-2 gap-8 p-8">
-              <div>
+            <div className="flex flex-col items-center space-y-10 lg:flex-row lg:space-x-10 lg:space-y-0">
+              <div className="w-full lg:w-auto">
                 <UserForm
                   client={client}
                   setClient={setClient}
@@ -177,28 +180,27 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   setTerms={setTerms}
                 />
               </div>
-              <div>
+              <div className="w-full lg:w-auto">
                 <Booking
                   store={store!}
                   startDate={startDate!}
                   endDate={endDate!}
                   reserves={reserves!}
                   total={total}
-                  setTotal={setTotal}
                   coin={coin!}
                   setCoin={setCoin}
                   coins={coins!}
+                  sizes={props.sizes}
                 />
-
-                <div className="flex flex-row-reverse py-2">
-                  <Button
-                    type="submit"
+                <div className="flex justify-end py-2">
+                  <ButtonCustomComponent
+                    text={"Continuar al pago"}
                     onClick={async () => {
                       try {
                         if (handleSubmit()) {
                           const clientResponse = await createClient(
                             client,
-                          ).then((res) => {
+                          ).then((res: any) => {
                             reserves.map(async (reserve: Reserve) => {
                               reserve.client = client.email;
                               const response = parseInt(
@@ -206,29 +208,30 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                               );
                               if (!isNaN(response)) {
                                 reserve.IdTransaction = response;
-                              } else {
                               }
                             });
                             return res;
                           });
                           setNReserve(clientResponse.id);
                           setReserva(true);
-                          let checkoutNumber = await test({
+                          const checkoutNumber = await test({
                             amount: total,
                             reference: clientResponse.id.toString(),
                             mail: client.email!,
                             name: client.name!,
                             identification: client.identifier!,
                           });
+                          console.log("--------------------------");
+                          console.log(checkoutNumber);
                           setCheckoutNumber(checkoutNumber);
                         }
                       } catch (error) {
                         console.log(error);
                       }
                     }}
-                  >
-                    Continuar al pago
-                  </Button>
+                    after={true}
+                    icon={<ChevronRightIcon className="h-4 w-4 " />}
+                  />
                 </div>
               </div>
             </div>
@@ -263,8 +266,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 store={store!}
                 nReserve={nReserve!}
                 total={total}
-                coin={coin!}
+                coin={coin}
                 checkoutNumber={checkoutNumber!}
+                sizes={props.sizes}
               />
             </div>
           </div>
