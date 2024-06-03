@@ -75,7 +75,7 @@ export default function SizeCard(props: {
               ref={imgRef}
               src={props.size.image ? props.size.image : "/placeholder.svg"}
               alt={props.size.nombre!}
-              className="h-52 object-cover"
+              className="h-96 object-cover"
               crossOrigin="anonymous"
               onLoad={extractColor}
             />
