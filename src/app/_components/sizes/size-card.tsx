@@ -61,7 +61,7 @@ export default function SizeCard(props: {
     <>
       {" "}
       {tarifa && (
-        <Card className="relative min-h-40 w-72 overflow-hidden rounded-lg bg-emerald-100 p-4 shadow-lg">
+        <Card className="relative min-h-40 w-80 overflow-hidden rounded-lg bg-emerald-100 p-4 shadow-lg">
           <div
             className="absolute left-2 top-2 flex h-10 w-10 items-center justify-center rounded-full"
             style={{ backgroundColor: bgColor }}
@@ -86,33 +86,35 @@ export default function SizeCard(props: {
               {tarifa.data?.value}
             </span>
           </div>
-          <div className="mt-2 flex items-center justify-between text-sm">
-            <span className=" text-gray-700">Número de lockers</span>
-            <div className="flex items-center">
-              <button
-                className="flex h-8 w-8 items-center justify-center rounded-l bg-orange-500 font-bold text-white hover:bg-orange-600"
-                disabled={props.disabledMinus}
-                onClick={props.onClickMinus}
-              >
-                -
-              </button>
-              <Input
-                className="h-8 w-12 border-none bg-gray-200 text-center text-black"
-                disabled={true}
-                value={props.value}
-                onChange={(e) => {
-                  // lógica para cambiar el número de lockers
-                }}
-              />
-              <button
-                className="flex h-8 w-8 items-center justify-center rounded-r bg-orange-500 font-bold text-white hover:bg-orange-600"
-                disabled={props.disabledPlus}
-                onClick={props.onClickPlus}
-              >
-                +
-              </button>
+          {props.size.cantidad !== 0 && (
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className=" text-gray-700">Número de lockers</span>
+              <div className="flex items-center">
+                <button
+                  className="flex h-10 w-10 items-center justify-center rounded-l bg-orange-500 font-bold text-white hover:bg-orange-600"
+                  disabled={props.disabledMinus}
+                  onClick={props.onClickMinus}
+                >
+                  -
+                </button>
+                <Input
+                  className="h-8 w-12 border-none bg-gray-200 text-center text-black"
+                  disabled={true}
+                  value={props.value}
+                  onChange={(e) => {
+                    // lógica para cambiar el número de lockers
+                  }}
+                />
+                <button
+                  className="flex h-10 w-10 items-center justify-center rounded-r bg-orange-500 font-bold text-white hover:bg-orange-600"
+                  disabled={props.disabledPlus}
+                  onClick={props.onClickPlus}
+                >
+                  +
+                </button>
+              </div>
             </div>
-          </div>
+          )}
           {props.size.cantidad === 0 && (
             <div className="mt-4 text-center text-red-600">
               No hay lockers disponibles

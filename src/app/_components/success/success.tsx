@@ -1,5 +1,7 @@
 "use client";
 
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { CheckCircle, DownloadIcon, XCircle } from "lucide-react";
 import { useRef } from "react";
 import { usePDF } from "react-to-pdf";
@@ -23,13 +25,17 @@ export default function Success(props: {
   const { toPDF, targetRef } = usePDF({
     filename: `comprobante${props.checkoutNumber ? props.checkoutNumber : ""}.pdf`,
   });
-  const ref = useRef();
   function getSize(idSize: number) {
-    console.log("--------------------------------------------");
-    console.log(props.sizes);
-    console.log(idSize);
     const size = props.sizes!.find((s: Size) => s.id === idSize);
     return size!.nombre;
+  }
+  function formatDateToTextDate(dateString?: string): string {
+    if (dateString) {
+      const date = new Date(dateString);
+      const formattedDate = format(date, "eee dd MMMM", { locale: es });
+      return formattedDate;
+    }
+    return "";
   }
   return (
     <main className="flex justify-center pb-5">
@@ -43,51 +49,67 @@ export default function Success(props: {
               <div className="flex justify-center  space-x-14 text-sm ">
                 <CheckCircle
                   color="#FF813A"
-                  className="border-buttonPick h-auto w-1/2"
+                  className="h-auto w-1/2 border-buttonPick"
                 />
               </div>
               <div className="flex justify-center space-x-14 pt-4 text-sm font-bold text-[#848484]">
                 <p>Su pago se ha completado exitosamente.</p>
               </div>
             </div>
-            <div className=" bg-gray-100 px-8 py-5 ">
-              <div className=" space-y-1">
-                <div className=" flex justify-between text-sm">
-                  <p>Local</p>
-                  <p className="text-[#848484]">{props.store.name}</p>
+            <div className=" bg-gray-100 px-8 py-4">
+              <div>
+                <div className="py-1 ">
+                  <div className=" flex justify-between text-sm">
+                    <p>Número de reserva</p>
+                    <p className="text-[#848484]">{props.nReserve}</p>
+                  </div>
+                  <div className=" flex justify-between text-sm">
+                    <p>Local</p>
+                    <p className="text-[#848484]">{props.store.name}</p>
+                  </div>
+                  <div className=" flex justify-between text-sm">
+                    <p>Organización</p>
+                    <p className="text-[#848484]">
+                      {props.store.organizationName}
+                    </p>
+                  </div>
                 </div>
-                <hr className="border-[#848484]" />
-
-                <div className=" flex justify-between text-sm">
-                  <p>Número de orden</p>
-                  <p className="text-[#848484]">{props.nReserve}</p>
+                <hr className="border-[#848484] py-1" />
+                <div className="py-1 ">
+                  <div className=" flex justify-between text-sm">
+                    <p>Importe</p>
+                    <p className="text-[#848484]">
+                      {" "}
+                      {props.coin!.description} {props.total}
+                    </p>
+                  </div>
                 </div>
-                <hr className="border-[#848484]" />
-
+                <hr className="border-[#848484] py-1" />
+                <div className="py-1 ">
+                  <div className=" flex justify-between text-sm">
+                    <p>
+                      <b>Período</b>
+                    </p>
+                  </div>
+                  <div className=" flex justify-between text-sm">
+                    <p>Entrega</p>
+                    <p className="text-[#848484]">
+                      {formatDateToTextDate(props.reserves[0]?.FechaInicio!)}
+                    </p>
+                  </div>
+                  <div className=" flex justify-between text-sm">
+                    <p>Retiro</p>
+                    <p className="text-[#848484]">
+                      {formatDateToTextDate(props.reserves[0]?.FechaFin!)}
+                    </p>
+                  </div>
+                </div>
+                <hr className="border-[#848484] py-1" />
                 <div className=" flex justify-between text-sm">
-                  <p>Id. Organización</p>
-                  <p className="text-[#848484]">
-                    {" "}
-                    {props.store.organizationName}
+                  <p>
+                    <b>Tokens</b>
                   </p>
                 </div>
-                <hr className="border-[#848484]" />
-
-                <div className=" flex justify-between text-sm">
-                  <p>Número de factura</p>
-                  <p className="text-[#848484]">123465</p>
-                </div>
-                <hr className="border-[#848484]" />
-
-                <div className=" flex justify-between text-sm">
-                  <p>Precio Total</p>
-                  <p className="text-[#848484]">
-                    {" "}
-                    {props.coin!.description} {props.total}
-                  </p>
-                </div>
-                <hr className="border-[#848484]" />
-
                 {props.reserves.map((r, index) => (
                   <div>
                     <div className=" flex justify-between text-sm">

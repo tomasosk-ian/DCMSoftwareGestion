@@ -68,7 +68,7 @@ export default function DateComponent(props: {
                 initialFocus
               />
             </div>
-            <div className="flex flex-col pt-1 md:flex-row-reverse">
+            <div className="flex flex-col pt-1 md:flex-row-reverse md:justify-between">
               <div className="mb-2 px-1 md:mb-0 md:w-1/2 lg:w-1/4">
                 <ButtonCustomComponent
                   onClick={handleClick}
