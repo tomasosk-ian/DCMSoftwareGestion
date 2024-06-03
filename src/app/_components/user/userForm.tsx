@@ -68,14 +68,14 @@ export default function UserForm(props: {
         Completá tus datos
       </h2>
       <Input
-        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-6"
+        className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-6"
         placeholder="Nombre"
         name="name"
         value={props.client.name!}
         onChange={handleChange}
       />
       <Input
-        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-6"
+        className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-6"
         placeholder="Apellido"
         name="surname"
         value={props.client.surname!}
@@ -88,7 +88,7 @@ export default function UserForm(props: {
         {props.errors.surname}
       </span>
       <Input
-        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-12"
+        className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-12"
         placeholder="Email"
         name="email"
         value={props.client.email!.toLowerCase()}
@@ -97,7 +97,7 @@ export default function UserForm(props: {
       <span className="col-span-1 text-red-500 md:col-span-12">
         {props.errors.email}
       </span>
-      <div className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-4">
+      <div className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-4">
         <Select
           onValueChange={(value: string) => {
             props.setClient({
@@ -127,7 +127,7 @@ export default function UserForm(props: {
         </Select>
       </div>
       <Input
-        className="border-buttonPick focus:border-buttonPick col-span-1 rounded border-2 md:col-span-8"
+        className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-8"
         placeholder="Telefono"
         name="telefono"
         value={props.client.telefono ? props.client.telefono : 0}
@@ -147,18 +147,15 @@ export default function UserForm(props: {
           {props.errors.telefono}
         </span>
       )}
-      <Label className="col-span-1 text-xs italic text-gray-600 md:col-span-12">
-        Te enviaremos un código para que puedas abrir tu locker.
-      </Label>
-      <Label className="text-buttonPick col-span-1 text-xs md:col-span-12">
+      <Label className="col-span-1 text-xs text-buttonPick md:col-span-12">
         Añade tu código de descuento
       </Label>
       <div className="col-span-1 flex md:col-span-12">
         <Input
-          className="border-buttonPick focus:border-buttonHover flex-grow rounded-l-md rounded-r-none border-2 border-r-0 px-2 focus:ring-0"
+          className="flex-grow rounded-l-md rounded-r-none border-2 border-r-0 border-buttonPick px-2 focus:border-buttonHover focus:ring-0"
           placeholder="Aplicar cupón de descuento"
         />
-        <Button className="bg-buttonPick hover:bg-buttonHover border-buttonPick rounded-l-none rounded-r-md border-2 border-l-0 text-white">
+        <Button className="rounded-l-none rounded-r-md border-2 border-l-0 border-buttonPick bg-buttonPick text-white hover:bg-buttonHover">
           Aplicar
         </Button>
       </div>

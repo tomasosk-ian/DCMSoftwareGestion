@@ -52,8 +52,11 @@ export default function Success(props: {
                   className="h-auto w-1/2 border-buttonPick"
                 />
               </div>
-              <div className="flex justify-center space-x-14 pt-4 text-sm font-bold text-[#848484]">
-                <p>Su pago se ha completado exitosamente.</p>
+              <div className="flex justify-center pt-4 text-sm font-bold text-[#848484]">
+                <p>Tu pago se ha completado exitosamente.</p>
+              </div>
+              <div className="flex justify-center pt-4 text-xs italic text-[#848484]">
+                <p> Te enviaremos un código para que puedas abrir tu locker.</p>
               </div>
             </div>
             <div className=" bg-gray-100 px-8 py-4">
