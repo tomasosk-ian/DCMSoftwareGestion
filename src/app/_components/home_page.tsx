@@ -127,7 +127,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   return (
     <div className="container absolute">
       <Badge>TESTING</Badge> {failedResponse && <AlertFailedResponse />}
-      <div className="grid grid-cols-3 justify-items-center gap-4	"></div>
+      {}
       <div className="flex flex-col items-center justify-center pt-2">
         <StoreSelector
           stores={storess.data}
@@ -197,33 +197,40 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                     text={"Continuar al pago"}
                     onClick={async () => {
                       try {
+                        let failed = false;
                         if (handleSubmit()) {
                           const clientResponse = await createClient(
                             client,
-                          ).then((res: any) => {
-                            reserves.map(async (reserve: Reserve) => {
-                              reserve.client = client.email;
-                              const response = parseInt(
-                                await reservarBox(reserve),
-                              );
-                              if (!isNaN(response)) {
-                                reserve.IdTransaction = response;
-                              }
-                            });
+                          ).then(async (res: any) => {
+                            await Promise.all(
+                              reserves.map(async (reserve: Reserve) => {
+                                reserve.client = client.email;
+                                const response = parseInt(
+                                  await reservarBox(reserve),
+                                );
+                                if (!isNaN(response)) {
+                                  reserve.IdTransaction = response;
+                                } else {
+                                  failed = true;
+                                  setFailedResponse(true);
+                                }
+                              }),
+                            );
+
                             return res;
                           });
-                          setNReserve(clientResponse.id);
-                          setReserva(true);
-                          const checkoutNumber = await test({
-                            amount: total,
-                            reference: clientResponse.id.toString(),
-                            mail: client.email!,
-                            name: client.name!,
-                            identification: client.identifier!,
-                          });
-                          console.log("--------------------------");
-                          console.log(checkoutNumber);
-                          setCheckoutNumber(checkoutNumber);
+                          if (!failed) {
+                            setNReserve(clientResponse.id);
+                            setReserva(true);
+                            const checkoutNumber = await test({
+                              amount: total,
+                              reference: clientResponse.id.toString(),
+                              mail: client.email!,
+                              name: client.name!,
+                              identification: client.identifier!,
+                            });
+                            setCheckoutNumber(checkoutNumber);
+                          }
                         }
                       } catch (error) {
                         console.log(error);
