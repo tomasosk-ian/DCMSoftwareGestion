@@ -168,7 +168,7 @@ export default function SizeSelector(props: {
   return (
     <main className="flex justify-center">
       {!props.sizeSelected && coin && (
-        <div className="flex w-full flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="flex w-full flex-col items-center justify-center px-4 sm:px-0 lg:px-8">
           <h2 className="mb-4 text-center text-2xl font-semibold">
             Selecciona tamaño de tu Locker.
           </h2>

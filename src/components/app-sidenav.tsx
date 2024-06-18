@@ -1,34 +1,22 @@
 import { DashboardIcon, PersonIcon } from "@radix-ui/react-icons";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import {
-  ActivityIcon,
-  ActivitySquareIcon,
   AlignStartVerticalIcon,
-  BanknoteIcon,
   CloudIcon,
   CogIcon,
-  DnaIcon,
   DollarSignIcon,
-  DotIcon,
-  FileUpIcon,
-  FingerprintIcon,
   GroupIcon,
-  LayoutDashboardIcon,
-  MessageCircleQuestionIcon,
-  MessageSquareReplyIcon,
-  PersonStanding,
+  KeyRound,
   ReceiptIcon,
   Settings2Icon,
-  TagsIcon,
-  TentIcon,
   UserIcon,
-  UsersIcon,
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { About } from "./about-dialog";
 import { Button } from "./ui/button";
 
-export default function AppSidenav() {
+export default function AppSidenav(props: { isAdmin: boolean }) {
+  console.log(props.isAdmin);
   return (
     <Sidenav>
       <SidenavSeparator>Administración</SidenavSeparator>
@@ -41,6 +29,21 @@ export default function AppSidenav() {
       <SidenavItem icon={<CloudIcon />} disabled={false}>
         Ciudades{" "}
       </SidenavItem>
+      {props.isAdmin && (
+        <SidenavItem icon={<UserIcon />} href="/panel/usuarios">
+          Usuarios
+        </SidenavItem>
+      )}
+      {props.isAdmin && (
+        <SidenavItem icon={<CogIcon />} disabled={false}>
+          Roles
+        </SidenavItem>
+      )}
+      {props.isAdmin && (
+        <SidenavItem icon={<KeyRound />} disabled={false}>
+          Permisos
+        </SidenavItem>
+      )}
       <SidenavItem icon={<AlignStartVerticalIcon />} href="/panel/locales">
         Locales
       </SidenavItem>
@@ -53,7 +56,7 @@ export default function AppSidenav() {
       <SidenavItem icon={<CloudIcon />} href="/panel/clientes">
         Clientes{" "}
       </SidenavItem>
-      <SidenavItem icon={<ReceiptIcon />} disabled={false}>
+      <SidenavItem icon={<ReceiptIcon />} href="/panel/reservas">
         Reservas
       </SidenavItem>
       {/* <SidenavSeparator>Separador</SidenavSeparator>

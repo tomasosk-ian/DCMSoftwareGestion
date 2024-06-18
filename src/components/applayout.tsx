@@ -1,7 +1,8 @@
 import { MenuIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { SidenavSheet } from "./sidenav-sheet";
-import { UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { checkRole } from "~/lib/roles";
 
 export type AppLayoutProps = {
   children: React.ReactNode;
@@ -22,7 +23,14 @@ export default function AppLayout(props: AppLayoutProps) {
           content={props.sidenav}
         />
         <div className="w-full">{props.title}</div>
-        <UserButton />{" "}
+        {/* <UserButton />{" "} */}
+        <div className="flex gap-4 pr-1">
+          <OrganizationSwitcher
+            afterSelectOrganizationUrl={"/panel"}
+            hidePersonal={true}
+          />
+          <UserButton afterSwitchSessionUrl="/panel" />
+        </div>
       </header>
       <aside className="fixed bottom-0 left-0 top-[70px] hidden max-h-full w-[250px] overflow-y-auto border-r md:block">
         {props.sidenav}

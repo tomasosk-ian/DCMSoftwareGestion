@@ -128,7 +128,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     <div className="container absolute">
       <Badge>TESTING</Badge> {failedResponse && <AlertFailedResponse />}
       {}
-      <div className="flex flex-col items-center justify-center pt-2">
+      <div className="flex flex-col items-center justify-center ">
         <StoreSelector
           stores={storess.data}
           store={store}
@@ -169,7 +169,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
         {sizeSelected && !reserva && !loadingPay && (
           <div>
-            <div className="flex flex-col items-center space-y-10 lg:flex-row lg:space-x-10 lg:space-y-0">
+            <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
               <div className="w-full lg:w-auto">
                 <UserForm
                   client={client}
