@@ -132,6 +132,7 @@ export default function SizeSelector(props: {
           : [...newReserves];
         props.setReserves(updatedReserves);
         props.setSizeSelected(true);
+        window.scrollTo({ top: 0 });
       }
     } catch (error) {
       // Manejar errores aquí
