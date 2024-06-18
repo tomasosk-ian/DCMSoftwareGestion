@@ -24,13 +24,13 @@ export default function AppLayout(props: AppLayoutProps) {
         />
         <div className="w-full">{props.title}</div>
         <UserButton />{" "}
-        {/* <div className="flex gap-4 pr-1">
+        <div className="flex gap-4 pr-1">
           <OrganizationSwitcher
             afterSelectOrganizationUrl={"/panel"}
             hidePersonal={true}
           />
           <UserButton afterSwitchSessionUrl="/panel" />
-        </div> */}
+        </div>
       </header>
       <aside className="fixed bottom-0 left-0 top-[70px] hidden max-h-full w-[250px] overflow-y-auto border-r md:block">
         {props.sidenav}
