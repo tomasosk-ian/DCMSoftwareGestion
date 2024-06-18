@@ -23,7 +23,7 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
       <SidenavItem icon={<DashboardIcon />} disabled={false}>
         Dashboard
       </SidenavItem>
-      <SidenavItem icon={<Settings2Icon />} href="/panel/global">
+      <SidenavItem icon={<Settings2Icon />} disabled={false}>
         Global
       </SidenavItem>
       <SidenavItem icon={<CloudIcon />} disabled={false}>
