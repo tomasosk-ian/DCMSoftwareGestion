@@ -23,7 +23,6 @@ export default function AppLayout(props: AppLayoutProps) {
           content={props.sidenav}
         />
         <div className="w-full">{props.title}</div>
-        <UserButton />{" "}
         <div className="flex gap-4 pr-1">
           <OrganizationSwitcher
             afterSelectOrganizationUrl={"/panel"}
