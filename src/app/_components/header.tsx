@@ -12,7 +12,6 @@ export default async function Home() {
             <div className="soc-ico in-top-bar-right in-menu-second-switch disabled-bg custom-border border-on hover-disabled-bg hover-custom-border hover-border-on hide-on-desktop show-on-first-switch display-none">
               <a
                 title="Instagram page opens in new window"
-                href="https://lockersurbanos.com.ar/#"
                 target="_blank"
                 className="instagram"
               >
