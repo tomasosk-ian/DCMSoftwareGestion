@@ -28,6 +28,7 @@ import { useState } from "react";
 import UserForm from "./user/userForm";
 import { env } from "process";
 import ButtonCustomComponent from "~/components/buttonCustom";
+import { Cupon } from "~/server/api/routers/cupones";
 
 export const Icons = {
   spinner: Loader2,
@@ -43,6 +44,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [reserva, setReserva] = useState<boolean>(false);
   const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [days, setDays] = useState<number>(0);
+  const [cupon, setCupon] = useState<Cupon>();
   const { mutateAsync: reservarBox } =
     api.lockerReserve.reserveBox.useMutation();
   const storess = api.store.get.useQuery();
@@ -69,6 +71,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const { mutateAsync: test } = api.mobbex.test.useMutation();
   const { data: coins } = api.coin.get.useQuery();
   const [terms, setTerms] = useState<boolean>();
+  const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
 
   const [errors, setErrors] = useState({
     name: "",
@@ -178,6 +181,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   setErrors={setErrors}
                   terms={terms!}
                   setTerms={setTerms}
+                  setCupon={setCupon}
                 />
               </div>
               <div className="w-full lg:w-auto">
@@ -191,6 +195,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   setCoin={setCoin}
                   coins={coins!}
                   sizes={props.sizes}
+                  cupon={cupon}
                 />
                 <div className="flex justify-end py-2">
                   <ButtonCustomComponent
@@ -231,6 +236,11 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                             });
                             setCheckoutNumber(checkoutNumber);
                           }
+                        }
+                        if (cupon) {
+                          useCupon({
+                            codigo: cupon?.identifier,
+                          });
                         }
                       } catch (error) {
                         console.log(error);

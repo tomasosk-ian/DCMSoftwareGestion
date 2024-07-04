@@ -33,12 +33,7 @@ import { Size } from "~/server/api/routers/sizes";
 import { Reserves } from "~/server/api/routers/reserves";
 import { Badge } from "~/components/ui/badge";
 
-export default function ReservePage(props: {
-  reserve: Reserves;
-  size: Size;
-  locker: string;
-}) {
-  const [locker, setILocker] = useState(props.locker);
+export default function ReservePage(props: { reserve: Reserves; size: Size }) {
   const [tamaño, setTamaño] = useState(props.size);
   const [token, setToken] = useState(props.reserve.Token1);
   const [fechaCreacion, setCreacion] = useState(props.reserve.FechaCreacion);
@@ -63,7 +58,11 @@ export default function ReservePage(props: {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <Label htmlFor="Locker">Locker</Label>
-                    <Input id="Locker" value={locker} disabled={true} />
+                    <Input
+                      id="Locker"
+                      value={props.reserve.NroSerie!}
+                      disabled={true}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="Tamaño">Tamaño</Label>
@@ -99,25 +98,6 @@ export default function ReservePage(props: {
                   </div>
                 </div>
               </Card>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="item-4" className="opacity-75 ">
-            <AccordionTrigger className="hover:no-underline" disabled={true}>
-              <div className="flex gap-2">
-                <h2 className="text-md ">Eliminar reserva</h2>
-                <Badge
-                  variant="outline"
-                  className="border-slate-300 bg-slate-200 "
-                >
-                  Próximamente
-                </Badge>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="flex justify-end">
-                <DeleteChannel reserveId={props.reserve.identifier!} />
-              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>

@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
 import { format } from "date-fns";
+import { Cupon } from "~/server/api/routers/cupones";
 interface GroupedItem {
   IdSize: number;
   Cantidad: number;
@@ -27,6 +28,7 @@ export default function Booking(props: {
   setCoin: (coin: Coin) => void;
   coins: Coin[];
   sizes: Size[];
+  cupon: Cupon | undefined;
 }) {
   const fees = api.fee.get.useQuery();
 
@@ -78,6 +80,17 @@ export default function Booking(props: {
     setGroupedItems(updatedItems);
   }, []);
 
+  useEffect(() => {
+    if (props.cupon?.tipo_descuento == "fijo") {
+      const newTotal = total - (props.cupon?.valor_descuento ?? 0);
+      setTotal(newTotal);
+    }
+    if (props.cupon?.tipo_descuento == "porcentaje") {
+      const newTotal =
+        total - (total * (props.cupon?.valor_descuento ?? 0)) / 100;
+      setTotal(newTotal);
+    }
+  }, [props.cupon]);
   function daysBetweenDates(date1: string, date2: string): number {
     const startDate = new Date(date1);
     const endDate = new Date(date2);
@@ -197,11 +210,29 @@ export default function Booking(props: {
               </div>
             </div>
           </div>
-          <div className="flex justify-between bg-[#e2f0e9] p-4 text-right">
-            <p className="font-bold text-black">Total</p>
-            <div className="flex items-baseline">
-              <p className="text-xs font-bold text-black"> ARS </p>
-              <p className=" font-bold text-black">{total}</p>
+          <div className="bg-[#e2f0e9] p-4 text-right">
+            <div className="pb-2">
+              {props.cupon?.tipo_descuento == "fijo" && (
+                <span className="text-xs text-red-500">
+                  -
+                  <a className="text-xs font-bold text-red-500 no-underline ">
+                    ARS
+                  </a>
+                  {props.cupon.valor_descuento} descuento aplicado
+                </span>
+              )}
+              {props.cupon?.tipo_descuento == "porcentaje" && (
+                <span className="text-xs text-red-500">
+                  -{props.cupon.valor_descuento}% descuento aplicado
+                </span>
+              )}
+            </div>
+            <div className="flex justify-between ">
+              <p className="font-bold text-black">Total</p>
+              <div className="flex items-baseline">
+                <p className="text-xs font-bold text-black"> ARS </p>
+                <p className=" font-bold text-black">{total}</p>
+              </div>
             </div>
           </div>
         </div>

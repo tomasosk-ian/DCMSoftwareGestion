@@ -1,4 +1,3 @@
-import { DashboardIcon, PersonIcon } from "@radix-ui/react-icons";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import {
   AlignStartVerticalIcon,
@@ -10,6 +9,8 @@ import {
   ReceiptIcon,
   Settings2Icon,
   UserIcon,
+  LayoutDashboardIcon,
+  PercentCircleIcon,
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { About } from "./about-dialog";
@@ -19,34 +20,35 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
   console.log(props.isAdmin);
   return (
     <Sidenav>
-      <SidenavSeparator>Administración</SidenavSeparator>
-      <SidenavItem icon={<DashboardIcon />} disabled={false}>
-        Dashboard
-      </SidenavItem>
-      <SidenavItem icon={<Settings2Icon />} disabled={false}>
-        Global
-      </SidenavItem>
-      <SidenavItem icon={<CloudIcon />} disabled={false}>
-        Ciudades{" "}
-      </SidenavItem>
+      {props.isAdmin && <SidenavSeparator>Mantenimiento</SidenavSeparator>}
       {props.isAdmin && (
         <SidenavItem icon={<UserIcon />} href="/panel/usuarios">
           Usuarios
         </SidenavItem>
       )}
       {props.isAdmin && (
-        <SidenavItem icon={<CogIcon />} disabled={false}>
+        <SidenavItem icon={<CogIcon />} disabled={true}>
           Roles
         </SidenavItem>
       )}
       {props.isAdmin && (
-        <SidenavItem icon={<KeyRound />} disabled={false}>
+        <SidenavItem icon={<KeyRound />} disabled={true}>
           Permisos
         </SidenavItem>
       )}
+      <SidenavSeparator>Administración</SidenavSeparator>
+
+      <SidenavItem icon={<LayoutDashboardIcon />} href="/panel/dashboard">
+        Dashboard
+      </SidenavItem>
+      <SidenavItem icon={<CloudIcon />} disabled={true}>
+        Ciudades{" "}
+      </SidenavItem>
+
       <SidenavItem icon={<AlignStartVerticalIcon />} href="/panel/locales">
         Locales
       </SidenavItem>
+
       <SidenavItem icon={<GroupIcon />} href="/panel/tamanos">
         Tamaños
       </SidenavItem>
@@ -59,13 +61,10 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
       <SidenavItem icon={<ReceiptIcon />} href="/panel/reservas">
         Reservas
       </SidenavItem>
-      {/* <SidenavSeparator>Separador</SidenavSeparator>
-      <SidenavItem icon={<FingerprintIcon />} href="/panel/locales">
-        Item 1
+      <SidenavItem icon={<PercentCircleIcon />} href="/panel/cupones">
+        Cupones{" "}
       </SidenavItem>
-      <SidenavItem icon={<DollarSignIcon />} href="/panel/tamanos">
-        Item 2
-      </SidenavItem> */}
+
       <div className="absolute bottom-0 right-0 px-5">
         <About />
       </div>

@@ -24,10 +24,10 @@ export default function AppLayout(props: AppLayoutProps) {
         />
         <div className="w-full">{props.title}</div>
         <div className="flex gap-4 pr-1">
-          <OrganizationSwitcher
+          {/* <OrganizationSwitcher
             afterSelectOrganizationUrl={"/panel"}
-            hidePersonal={true}
-          />
+            hidePersonal={false}
+          /> */}
           <UserButton afterSwitchSessionUrl="/panel" />
         </div>
       </header>

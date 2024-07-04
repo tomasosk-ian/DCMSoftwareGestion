@@ -13,6 +13,7 @@ import { emailRouter } from "./routers/email";
 import { mobbexRouter } from "./routers/mobbex";
 import { clerkRouter } from "./routers/clerk";
 import { reserveRouter } from "./routers/reserves";
+import { cuponesRouter } from "./routers/cupones";
 
 /**
  * This is the primary router for your server.
@@ -34,6 +35,7 @@ export const appRouter = createTRPCRouter({
   mobbex: mobbexRouter,
   clerk: clerkRouter,
   reserve: reserveRouter,
+  cupones: cuponesRouter,
 });
 
 // export type definition of API

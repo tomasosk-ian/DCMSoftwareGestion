@@ -16,7 +16,7 @@ export function SidenavItem(props: {
   onClick?: () => void;
   disabled?: boolean;
 }) {
-  if (props.disabled || props.disabled == undefined) {
+  if (!props.disabled || props.disabled == undefined) {
     const className = `w-full flex gap-2 px-3 py-1 items-center
     hover:bg-stone-100 dark:hover:bg-stone-900
     active:bg-stone-200 dark:active:bg-stone-800`;

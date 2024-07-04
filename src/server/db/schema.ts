@@ -211,3 +211,20 @@ export const feeRelations = relations(feeData, ({ one }) => ({
     references: [coinData.identifier],
   }),
 }));
+
+export const cuponesData = sqliteTable(
+  "test_cupones",
+  {
+    identifier: text("identifier", { length: 255 }).notNull(),
+    codigo: text("codigo", { length: 255 }),
+    tipo_descuento: text("tipo_descuento", { length: 255 }),
+    valor_descuento: real("valor_descuento"),
+    cantidad_usos: real("cantidad_usos"),
+    fecha_desde: text("fecha_desde"),
+    fecha_hasta: text("fecha_hasta"),
+    usos: real("usos"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
