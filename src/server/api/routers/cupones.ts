@@ -46,7 +46,7 @@ export const cuponesRouter = createTRPCRouter({
           fecha_desde: input.fecha_desde,
           fecha_hasta: input.fecha_hasta,
           cantidad_usos: input.cantidad_usos,
-          usos: input.usos,
+          usos: 0,
         });
 
         return { identifier };
@@ -77,18 +77,17 @@ export const cuponesRouter = createTRPCRouter({
       const cupon = await db.query.cuponesData.findFirst({
         where: eq(schema.cuponesData.codigo, input.codigo),
       });
-      if (cupon?.cantidad_usos == cupon?.usos) return null;
+      console.log(cupon?.cantidad_usos);
+      console.log(cupon?.usos);
+
       const currentDate = new Date();
       const fechaDesde = new Date(cupon?.fecha_desde || "");
       const fechaHasta = new Date(cupon?.fecha_hasta || "");
 
-      if (
-        !cupon ||
-        currentDate < fechaDesde ||
-        currentDate > fechaHasta ||
-        cupon.cantidad_usos == cupon.usos
-      ) {
-        return null;
+      if (!cupon || currentDate < fechaDesde || currentDate > fechaHasta) {
+        if (cupon?.cantidad_usos == cupon?.usos && cupon?.cantidad_usos! >= 0) {
+          return null;
+        }
       }
 
       return cupon;

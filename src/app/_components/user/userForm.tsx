@@ -72,7 +72,7 @@ export default function UserForm(props: {
     }).then((cupon) => {
       if (cupon) {
         props.setCupon(cupon);
-        setApplyButton(true);
+        // setApplyButton(true);
       }
     });
   }
