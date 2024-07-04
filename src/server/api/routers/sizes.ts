@@ -14,6 +14,7 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const sizeRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
+    console.log("sizeResponse", `${env.SERVER_URL}/api/size`);
     const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
     // Handle the response from the external API
