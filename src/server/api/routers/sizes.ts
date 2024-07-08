@@ -69,6 +69,10 @@ export const sizeRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       try {
+        console.log(
+          "sizeResponse4",
+          `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
+        );
         const sizeResponse = await fetch(
           `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
         );
@@ -83,6 +87,7 @@ export const sizeRouter = createTRPCRouter({
         const reservedBoxData = await sizeResponse.json();
 
         const validatedData = responseValidator.parse(reservedBoxData);
+        console.log("validatedData4", validatedData);
         await Promise.all(
           validatedData.map(async (v) => {
             const fee = await db.query.feeData.findFirst({
@@ -167,12 +172,12 @@ export const sizeRouter = createTRPCRouter({
 
 const sizeValidator = z.object({
   id: z.number(),
+  nombre: z.string().nullable(),
   alto: z.number(),
   ancho: z.number().nullable(),
   profundidad: z.number().nullable(),
-  nombre: z.string().nullable(),
   cantidad: z.number().nullable().optional(),
-  cantidadSeleccionada: z.number().optional().default(0),
+  cantidadSeleccionada: z.number().nullable().optional().default(0),
   tarifa: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
 });

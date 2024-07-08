@@ -83,14 +83,17 @@ export const cuponesRouter = createTRPCRouter({
       const currentDate = new Date();
       const fechaDesde = new Date(cupon?.fecha_desde || "");
       const fechaHasta = new Date(cupon?.fecha_hasta || "");
-
-      if (!cupon || currentDate < fechaDesde || currentDate > fechaHasta) {
-        if (cupon?.cantidad_usos == cupon?.usos && cupon?.cantidad_usos! >= 0) {
-          return null;
+      if (cupon) {
+        if (currentDate > fechaDesde && currentDate < fechaHasta) {
+          if (
+            cupon?.cantidad_usos! > cupon?.usos! ||
+            cupon?.cantidad_usos! == -1
+          ) {
+            return cupon;
+          }
         }
       }
-
-      return cupon;
+      return null;
     }),
   change: publicProcedure
     .input(
@@ -115,42 +118,42 @@ export const cuponesRouter = createTRPCRouter({
           fecha_desde: input.fecha_desde,
           fecha_hasta: input.fecha_hasta,
           cantidad_usos: input.cantidad_usos,
-          usos: input.cantidad_usos,
         })
         .where(eq(cuponesData.identifier, input.identifier));
     }),
   useCupon: publicProcedure
     .input(
       z.object({
-        codigo: z.string().min(0).max(1023),
+        identifier: z.string().min(0).max(1023),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const cupon = await db.query.cuponesData.findFirst({
-        where: eq(schema.cuponesData.codigo, input.codigo),
-      });
-      const currentDate = new Date();
-      const fechaDesde = new Date(cupon?.fecha_desde || "");
-      const fechaHasta = new Date(cupon?.fecha_hasta || "");
+      // const cupon = await db.query.cuponesData.findFirst({
+      //   where: eq(schema.cuponesData.codigo, input.codigo),
+      // });
+      // const currentDate = new Date();
+      // const fechaDesde = new Date(cupon?.fecha_desde || "");
+      // const fechaHasta = new Date(cupon?.fecha_hasta || "");
 
-      if (
-        !cupon ||
-        currentDate < fechaDesde ||
-        currentDate > fechaHasta ||
-        cupon.cantidad_usos == cupon.usos
-      ) {
-        return null;
-      }
-      if (cupon?.cantidad_usos == cupon?.usos) return null;
-      const cuponNuevo = ctx.db
+      // if (
+      //   !cupon ||
+      //   currentDate < fechaDesde ||
+      //   currentDate > fechaHasta ||
+      //   cupon.cantidad_usos == cupon.usos
+      // ) {
+      //   return null;
+      // }
+      // if (cupon?.cantidad_usos == cupon?.usos) return null;
+      await ctx.db
         .update(cuponesData)
         .set({
           usos: sql`${cuponesData.usos} + 1`,
         })
-        .where(eq(cuponesData.codigo, input.codigo));
+        .where(eq(schema.cuponesData.identifier, input.identifier));
       const response = await db.query.cuponesData.findFirst({
-        where: eq(schema.cuponesData.codigo, input.codigo),
+        where: eq(schema.cuponesData.identifier, input.identifier),
       });
+      console.log("response?.usos", response?.usos);
       return response;
     }),
   delete: publicProcedure

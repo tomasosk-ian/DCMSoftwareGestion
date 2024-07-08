@@ -103,7 +103,7 @@ export const lockerReserveRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       console.log("input.idToken", input.idToken);
       const reservationResponse = await fetch(
-        `http://168.205.92.83:8000/api/token/confirmar`,
+        `${env.SERVER_URL}/api/token/confirmar`,
         {
           method: "POST",
           headers: {

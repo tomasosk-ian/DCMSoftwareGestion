@@ -35,7 +35,7 @@ export default function CuponPage(props: { cupon: Cupon }) {
   } = useForm({
     defaultValues: {
       codigo: props.cupon.codigo || "",
-      usos: props.cupon.cantidad_usos || 0,
+      cantidad_usos: props.cupon.cantidad_usos || 0,
       fecha_desde: props.cupon.fecha_desde || "",
       fecha_hasta: props.cupon.fecha_hasta || "",
       porcentaje:
@@ -54,7 +54,7 @@ export default function CuponPage(props: { cupon: Cupon }) {
       await editarCupon({
         identifier: props.cupon.identifier,
         codigo: data.codigo,
-        cantidad_usos: parseFloat(data.usos),
+        cantidad_usos: parseFloat(data.cantidad_usos),
         fecha_desde: data.fecha_desde,
         fecha_hasta: data.fecha_hasta,
         tipo_descuento: data.monto ? "fijo" : "porcentaje",
@@ -116,7 +116,7 @@ export default function CuponPage(props: { cupon: Cupon }) {
                     className="w-full rounded border-2 border-buttonPick focus:border-buttonPick"
                     type="number"
                     step="1"
-                    {...register("usos")}
+                    {...register("cantidad_usos")}
                   />
                 </div>
               </TabsContent>

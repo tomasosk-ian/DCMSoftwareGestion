@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 import { Client } from "~/server/api/routers/clients";
 import { Coin } from "~/server/api/routers/coin";
+import { Cupon } from "~/server/api/routers/cupones";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
@@ -30,9 +31,11 @@ export default function Payment(props: {
   endDate: string;
   setReserves: (reserves: Reserve[]) => void;
   setPagoOk: (pagoOk: boolean) => void;
+  cupon: Cupon | null | undefined;
 }) {
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();
+  const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
   const [transaction, setTransaction] = useState<Transaction>();
@@ -76,6 +79,8 @@ export default function Payment(props: {
                         ...transaction,
                         client: reserve.client,
                       });
+                      if (props.cupon)
+                        useCupon({ identifier: props.cupon.identifier! });
                     }
 
                     return {

@@ -191,6 +191,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   endDate={endDate!}
                   reserves={reserves!}
                   total={total}
+                  setTotal={setTotal}
                   coin={coin!}
                   setCoin={setCoin}
                   coins={coins!}
@@ -237,11 +238,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                             setCheckoutNumber(checkoutNumber);
                           }
                         }
-                        if (cupon) {
-                          useCupon({
-                            codigo: cupon?.identifier,
-                          });
-                        }
                       } catch (error) {
                         console.log(error);
                       }
@@ -271,6 +267,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 sizes={props.sizes}
                 store={store!}
                 total={total}
+                cupon={cupon}
               />
             )}
           </div>

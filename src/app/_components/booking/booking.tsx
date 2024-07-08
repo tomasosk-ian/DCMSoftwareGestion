@@ -24,6 +24,8 @@ export default function Booking(props: {
   endDate: string;
   reserves: Reserve[];
   total: number;
+  setTotal: (total: number) => void;
+
   coin: Coin;
   setCoin: (coin: Coin) => void;
   coins: Coin[];
@@ -33,7 +35,6 @@ export default function Booking(props: {
   const fees = api.fee.get.useQuery();
 
   const [subTotal, setSubTotal] = useState<number>(0);
-  const [total, setTotal] = useState<number>(0);
   const [groupedItems, setGroupedItems] = useState<GroupedItem[]>();
 
   useEffect(() => {
@@ -75,20 +76,20 @@ export default function Booking(props: {
     });
 
     const newTotal = updatedItems.reduce((acc, item) => acc + item.Total, 0);
-    setTotal(newTotal);
+    props.setTotal(newTotal);
     setSubTotal(newTotal);
     setGroupedItems(updatedItems);
   }, []);
 
   useEffect(() => {
     if (props.cupon?.tipo_descuento == "fijo") {
-      const newTotal = total - (props.cupon?.valor_descuento ?? 0);
-      setTotal(newTotal);
+      const newTotal = props.total - (props.cupon?.valor_descuento ?? 0);
+      props.setTotal(newTotal);
     }
     if (props.cupon?.tipo_descuento == "porcentaje") {
       const newTotal =
-        total - (total * (props.cupon?.valor_descuento ?? 0)) / 100;
-      setTotal(newTotal);
+        props.total - (props.total * (props.cupon?.valor_descuento ?? 0)) / 100;
+      props.setTotal(newTotal);
     }
   }, [props.cupon]);
   function daysBetweenDates(date1: string, date2: string): number {
@@ -231,7 +232,7 @@ export default function Booking(props: {
               <p className="font-bold text-black">Total</p>
               <div className="flex items-baseline">
                 <p className="text-xs font-bold text-black"> ARS </p>
-                <p className=" font-bold text-black">{total}</p>
+                <p className=" font-bold text-black">{props.total}</p>
               </div>
             </div>
           </div>
