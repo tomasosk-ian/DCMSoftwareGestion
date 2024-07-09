@@ -40,10 +40,35 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Boxes } from "~/server/api/routers/lockers";
-import { BriefcaseIcon, LockIcon, UnlockIcon } from "lucide-react";
+import { Boxes, Locker } from "~/server/api/routers/lockers";
+import {
+  AlertCircle,
+  BriefcaseIcon,
+  LockIcon,
+  MessageCircleWarningIcon,
+  UnlockIcon,
+} from "lucide-react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Reserves } from "~/server/api/routers/reserves";
+import { api } from "~/trpc/react";
+import { Size } from "~/server/api/routers/sizes";
+
+interface Token {
+  id: number;
+  idLocker: number;
+  idSize: number;
+  idBox: number;
+  token1: string;
+  fechaCreacion: string;
+  fechaInicio: string;
+  fechaFin: string;
+  contador: number;
+  confirmado: boolean;
+  modo: string;
+  idBoxNavigation: null;
+  idLockerNavigation: null;
+  idSizeNavigation: null;
+}
 
 function getDaysFromDateUntilToday(startDate: string): number {
   // Convertimos la fecha de inicio a un objeto Date
@@ -61,15 +86,20 @@ function getDaysFromDateUntilToday(startDate: string): number {
 }
 
 export function DataTableDemo(props: {
-  data: Boxes[];
-  reservas: Reserves | null;
+  data: Locker;
+  reservas: Reserves[] | null;
+  sizes: Size[];
 }) {
+  const { sizes, reservas } = props;
   const columns: ColumnDef<Boxes>[] = [
     {
       accessorKey: "idSize",
       header: "Size",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("idSize")}</div>
+        <div className="capitalize">
+          {sizes &&
+            sizes.find((x: Size) => x.id == row.getValue("idSize"))?.nombre}
+        </div>
       ),
     },
     {
@@ -115,6 +145,50 @@ export function DataTableDemo(props: {
       ),
     },
     {
+      accessorKey: "id",
+      header:
+        // ({ column }) => {
+        //   return (
+        //     <Button
+        //       variant="ghost"
+        //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        //     >
+        //       Email
+        //       <CaretSortIcon className="ml-2 h-4 w-4" />
+        //     </Button>
+        //   );}
+        "",
+      cell: ({ row }) => {
+        console.log("el token es", row.getValue("id"));
+        console.log("el puerta es", row.getValue("puerta"));
+        return (
+          <div className="animate-pulse lowercase">
+            {
+              props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+                ?.token1
+            }
+            {row.getValue("ocupacion") &&
+            (new Date(
+              reservas?.find((r) => {
+                r.Token1?.toString() ==
+                  props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+                    ?.token1;
+              })?.FechaFin ?? "",
+            ) < new Date() ||
+              !reservas?.find((r) => {
+                r.Token1?.toString() ==
+                  props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+                    ?.token1;
+              })?.FechaFin) ? (
+              <AlertCircle color="red" />
+            ) : (
+              ""
+            )}
+          </div>
+        );
+      },
+    },
+    {
       id: "acciones",
       enableHiding: false,
       cell: ({ row }) => {
@@ -139,7 +213,8 @@ export function DataTableDemo(props: {
       },
     },
   ];
-  const { data } = props;
+  const data = props.data.boxes;
+  console.log("props.data.boxes", props.data);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],

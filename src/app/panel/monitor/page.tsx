@@ -17,9 +17,6 @@ export default async function Home() {
   const store = await api.store.get.query();
   const reservas = await api.reserve.get.query();
 
-  if (Array.isArray(lockers)) {
-    lockers.map((x) => console.log("asdasdas", x.status));
-  }
   return (
     <section className="w-full">
       <div className="w-full">
@@ -62,14 +59,7 @@ export default async function Home() {
                           </div>
                         </CardTitle>
 
-                        <BoxContent
-                          boxes={x.boxes!}
-                          reservas={
-                            reservas.find(
-                              (r) => r.NroSerie == x.nroSerieLocker,
-                            )!
-                          }
-                        />
+                        <BoxContent locker={x!} reservas={reservas} />
                       </Card>
                     </div>
                   </CarouselItem>

@@ -2,7 +2,22 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
 
-// Define boxesValidator schema
+const tokenValidator = z.object({
+  id: z.number(),
+  idLocker: z.number(),
+  idSize: z.number(),
+  idBox: z.number().nullable(),
+  token1: z.string(),
+  fechaCreacion: z.string(),
+  fechaInicio: z.string(),
+  fechaFin: z.string(),
+  contador: z.number(),
+  confirmado: z.boolean(),
+  modo: z.string(),
+  idBoxNavigation: z.any().nullable(),
+  idLockerNavigation: z.any().nullable(),
+  idSizeNavigation: z.any().nullable(),
+});
 const boxesValidator = z.object({
   id: z.number(),
   idFisico: z.number(),
@@ -24,7 +39,7 @@ const boxesValidator = z.object({
       profundidad: z.number(),
     })
     .nullable(),
-  tokens: z.array(z.any()),
+  tokens: z.array(tokenValidator), // Use the token schema here
 });
 
 // Define lockerValidator schema
@@ -43,11 +58,12 @@ const lockerValidator = z.object({
       lockers: z.array(z.any()).nullable(),
     })
     .nullable(),
-  tokens: z.array(z.any()).nullable(),
+  tokens: z.array(tokenValidator).nullable().optional(), // Use the token schema here
 });
 
 export type Locker = z.infer<typeof lockerValidator>;
 export type Boxes = z.infer<typeof boxesValidator>;
+export type Token = z.infer<typeof tokenValidator>;
 
 export const lockerRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
@@ -71,7 +87,7 @@ export const lockerRouter = createTRPCRouter({
 
       throw null;
     }
-    console.log("validatedData.data", validatedData.data);
+    // console.log("validatedData.data", validatedData.data);
     return validatedData.data;
   }),
 });

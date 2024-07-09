@@ -38,8 +38,8 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
       )}
       <SidenavSeparator>Administración</SidenavSeparator>
 
-      <SidenavItem icon={<LayoutDashboardIcon />} href="/panel/dashboard">
-        Dashboard
+      <SidenavItem icon={<LayoutDashboardIcon />} href="/panel/monitor">
+        Monitor
       </SidenavItem>
       <SidenavItem icon={<CloudIcon />} disabled={true}>
         Ciudades{" "}
