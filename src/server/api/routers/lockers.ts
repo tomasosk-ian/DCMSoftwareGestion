@@ -87,7 +87,7 @@ export const lockerRouter = createTRPCRouter({
 
       throw null;
     }
-    // console.log("validatedData.data", validatedData.data);
+    console.log("validatedData.data", validatedData.data[0]?.boxes);
     return validatedData.data;
   }),
 });

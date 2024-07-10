@@ -145,6 +145,19 @@ export function DataTableDemo(props: {
       ),
     },
     {
+      accessorKey: "idFisico",
+      header: "ID BOX",
+      cell: ({ row }) => (
+        <div className="capitalize">
+          {
+            row.getValue("idFisico")
+            // props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+            //   ?.
+          }
+        </div>
+      ),
+    },
+    {
       accessorKey: "id",
       header:
         // ({ column }) => {
@@ -159,7 +172,6 @@ export function DataTableDemo(props: {
         //   );}
         "",
       cell: ({ row }) => {
-       
         return (
           <div className="animate-pulse lowercase">
             {/* {
@@ -187,6 +199,7 @@ export function DataTableDemo(props: {
         );
       },
     },
+
     {
       id: "acciones",
       enableHiding: false,
