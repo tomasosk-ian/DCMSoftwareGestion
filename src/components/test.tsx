@@ -159,14 +159,13 @@ export function DataTableDemo(props: {
         //   );}
         "",
       cell: ({ row }) => {
-        console.log("el token es", row.getValue("id"));
-        console.log("el puerta es", row.getValue("puerta"));
+       
         return (
           <div className="animate-pulse lowercase">
-            {
+            {/* {
               props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
                 ?.token1
-            }
+            } */}
             {row.getValue("ocupacion") &&
             (new Date(
               reservas?.find((r) => {
@@ -214,7 +213,6 @@ export function DataTableDemo(props: {
     },
   ];
   const data = props.data.boxes;
-  console.log("props.data.boxes", props.data);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
