@@ -93,6 +93,19 @@ export function DataTableDemo(props: {
   const { sizes, reservas } = props;
   const columns: ColumnDef<Boxes>[] = [
     {
+      accessorKey: "idFisico",
+      header: "ID BOX",
+      cell: ({ row }) => (
+        <div className="capitalize">
+          {
+            row.getValue("idFisico")
+            // props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+            //   ?.
+          }
+        </div>
+      ),
+    },
+    {
       accessorKey: "idSize",
       header: "Size",
       cell: ({ row }) => (
@@ -144,19 +157,7 @@ export function DataTableDemo(props: {
         </div>
       ),
     },
-    {
-      accessorKey: "idFisico",
-      header: "ID BOX",
-      cell: ({ row }) => (
-        <div className="capitalize">
-          {
-            row.getValue("idFisico")
-            // props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-            //   ?.
-          }
-        </div>
-      ),
-    },
+
     {
       accessorKey: "id",
       header:
@@ -172,25 +173,34 @@ export function DataTableDemo(props: {
         //   );}
         "",
       cell: ({ row }) => {
+        console.log(
+          "token",
+
+          props.data.tokens?.find((x) => x.idBox == row.getValue("id"))?.token1,
+        );
+        console.log("reservas", reservas);
+        console.log(
+          "reserva",
+          reservas?.find(
+            (r) =>
+              r.Token1?.toString() ==
+              props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+                ?.token1,
+          )?.identifier,
+        );
         return (
           <div className="animate-pulse lowercase">
-            {/* {
-              props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-                ?.token1
-            } */}
             {row.getValue("ocupacion") &&
             (new Date(
-              reservas?.find((r) => {
-                r.Token1?.toString() ==
-                  props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-                    ?.token1;
-              })?.FechaFin ?? "",
-            ) < new Date() ||
-              !reservas?.find((r) => {
-                r.Token1?.toString() ==
-                  props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-                    ?.token1;
-              })?.FechaFin) ? (
+              props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+                ?.fechaFin ?? "",
+            ).getTime() < new Date().getTime() ||
+              !reservas?.find(
+                (r) =>
+                  r.Token1?.toString() ==
+                  (props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+                    ?.token1 ?? ""),
+              )?.FechaFin) ? (
               <AlertCircle color="red" />
             ) : (
               ""
