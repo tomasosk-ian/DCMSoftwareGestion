@@ -48,6 +48,7 @@ import {
   BriefcaseIcon,
   LockIcon,
   QrCode,
+  RotateCw,
   UnlockIcon,
 } from "lucide-react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
@@ -104,37 +105,38 @@ export function DataTableDemo(props: {
   }, [props.data.tokens]);
 
   function GetQR(props: { idLocker: number; idSize: number; idBox: number }) {
+    const fechaInicio = new Date();
+    fechaInicio.setHours(0, 0, 0, 0);
+
+    const fechaFin = new Date();
+    fechaFin.setHours(23, 59, 59, 999);
+    function post() {
+      const newToken = {
+        idLocker,
+        idSize,
+        idBox,
+        token1: Math.floor(100000 + Math.random() * 900000).toString(),
+        fechaCreacion: formatDate(new Date().toString()),
+        fechaInicio: formatDate(fechaInicio.toString()),
+        fechaFin: formatDate(fechaFin.toString()),
+        contador: 0,
+        cantidad: 1,
+        confirmado: true,
+        modo: "Por cantidad",
+        idBoxNavigation: null,
+        idLockerNavigation: null,
+        idSizeNavigation: null,
+      };
+      postToken({ token: newToken });
+      setGeneratedTokens(new Map(generatedTokens.set(idBox, newToken.token1)));
+      setCurrentToken(newToken.token1);
+    }
     const { idLocker, idSize, idBox } = props;
 
     const handleQRClick = async () => {
-      const fechaInicio = new Date();
-      fechaInicio.setHours(0, 0, 0, 0);
-
-      const fechaFin = new Date();
-      fechaFin.setHours(23, 59, 59, 999);
       const existingToken = generatedTokens.get(idBox);
       if (!existingToken) {
-        const newToken = {
-          idLocker,
-          idSize,
-          idBox,
-          token1: Math.floor(100000 + Math.random() * 900000).toString(),
-          fechaCreacion: formatDate(new Date().toString()),
-          fechaInicio: formatDate(fechaInicio.toString()),
-          fechaFin: formatDate(fechaFin.toString()),
-          contador: 0,
-          cantidad: 1,
-          confirmado: true,
-          modo: "Por cantidad",
-          idBoxNavigation: null,
-          idLockerNavigation: null,
-          idSizeNavigation: null,
-        };
-        await postToken({ token: newToken });
-        setGeneratedTokens(
-          new Map(generatedTokens.set(idBox, newToken.token1)),
-        );
-        setCurrentToken(newToken.token1);
+        post();
       } else {
         setCurrentToken(existingToken);
       }
@@ -155,6 +157,12 @@ export function DataTableDemo(props: {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
+              <div className="pb-4">
+                <RotateCw
+                  className="float-right cursor-pointer "
+                  onClick={async () => post()}
+                />
+              </div>
               <div
                 style={{
                   height: "auto",
@@ -173,7 +181,7 @@ export function DataTableDemo(props: {
               </div>
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <div className="items-center justify-center text-5xl font-bold">
+              <div className="flex w-full items-center justify-center pt-4 text-5xl font-bold">
                 {currentToken}
               </div>
             </AlertDialogDescription>
