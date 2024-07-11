@@ -55,7 +55,7 @@ import { Reserves } from "~/server/api/routers/reserves";
 import { api } from "~/trpc/react";
 import { Size } from "~/server/api/routers/sizes";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   AlertDialog,
@@ -70,19 +70,15 @@ import {
 } from "~/components/ui/alert-dialog";
 
 function getDaysFromDateUntilToday(startDate: string): number {
-  // Convertimos la fecha de inicio a un objeto Date
   const start = new Date(startDate);
-  // Obtenemos la fecha actual
   const today = new Date();
 
-  // Calculamos la diferencia en milisegundos
   const diffInMs = today.getTime() - start.getTime();
-
-  // Convertimos la diferencia de milisegundos a días
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
   return diffInDays;
 }
+
 export function DataTableDemo(props: {
   data: Locker;
   reservas: Reserves[] | null;
@@ -92,25 +88,33 @@ export function DataTableDemo(props: {
 
   const [isOpen, setIsOpen] = useState(false);
   const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [generatedTokens, setGeneratedTokens] = useState<Map<number, string>>(
+    new Map(),
+  );
 
-  function GetQR(props: {
-    idLocker: number;
-    idSize: number;
-    idBox: number;
-    token: string | null;
-  }) {
-    const { idLocker, idSize, idBox, token } = props;
+  useEffect(() => {
+    // Inicializar el estado de los tokens generados desde los datos recibidos
+    const tokenMap = new Map<number, string>();
+    props.data.tokens?.forEach((token) => {
+      if (token.idBox) {
+        tokenMap.set(token.idBox, token.token1);
+      }
+    });
+    setGeneratedTokens(tokenMap);
+  }, [props.data.tokens]);
+
+  function GetQR(props: { idLocker: number; idSize: number; idBox: number }) {
+    const { idLocker, idSize, idBox } = props;
 
     const handleQRClick = async () => {
-      console.log("MAMITA", idLocker, idSize, idBox, token);
       const fechaInicio = new Date();
       fechaInicio.setHours(0, 0, 0, 0);
 
       const fechaFin = new Date();
       fechaFin.setHours(23, 59, 59, 999);
-
-      if (!token) {
-        const newToken: Token = {
+      const existingToken = generatedTokens.get(idBox);
+      if (!existingToken) {
+        const newToken = {
           idLocker,
           idSize,
           idBox,
@@ -125,12 +129,13 @@ export function DataTableDemo(props: {
           idLockerNavigation: null,
           idSizeNavigation: null,
         };
-        await postToken({
-          token: newToken,
-        });
+        await postToken({ token: newToken });
+        setGeneratedTokens(
+          new Map(generatedTokens.set(idBox, newToken.token1)),
+        );
         setCurrentToken(newToken.token1);
       } else {
-        setCurrentToken(token);
+        setCurrentToken(existingToken);
       }
 
       setIsOpen(true);
@@ -140,7 +145,7 @@ export function DataTableDemo(props: {
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
         <AlertDialogTrigger asChild>
           <Button
-            className=" bg-transparent p-1 outline-none hover:bg-transparent "
+            className="bg-transparent p-1 outline-none hover:bg-transparent"
             onClick={handleQRClick}
           >
             <QrCode color="black" />
@@ -181,9 +186,10 @@ export function DataTableDemo(props: {
       </AlertDialog>
     );
   }
-  const router = useRouter();
 
+  const router = useRouter();
   const { sizes, reservas } = props;
+
   const columns: ColumnDef<Boxes>[] = [
     {
       accessorKey: "idFisico",
@@ -197,8 +203,7 @@ export function DataTableDemo(props: {
       header: "Size",
       cell: ({ row }) => (
         <div className="capitalize">
-          {sizes &&
-            sizes.find((x: Size) => x.id == row.getValue("idSize"))?.nombre}
+          {sizes.find((x) => x.id == row.getValue("idSize"))?.nombre}
         </div>
       ),
     },
@@ -223,41 +228,34 @@ export function DataTableDemo(props: {
     {
       accessorKey: "id",
       header: "",
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-center p-0">
-            {row.getValue("ocupacion") &&
-            (new Date(
-              props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-                ?.fechaFin ?? "",
-            ).getTime() < new Date().getTime() ||
-              !reservas?.find(
-                (r) =>
-                  r.Token1?.toString() ==
-                  (props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-                    ?.token1 ?? ""),
-              )?.FechaFin) ? (
-              <div className="flex items-center space-x-5">
-                <div className="animate-pulse lowercase">
-                  <AlertCircle color="red" />
-                </div>
-                <GetQR
-                  idLocker={row.original.idLocker}
-                  idSize={row.getValue("idSize")}
-                  idBox={row.getValue("id")}
-                  token={
-                    props.data.tokens?.find(
-                      (x) => x.idBox == row.getValue("id"),
-                    )?.token1 ?? ""
-                  }
-                />
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center p-0">
+          {row.getValue("ocupacion") &&
+          (new Date(
+            props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+              ?.fechaFin ?? "",
+          ).getTime() < new Date().getTime() ||
+            !reservas?.find(
+              (r) =>
+                r.Token1?.toString() ==
+                (props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
+                  ?.token1 ?? ""),
+            )?.FechaFin) ? (
+            <div className="flex items-center space-x-5">
+              <div className="animate-pulse lowercase">
+                <AlertCircle color="red" />
               </div>
-            ) : (
-              ""
-            )}
-          </div>
-        );
-      },
+              <GetQR
+                idLocker={row.original.idLocker}
+                idSize={row.getValue("idSize")}
+                idBox={row.getValue("id")}
+              />
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
+      ),
     },
     {
       id: "acciones",
@@ -276,7 +274,6 @@ export function DataTableDemo(props: {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Acciones</DropdownMenuLabel>
               <DropdownMenuSeparator />
-
               <DropdownMenuItem
                 disabled={
                   reservas?.find(
@@ -291,15 +288,7 @@ export function DataTableDemo(props: {
                 }
                 onClick={() => {
                   router.push(
-                    `/panel/reservas/${
-                      reservas?.find(
-                        (r) =>
-                          r.Token1?.toString() ==
-                          props.data.tokens?.find(
-                            (x) => x.idBox == row.getValue("id"),
-                          )?.token1,
-                      )?.nReserve
-                    }`,
+                    `/panel/reservas/${reservas?.find((r) => r.Token1?.toString() == props.data.tokens?.find((x) => x.idBox == row.getValue("id"))?.token1)?.nReserve}`,
                   );
                 }}
               >
@@ -311,6 +300,7 @@ export function DataTableDemo(props: {
       },
     },
   ];
+
   const data = props.data.boxes;
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -344,14 +334,6 @@ export function DataTableDemo(props: {
   return (
     <div className="w-full px-4 py-2">
       <div className="flex items-center py-2">
-        {/* <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        /> */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -362,40 +344,36 @@ export function DataTableDemo(props: {
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value: any) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
+              .map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value: any) =>
+                    column.toggleVisibility(!!value)
+                  }
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="w-full rounded-md border ">
+      <div className="w-full rounded-md border">
         <Table className="">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -453,6 +431,7 @@ export function DataTableDemo(props: {
     </div>
   );
 }
+
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toISOString().slice(0, 19);
