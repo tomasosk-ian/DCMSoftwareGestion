@@ -3,41 +3,44 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
 
 const tokenValidator = z.object({
-  idLocker: z.number(),
-  idSize: z.number(),
-  idBox: z.number().nullable(),
-  token1: z.string(),
-  fechaCreacion: z.string(),
-  fechaInicio: z.string(),
-  fechaFin: z.string(),
-  contador: z.number(),
-  confirmado: z.boolean(),
-  modo: z.string(),
-  idBoxNavigation: z.any().nullable(),
-  idLockerNavigation: z.any().nullable(),
-  idSizeNavigation: z.any().nullable(),
+  id: z.number().nullable().optional(),
+  idLocker: z.number().nullable().optional(),
+  idSize: z.number().nullable().optional(),
+  idBox: z.number().nullable().optional(),
+  token1: z.string().nullable().optional(),
+  fechaCreacion: z.string().nullable().optional(),
+  fechaInicio: z.string().nullable().optional(),
+  fechaFin: z.string().nullable().optional(),
+  contador: z.number().nullable().optional(),
+  cantidad: z.number().nullable().optional(),
+  confirmado: z.boolean().nullable().optional(),
+  modo: z.string().nullable().optional(),
+  idBoxNavigation: z.any().nullable().optional(),
+  idLockerNavigation: z.any().nullable().optional(),
+  idSizeNavigation: z.any().nullable().optional(),
 });
 const boxesValidator = z.object({
-  id: z.number(),
-  idFisico: z.number(),
+  id: z.number().nullable().optional(),
+  idFisico: z.number().nullable().optional(),
   idLocker: z.number(),
-  idSize: z.number().nullable(),
-  box1: z.string().nullable(),
-  puerta: z.boolean(),
-  ocupacion: z.boolean(),
-  libre: z.string().nullable(),
-  lastUpdateTime: z.string().nullable(),
-  status: z.string().nullable(),
-  enable: z.boolean(),
+  idSize: z.number().nullable().optional(),
+  box1: z.string().nullable().optional(),
+  puerta: z.boolean().nullable().optional(),
+  ocupacion: z.boolean().nullable().optional(),
+  libre: z.string().nullable().optional(),
+  lastUpdateTime: z.string().nullable().optional(),
+  status: z.string().nullable().optional(),
+  enable: z.boolean().nullable().optional(),
   idSizeNavigation: z
     .object({
-      id: z.number(),
-      nombre: z.string(),
-      alto: z.number(),
-      ancho: z.number(),
-      profundidad: z.number(),
+      id: z.number().nullable().optional(),
+      nombre: z.string().nullable().optional(),
+      alto: z.number().nullable().optional(),
+      ancho: z.number().nullable().optional(),
+      profundidad: z.number().nullable().optional(),
     })
-    .nullable(),
+    .nullable()
+    .optional(),
   tokens: z.array(tokenValidator), // Use the token schema here
 });
 
@@ -45,8 +48,8 @@ const boxesValidator = z.object({
 const lockerValidator = z.object({
   id: z.number(),
   nroSerieLocker: z.string(),
-  lastUpdateTime: z.string().nullable(),
-  status: z.string().nullable(),
+  lastUpdateTime: z.string().nullable().optional(),
+  status: z.string().nullable().nullable().optional(),
   boxes: z.array(boxesValidator),
   empresaNavigation: z
     .object({
@@ -56,7 +59,9 @@ const lockerValidator = z.object({
       tokenEmpresa: z.string(),
       lockers: z.array(z.any()).nullable(),
     })
-    .nullable(),
+    .nullable()
+    .nullable()
+    .optional(),
   tokens: z.array(tokenValidator).nullable().optional(), // Use the token schema here
 });
 
@@ -66,6 +71,10 @@ export type Token = z.infer<typeof tokenValidator>;
 
 export const lockerRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
+    console.log(
+      "sizeResponsssssse",
+      `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
+    );
     const sizeResponse = await fetch(
       `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
     );
@@ -86,7 +95,7 @@ export const lockerRouter = createTRPCRouter({
 
       throw null;
     }
-    console.log("validatedData.data", validatedData.data[0]?.tokens);
+    console.log("validatedData.data", validatedData.data[0]?.boxes);
     return validatedData.data;
   }),
 });

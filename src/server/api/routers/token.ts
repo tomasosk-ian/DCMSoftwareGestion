@@ -11,6 +11,7 @@ const tokenValidator = z.object({
   fechaInicio: z.string().nullable(),
   fechaFin: z.string().nullable(),
   contador: z.number().nullable(),
+  cantidad: z.number().nullable(),
   confirmado: z.boolean().nullable(),
   modo: z.string().nullable(),
   idBoxNavigation: z.any().nullable(),

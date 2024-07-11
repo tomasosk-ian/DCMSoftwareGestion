@@ -97,7 +97,7 @@ export function DataTableDemo(props: {
     const tokenMap = new Map<number, string>();
     props.data.tokens?.forEach((token) => {
       if (token.idBox) {
-        tokenMap.set(token.idBox, token.token1);
+        tokenMap.set(token.idBox, token.token1!);
       }
     });
     setGeneratedTokens(tokenMap);
@@ -123,8 +123,9 @@ export function DataTableDemo(props: {
           fechaInicio: formatDate(fechaInicio.toString()),
           fechaFin: formatDate(fechaFin.toString()),
           contador: 0,
+          cantidad: 1,
           confirmado: true,
-          modo: "Por fecha",
+          modo: "Por cantidad",
           idBoxNavigation: null,
           idLockerNavigation: null,
           idSizeNavigation: null,
