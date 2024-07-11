@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import QRCode from "react-qr-code";
+
 import {
   CaretSortIcon,
   ChevronDownIcon,
@@ -40,35 +42,32 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Boxes, Locker } from "~/server/api/routers/lockers";
+import { Boxes, Locker, Token } from "~/server/api/routers/lockers";
 import {
   AlertCircle,
   BriefcaseIcon,
   LockIcon,
-  MessageCircleWarningIcon,
+  QrCode,
   UnlockIcon,
 } from "lucide-react";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Reserves } from "~/server/api/routers/reserves";
 import { api } from "~/trpc/react";
 import { Size } from "~/server/api/routers/sizes";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-interface Token {
-  id: number;
-  idLocker: number;
-  idSize: number;
-  idBox: number;
-  token1: string;
-  fechaCreacion: string;
-  fechaInicio: string;
-  fechaFin: string;
-  contador: number;
-  confirmado: boolean;
-  modo: string;
-  idBoxNavigation: null;
-  idLockerNavigation: null;
-  idSizeNavigation: null;
-}
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 
 function getDaysFromDateUntilToday(startDate: string): number {
   // Convertimos la fecha de inicio a un objeto Date
@@ -84,25 +83,113 @@ function getDaysFromDateUntilToday(startDate: string): number {
 
   return diffInDays;
 }
-
 export function DataTableDemo(props: {
   data: Locker;
   reservas: Reserves[] | null;
   sizes: Size[];
 }) {
+  const { mutateAsync: postToken } = api.token.post.useMutation();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentToken, setCurrentToken] = useState<string | null>(null);
+
+  function GetQR(props: {
+    idLocker: number;
+    idSize: number;
+    idBox: number;
+    token: string | null;
+  }) {
+    const { idLocker, idSize, idBox, token } = props;
+
+    const handleQRClick = async () => {
+      console.log("MAMITA", idLocker, idSize, idBox, token);
+      const fechaInicio = new Date();
+      fechaInicio.setHours(0, 0, 0, 0);
+
+      const fechaFin = new Date();
+      fechaFin.setHours(23, 59, 59, 999);
+
+      if (!token) {
+        const newToken: Token = {
+          idLocker,
+          idSize,
+          idBox,
+          token1: Math.floor(100000 + Math.random() * 900000).toString(),
+          fechaCreacion: formatDate(new Date().toString()),
+          fechaInicio: formatDate(fechaInicio.toString()),
+          fechaFin: formatDate(fechaFin.toString()),
+          contador: 0,
+          confirmado: true,
+          modo: "Por fecha",
+          idBoxNavigation: null,
+          idLockerNavigation: null,
+          idSizeNavigation: null,
+        };
+        await postToken({
+          token: newToken,
+        });
+        setCurrentToken(newToken.token1);
+      } else {
+        setCurrentToken(token);
+      }
+
+      setIsOpen(true);
+    };
+
+    return (
+      <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+        <AlertDialogTrigger asChild>
+          <Button
+            className=" bg-transparent p-1 outline-none hover:bg-transparent "
+            onClick={handleQRClick}
+          >
+            <QrCode color="black" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div
+                style={{
+                  height: "auto",
+                  margin: "0 auto",
+                  maxWidth: 128,
+                  width: "100%",
+                }}
+              >
+                <QRCode
+                  className="w-full"
+                  size={512}
+                  style={{ height: "auto", width: "100%" }}
+                  value={currentToken ?? ""}
+                  viewBox={`0 0 512 512`}
+                />
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="items-center justify-center text-5xl font-bold">
+                {currentToken}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsOpen(false)}>
+              Aceptar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+  const router = useRouter();
+
   const { sizes, reservas } = props;
   const columns: ColumnDef<Boxes>[] = [
     {
       accessorKey: "idFisico",
       header: "ID BOX",
       cell: ({ row }) => (
-        <div className="capitalize">
-          {
-            row.getValue("idFisico")
-            // props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-            //   ?.
-          }
-        </div>
+        <div className="capitalize">{row.getValue("idFisico")}</div>
       ),
     },
     {
@@ -117,79 +204,28 @@ export function DataTableDemo(props: {
     },
     {
       accessorKey: "ocupacion",
-      header:
-        // ({ column }) => {
-        //   return (
-        //     <Button
-        //       variant="ghost"
-        //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        //     >
-        //       Email
-        //       <CaretSortIcon className="ml-2 h-4 w-4" />
-        //     </Button>
-        //   );}
-        "Ocupación",
+      header: "Ocupación",
       cell: ({ row }) => (
         <div className="lowercase">
-          {" "}
           {row.getValue("ocupacion") ? <BriefcaseIcon /> : ""}
         </div>
       ),
     },
     {
       accessorKey: "puerta",
-      header:
-        // ({ column }) => {
-        //   return (
-        //     <Button
-        //       variant="ghost"
-        //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        //     >
-        //       Email
-        //       <CaretSortIcon className="ml-2 h-4 w-4" />
-        //     </Button>
-        //   );}
-        "Puerta",
+      header: "Puerta",
       cell: ({ row }) => (
         <div className="lowercase">
-          {" "}
           {row.getValue("puerta") ? <LockIcon /> : <UnlockIcon />}
         </div>
       ),
     },
-
     {
       accessorKey: "id",
-      header:
-        // ({ column }) => {
-        //   return (
-        //     <Button
-        //       variant="ghost"
-        //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        //     >
-        //       Email
-        //       <CaretSortIcon className="ml-2 h-4 w-4" />
-        //     </Button>
-        //   );}
-        "",
+      header: "",
       cell: ({ row }) => {
-        console.log(
-          "token",
-
-          props.data.tokens?.find((x) => x.idBox == row.getValue("id"))?.token1,
-        );
-        console.log("reservas", reservas);
-        console.log(
-          "reserva",
-          reservas?.find(
-            (r) =>
-              r.Token1?.toString() ==
-              props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-                ?.token1,
-          )?.identifier,
-        );
         return (
-          <div className="animate-pulse lowercase">
+          <div className="flex items-center justify-center p-0">
             {row.getValue("ocupacion") &&
             (new Date(
               props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
@@ -201,7 +237,21 @@ export function DataTableDemo(props: {
                   (props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
                     ?.token1 ?? ""),
               )?.FechaFin) ? (
-              <AlertCircle color="red" />
+              <div className="flex items-center space-x-5">
+                <div className="animate-pulse lowercase">
+                  <AlertCircle color="red" />
+                </div>
+                <GetQR
+                  idLocker={row.original.idLocker}
+                  idSize={row.getValue("idSize")}
+                  idBox={row.getValue("id")}
+                  token={
+                    props.data.tokens?.find(
+                      (x) => x.idBox == row.getValue("id"),
+                    )?.token1 ?? ""
+                  }
+                />
+              </div>
             ) : (
               ""
             )}
@@ -209,7 +259,6 @@ export function DataTableDemo(props: {
         );
       },
     },
-
     {
       id: "acciones",
       enableHiding: false,
@@ -227,8 +276,35 @@ export function DataTableDemo(props: {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Acciones</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Ver locker</DropdownMenuItem>
-              <DropdownMenuItem>Ver última reserva</DropdownMenuItem>
+
+              <DropdownMenuItem
+                disabled={
+                  reservas?.find(
+                    (r) =>
+                      r.Token1?.toString() ==
+                      (props.data.tokens?.find(
+                        (x) => x.idBox == row.getValue("id"),
+                      )?.token1 ?? ""),
+                  )?.identifier
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  router.push(
+                    `/panel/reservas/${
+                      reservas?.find(
+                        (r) =>
+                          r.Token1?.toString() ==
+                          props.data.tokens?.find(
+                            (x) => x.idBox == row.getValue("id"),
+                          )?.token1,
+                      )?.nReserve
+                    }`,
+                  );
+                }}
+              >
+                Ver última reserva
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -236,17 +312,14 @@ export function DataTableDemo(props: {
     },
   ];
   const data = props.data.boxes;
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [pagination, setPagination] = React.useState<PaginationState>({
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 5,
   });
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
   const table = useReactTable({
     data,
     columns,
@@ -271,14 +344,14 @@ export function DataTableDemo(props: {
   return (
     <div className="w-full px-4 py-2">
       <div className="flex items-center py-2">
-        <Input
+        {/* <Input
           placeholder="Filter emails..."
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("email")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
-        />
+        /> */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -379,4 +452,8 @@ export function DataTableDemo(props: {
       </div>
     </div>
   );
+}
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toISOString().slice(0, 19);
 }

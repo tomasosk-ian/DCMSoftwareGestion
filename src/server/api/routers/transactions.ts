@@ -19,6 +19,8 @@ export const transactionRouter = createTRPCRouter({
       z.object({
         confirm: z.boolean().nullable().optional(),
         client: z.string().nullable().optional(),
+        nReserve: z.number().nullable().optional(),
+        amount: z.number().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -29,6 +31,8 @@ export const transactionRouter = createTRPCRouter({
       await db.insert(schema.transactions).values({
         confirm: input.confirm,
         client: input.client,
+        amount: input.amount,
+        nReserve: input.nReserve,
       });
 
       return { identifier };
@@ -44,6 +48,18 @@ export const transactionRouter = createTRPCRouter({
         where: eq(schema.transactions.id, input.Id),
       });
 
+      return channel;
+    }),
+  getBynroReserve: publicProcedure
+    .input(
+      z.object({
+        nReserve: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const channel = await db.query.transactions.findFirst({
+        where: eq(schema.transactions.nReserve, input.nReserve),
+      });
       return channel;
     }),
   change: publicProcedure

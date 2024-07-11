@@ -57,8 +57,9 @@ export default function Payment(props: {
           window.MobbexEmbed.close();
         },
         onPayment: async (data: any) => {
+          console.log("data.data", data.data);
           statusCode = parseInt(data.data.status.code);
-
+          const IdTransaction = parseInt(data.data.status.code);
           if (statusCode == 200) {
             try {
               props.setLoadingPay(true);
@@ -68,6 +69,7 @@ export default function Payment(props: {
                   if (reserve.IdTransaction) {
                     const response = await confirmarBox({
                       idToken: reserve.IdTransaction!,
+                      nReserve: props.nReserve,
                     });
                     if (response) {
                       token.push([
@@ -78,6 +80,8 @@ export default function Payment(props: {
                       await createTransaction({
                         ...transaction,
                         client: reserve.client,
+                        amount: props.total,
+                        nReserve: props.nReserve,
                       });
                       if (props.cupon)
                         useCupon({ identifier: props.cupon.identifier! });
@@ -86,6 +90,8 @@ export default function Payment(props: {
                     return {
                       ...reserve,
                       Token1: response,
+                      idToken: reserve.IdTransaction!,
+                      nReserve: props.nReserve,
                     };
                   } else {
                     return reserve;

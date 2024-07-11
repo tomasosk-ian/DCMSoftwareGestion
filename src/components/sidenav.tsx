@@ -6,7 +6,7 @@ export default function Sidenav(props: { children: React.ReactNode }) {
 }
 
 export function SidenavSeparator(props: { children: React.ReactNode }) {
-  return <li className="px-4 pt-3 text-sm font-medium">{props.children}</li>;
+  return <li className="px-4 pt-2 text-sm font-medium">{props.children}</li>;
 }
 
 export function SidenavItem(props: {
@@ -48,7 +48,7 @@ export function SidenavItem(props: {
       </li>
     );
   } else {
-    const className = `w-full flex gap-2 px-3 py-2 items-center
+    const className = `w-full flex gap-2 px-3 py-1 items-center
     opacity-75`;
 
     const content = (

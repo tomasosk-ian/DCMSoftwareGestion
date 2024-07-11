@@ -6,28 +6,8 @@ import ReservesComponent from "./reserves-component";
 import { Reserves } from "~/server/api/routers/reserves";
 
 export default async function Home() {
-  const activesReserves = (await api.reserve.getActive.query()).reduce(
-    (acc, reserve) => {
-      const { client } = reserve;
-      if (!acc[client!]) {
-        acc[client!] = [];
-      }
-      acc[client!]!.push(reserve);
-      return acc;
-    },
-    {} as Record<number, Reserves[]>,
-  );
-  const allReserves = (await api.reserve.get.query()).reduce(
-    (acc, reserve) => {
-      const { client } = reserve;
-      if (!acc[client!]) {
-        acc[client!] = [];
-      }
-      acc[client!]!.push(reserve);
-      return acc;
-    },
-    {} as Record<number, Reserves[]>,
-  );
+  const activesReserves = await api.reserve.getActive.query();
+  const allReserves = await api.reserve.get.query();
   return (
     <section className="space-y-2">
       <div className="flex justify-between">

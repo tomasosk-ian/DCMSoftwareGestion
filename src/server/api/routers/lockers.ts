@@ -3,7 +3,6 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
 
 const tokenValidator = z.object({
-  id: z.number(),
   idLocker: z.number(),
   idSize: z.number(),
   idBox: z.number().nullable(),
@@ -87,7 +86,7 @@ export const lockerRouter = createTRPCRouter({
 
       throw null;
     }
-    console.log("validatedData.data", validatedData.data[0]?.boxes);
+    console.log("validatedData.data", validatedData.data[0]?.tokens);
     return validatedData.data;
   }),
 });

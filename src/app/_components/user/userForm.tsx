@@ -123,9 +123,9 @@ export default function UserForm(props: {
           }}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Elija un prefijo" />
+            <SelectValue placeholder="Seleccione" />
           </SelectTrigger>
-          <SelectContent className="max-h-60 overflow-auto">
+          <SelectContent className="max-h-60 w-64">
             <SelectGroup>
               <SelectLabel>Prefijos</SelectLabel>
               {phones?.map((item) => (

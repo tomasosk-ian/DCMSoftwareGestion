@@ -62,10 +62,12 @@ export const storesRelations = relations(stores, ({ one }) => ({
 export const transactions = sqliteTable(
   "test_transactions",
   {
-    id: integer("number").primaryKey().primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().primaryKey({ autoIncrement: true }),
     confirm: integer("confirm", { mode: "boolean" }).default(false),
     confirmedAt: text("confirmedAt").default(sql`(CURRENT_DATE)`),
     client: text("client", { length: 255 }),
+    amount: integer("amount"),
+    nReserve: integer("nReserve"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.id),
@@ -114,6 +116,7 @@ export const reservas = sqliteTable(
     Cantidad: integer("Cantidad"),
     IdTransaction: integer("IdTransaction"),
     client: integer("client"),
+    nReserve: integer("nReserve"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),

@@ -188,7 +188,14 @@ export default function ReservesComponent(props: {
                   <TableBody>
                     {table.getRowModel().rows?.length ? (
                       table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.original[1][0]?.clients?.identifier}>
+                        <TableRow
+                          key={row.original[1][0]?.clients?.identifier}
+                          onClick={() =>
+                            router.push(
+                              `/panel/reservas/${row.original[1][0]?.nReserve}`,
+                            )
+                          }
+                        >
                           {row.getVisibleCells().map((cell) => (
                             <TableCell key={cell.id}>
                               {flexRender(
@@ -307,7 +314,7 @@ export default function ReservesComponent(props: {
                           key={row.original[1][0]?.clients?.identifier}
                           onClick={() =>
                             router.push(
-                              `/panel/reservas/${row.original[1][0]?.client}`,
+                              `/panel/reservas/${row.original[1][0]?.nReserve}`,
                             )
                           }
                         >

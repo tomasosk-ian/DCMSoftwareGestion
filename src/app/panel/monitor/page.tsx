@@ -15,7 +15,7 @@ import { BriefcaseIcon, Power, Zap, ZapOff } from "lucide-react";
 export default async function Home() {
   const lockers = await api.locker.get.query();
   const store = await api.store.get.query();
-  const reservas = await api.reserve.get.query();
+  const reservas = await api.reserve.list.query();
 
   return (
     <section className="w-full">

@@ -45,6 +45,7 @@ export const lockerReserveRouter = createTRPCRouter({
         Cantidad: z.number().optional(),
         IdTransaction: z.number().optional(),
         client: z.string().nullable().optional(),
+        nReserve: z.number().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -90,6 +91,7 @@ export const lockerReserveRouter = createTRPCRouter({
         Cantidad: input.Cantidad,
         IdTransaction: reservedBoxData,
         client: client?.identifier,
+        nReserve: input.nReserve,
       });
       return reservedBoxData;
     }),
@@ -98,10 +100,10 @@ export const lockerReserveRouter = createTRPCRouter({
     .input(
       z.object({
         idToken: z.number(),
+        nReserve: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
-      console.log("input.idToken", input.idToken);
       const reservationResponse = await fetch(
         `${env.SERVER_URL}/api/token/confirmar`,
         {
@@ -125,7 +127,7 @@ export const lockerReserveRouter = createTRPCRouter({
       const reservedBoxData = await reservationResponse.json();
       await db
         .update(schema.reservas)
-        .set({ Token1: reservedBoxData })
+        .set({ Token1: reservedBoxData, nReserve: input.nReserve })
         .where(eq(schema.reservas.IdTransaction, input.idToken));
       return reservedBoxData;
     }),

@@ -57,6 +57,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.52.0",
+    "react-qr-code": "^2.0.15",
     "react-to-pdf": "^1.0.1",
     "server-only": "^0.0.1",
     "sonner": "^1.4.41",
