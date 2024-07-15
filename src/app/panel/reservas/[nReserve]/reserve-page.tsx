@@ -66,17 +66,17 @@ export default function ReservePage(props: {
           </div>
           <div className="flex justify-between bg-gray-100 px-8 pb-2 pt-1">
             <div className="  ">
-              <p className=" text-xxs mb-0">Nombre y Apellido</p>
+              <p className=" mb-0 text-xxs">Nombre y Apellido</p>
 
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {reserve[0]!.clients?.name} {reserve[0]!.clients?.surname}
               </p>
-              <p className=" text-xxs mb-0 mt-3">Email</p>
+              <p className=" mb-0 mt-3 text-xxs">Email</p>
 
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {reserve[0]!.clients?.email}
               </p>
-              <p className=" text-xxs   mt-3">Telefono</p>
+              <p className=" mt-3   text-xxs">Telefono</p>
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {reserve[0]!.clients?.telefono}
               </p>
@@ -84,26 +84,26 @@ export default function ReservePage(props: {
 
             <div className="">
               {" "}
-              <p className=" text-xxs mb-0">Locker </p>
+              <p className=" mb-0 text-xxs">Locker </p>
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {reserve[0]!.NroSerie}
               </p>
-              <p className=" text-xxs mb-0 mt-3">Local </p>
+              <p className=" mb-0 mt-3 text-xxs">Local </p>
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {store?.name}
               </p>{" "}
             </div>
 
             <div className="  ">
-              <p className=" text-xxs mb-0 ">Organización </p>
+              <p className=" mb-0 text-xxs ">Organización </p>
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {store?.organizationName}
               </p>
-              <p className=" text-xxs mb-0 mt-3">Fecha inicio </p>
+              <p className=" mb-0 mt-3 text-xxs">Fecha inicio </p>
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {formatDateToTextDate(reserve[0]!.FechaInicio ?? "")}
               </p>{" "}
-              <p className=" text-xxs mb-0 mt-3">Fecha fin </p>
+              <p className=" mb-0 mt-3 text-xxs">Fecha fin </p>
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {formatDateToTextDate(reserve[0]!.FechaFin ?? "")}
               </p>
@@ -140,7 +140,7 @@ export default function ReservePage(props: {
           </div>
         </div>
       </section>
-      <DeleteReserve nReserve={reserve[0]!.nReserve!}></DeleteReserve>
+      {/* <DeleteReserve nReserve={reserve[0]!.nReserve!}></DeleteReserve> */}
     </LayoutContainer>
   );
 }
