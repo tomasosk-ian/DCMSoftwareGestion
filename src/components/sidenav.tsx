@@ -6,7 +6,7 @@ export default function Sidenav(props: { children: React.ReactNode }) {
 }
 
 export function SidenavSeparator(props: { children: React.ReactNode }) {
-  return <li className="px-4 pt-3 text-sm font-medium">{props.children}</li>;
+  return <li className="px-4 pt-2 text-sm font-medium">{props.children}</li>;
 }
 
 export function SidenavItem(props: {
@@ -16,9 +16,8 @@ export function SidenavItem(props: {
   onClick?: () => void;
   disabled?: boolean;
 }) {
-  console.log(props.disabled);
-  if (props.disabled || props.disabled == undefined) {
-    const className = `w-full flex gap-2 px-3 py-2 items-center
+  if (!props.disabled || props.disabled == undefined) {
+    const className = `w-full flex gap-2 px-3 py-1 items-center
     hover:bg-stone-100 dark:hover:bg-stone-900
     active:bg-stone-200 dark:active:bg-stone-800`;
 
@@ -49,7 +48,7 @@ export function SidenavItem(props: {
       </li>
     );
   } else {
-    const className = `w-full flex gap-2 px-3 py-2 items-center
+    const className = `w-full flex gap-2 px-3 py-1 items-center
     opacity-75`;
 
     const content = (

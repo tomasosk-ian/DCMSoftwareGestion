@@ -16,10 +16,13 @@ import { Label } from "~/components/ui/label";
 import { Client } from "~/server/api/routers/clients";
 import { countries } from "countries-list";
 import { Checkbox } from "~/components/ui/checkbox";
+import { api } from "~/trpc/react";
+import { Cupon } from "~/server/api/routers/cupones";
 
 export default function UserForm(props: {
   client: Client;
   setClient: (client: Client) => void;
+  setCupon: (cupon: Cupon) => void;
   errors: {
     name: string;
     surname: string;
@@ -39,11 +42,13 @@ export default function UserForm(props: {
   terms: boolean;
   setTerms: (terms: boolean) => void;
 }) {
+  const { mutateAsync: useCupon } = api.cupones.getByCode.useMutation();
   const [phones, setPhones] = useState<Record<string, number>[]>();
-
+  const [discount, setDiscount] = useState<string>("");
+  const [discountCode, setDiscountCode] = useState<string>("");
+  const [applyButton, setApplyButton] = useState<boolean>();
   useEffect(() => {
     const phoneNumbers: Record<string, number>[] = [];
-
     Object.entries(countries).forEach(([countryCode, countryData]) => {
       const { phone } = countryData;
       if (countryCode === "AR") {
@@ -61,6 +66,16 @@ export default function UserForm(props: {
     props.setClient({ ...props.client, [name]: value });
     props.setErrors({ ...props.errors, [name]: "" });
   };
+  function applyDiscount() {
+    const response = useCupon({
+      codigo: discountCode,
+    }).then((cupon) => {
+      if (cupon) {
+        props.setCupon(cupon);
+        setApplyButton(true);
+      }
+    });
+  }
 
   return (
     <div className="grid grid-cols-1 gap-4 rounded-lg bg-[#F0F0F0] p-6 shadow-md md:grid-cols-12 md:px-3 md:py-6">
@@ -108,9 +123,9 @@ export default function UserForm(props: {
           }}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Elija un prefijo" />
+            <SelectValue placeholder="Seleccione" />
           </SelectTrigger>
-          <SelectContent className="max-h-60 overflow-auto">
+          <SelectContent className="max-h-60 w-64">
             <SelectGroup>
               <SelectLabel>Prefijos</SelectLabel>
               {phones?.map((item) => (
@@ -154,8 +169,16 @@ export default function UserForm(props: {
         <Input
           className="flex-grow rounded-l-md rounded-r-none border-2 border-r-0 border-buttonPick px-2 focus:border-buttonHover focus:ring-0"
           placeholder="Aplicar cupón de descuento"
+          value={discountCode}
+          onChange={(e) => {
+            setDiscountCode(e.target.value);
+          }}
         />
-        <Button className="rounded-l-none rounded-r-md border-2 border-l-0 border-buttonPick bg-buttonPick text-white hover:bg-buttonHover">
+        <Button
+          className="rounded-l-none rounded-r-md border-2 border-l-0 border-buttonPick bg-buttonPick text-white hover:bg-buttonHover"
+          onClick={applyDiscount}
+          disabled={applyButton}
+        >
           Aplicar
         </Button>
       </div>

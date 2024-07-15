@@ -5,7 +5,6 @@ import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 
-z;
 const getClientByEmail = async (email: string) => {
   const client = await db.query.clients.findFirst({
     where: eq(schema.clients.email, email),
@@ -46,9 +45,11 @@ export const lockerReserveRouter = createTRPCRouter({
         Cantidad: z.number().optional(),
         IdTransaction: z.number().optional(),
         client: z.string().nullable().optional(),
+        nReserve: z.number().optional(),
       }),
     )
     .mutation(async ({ input }) => {
+      console.log(`${env.SERVER_URL}/api/token/reservar/${input.NroSerie}`);
       const reservationResponse = await fetch(
         `${env.SERVER_URL}/api/token/reservar/${input.NroSerie}`,
         {
@@ -60,6 +61,18 @@ export const lockerReserveRouter = createTRPCRouter({
           body: JSON.stringify(input),
         },
       );
+
+      // Handle the response from the external API
+      if (!reservationResponse.ok) {
+        // Extract the error message from the response
+        const errorResponse = await reservationResponse.json();
+        console.log(errorResponse);
+        // Throw an error or return the error message
+        return errorResponse.message || "Unknown error";
+      } else {
+      }
+
+      const reservedBoxData = await reservationResponse.json();
 
       const client = await getClientByEmail(input.client!);
       const identifier = createId();
@@ -76,22 +89,10 @@ export const lockerReserveRouter = createTRPCRouter({
         Confirmado: input.Confirmado,
         Modo: input.Modo,
         Cantidad: input.Cantidad,
-        IdTransaction: input.IdTransaction,
+        IdTransaction: reservedBoxData,
         client: client?.identifier,
+        nReserve: input.nReserve,
       });
-
-      // Handle the response from the external API
-      if (!reservationResponse.ok) {
-        // Extract the error message from the response
-        const errorResponse = await reservationResponse.json();
-        console.log(errorResponse);
-        // Throw an error or return the error message
-        return errorResponse.message || "Unknown error";
-      } else {
-      }
-
-      const reservedBoxData = await reservationResponse.json();
-
       return reservedBoxData;
     }),
 
@@ -99,11 +100,12 @@ export const lockerReserveRouter = createTRPCRouter({
     .input(
       z.object({
         idToken: z.number(),
+        nReserve: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
       const reservationResponse = await fetch(
-        `http://168.205.92.83:8000/api/token/confirmar`,
+        `${env.SERVER_URL}/api/token/confirmar`,
         {
           method: "POST",
           headers: {
@@ -123,6 +125,10 @@ export const lockerReserveRouter = createTRPCRouter({
         return errorResponse.message || "Unknown error";
       }
       const reservedBoxData = await reservationResponse.json();
+      await db
+        .update(schema.reservas)
+        .set({ Token1: reservedBoxData, nReserve: input.nReserve })
+        .where(eq(schema.reservas.IdTransaction, input.idToken));
       return reservedBoxData;
     }),
   assignClientToReserve: publicProcedure

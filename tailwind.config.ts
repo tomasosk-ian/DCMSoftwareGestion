@@ -64,6 +64,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontSize: {
+        xxs: "0.625rem", // 10px
+      },
       keyframes: {
         "accordion-down": {
           from: { height: 0 },
@@ -77,6 +80,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        blink: "blink 1s step-start infinite",
       },
     },
   },

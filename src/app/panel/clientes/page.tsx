@@ -4,7 +4,6 @@ import { api } from "~/trpc/server";
 
 export default async function Home() {
   const clientes = await api.client.getByEmail.query();
-  console.log(clientes);
   return (
     <section className="space-y-2">
       <div className="flex justify-between">

@@ -28,6 +28,7 @@ import { useState } from "react";
 import UserForm from "./user/userForm";
 import { env } from "process";
 import ButtonCustomComponent from "~/components/buttonCustom";
+import { Cupon } from "~/server/api/routers/cupones";
 
 export const Icons = {
   spinner: Loader2,
@@ -43,6 +44,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [reserva, setReserva] = useState<boolean>(false);
   const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [days, setDays] = useState<number>(0);
+  const [cupon, setCupon] = useState<Cupon>();
   const { mutateAsync: reservarBox } =
     api.lockerReserve.reserveBox.useMutation();
   const storess = api.store.get.useQuery();
@@ -69,6 +71,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const { mutateAsync: test } = api.mobbex.test.useMutation();
   const { data: coins } = api.coin.get.useQuery();
   const [terms, setTerms] = useState<boolean>();
+  const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
 
   const [errors, setErrors] = useState({
     name: "",
@@ -126,8 +129,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   }
   return (
     <div className="container absolute">
-      <div className="grid grid-cols-3 justify-items-center gap-4	"></div>
-      <div className="flex flex-col items-center justify-center pt-2">
+      <Badge>TESTING</Badge> {failedResponse && <AlertFailedResponse />}
+      {}
+      <div className="flex flex-col items-center justify-center ">
         <StoreSelector
           stores={storess.data}
           store={store}
@@ -168,7 +172,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
         {sizeSelected && !reserva && !loadingPay && (
           <div>
-            <div className="flex flex-col items-center space-y-10 lg:flex-row lg:space-x-10 lg:space-y-0">
+            <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
               <div className="w-full lg:w-auto">
                 <UserForm
                   client={client}
@@ -177,6 +181,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   setErrors={setErrors}
                   terms={terms!}
                   setTerms={setTerms}
+                  setCupon={setCupon}
                 />
               </div>
               <div className="w-full lg:w-auto">
@@ -186,43 +191,52 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   endDate={endDate!}
                   reserves={reserves!}
                   total={total}
+                  setTotal={setTotal}
                   coin={coin!}
                   setCoin={setCoin}
                   coins={coins!}
                   sizes={props.sizes}
+                  cupon={cupon}
                 />
                 <div className="flex justify-end py-2">
                   <ButtonCustomComponent
                     text={"Continuar al pago"}
                     onClick={async () => {
                       try {
+                        let failed = false;
                         if (handleSubmit()) {
                           const clientResponse = await createClient(
                             client,
-                          ).then((res: any) => {
-                            reserves.map(async (reserve: Reserve) => {
-                              reserve.client = client.email;
-                              const response = parseInt(
-                                await reservarBox(reserve),
-                              );
-                              if (!isNaN(response)) {
-                                reserve.IdTransaction = response;
-                              }
-                            });
+                          ).then(async (res: any) => {
+                            await Promise.all(
+                              reserves.map(async (reserve: Reserve) => {
+                                reserve.client = client.email;
+                                const response = parseInt(
+                                  await reservarBox(reserve),
+                                );
+                                if (!isNaN(response)) {
+                                  reserve.IdTransaction = response;
+                                } else {
+                                  failed = true;
+                                  setFailedResponse(true);
+                                }
+                              }),
+                            );
+
                             return res;
                           });
-                          setNReserve(clientResponse.id);
-                          setReserva(true);
-                          const checkoutNumber = await test({
-                            amount: total,
-                            reference: clientResponse.id.toString(),
-                            mail: client.email!,
-                            name: client.name!,
-                            identification: client.identifier!,
-                          });
-                          console.log("--------------------------");
-                          console.log(checkoutNumber);
-                          setCheckoutNumber(checkoutNumber);
+                          if (!failed) {
+                            setNReserve(clientResponse.id);
+                            setReserva(true);
+                            const checkoutNumber = await test({
+                              amount: total,
+                              reference: clientResponse.id.toString(),
+                              mail: client.email!,
+                              name: client.name!,
+                              identification: client.identifier!,
+                            });
+                            setCheckoutNumber(checkoutNumber);
+                          }
                         }
                       } catch (error) {
                         console.log(error);
@@ -253,6 +267,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 sizes={props.sizes}
                 store={store!}
                 total={total}
+                cupon={cupon}
               />
             )}
           </div>

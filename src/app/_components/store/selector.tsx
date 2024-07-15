@@ -18,30 +18,35 @@ export default function storeSelector(props: {
     return <Title>No hay locales disponibles.</Title>;
   } else {
     return (
-      <main className="flex justify-center">
+      <main className="flex justify-center sm:p-4 md:p-6 lg:p-8">
         {!props.store && (
-          <div className="container flex flex-col items-center justify-center gap-6 ">
-            <h2 className="text-3xl font-semibold">
+          <div className="container flex flex-col items-center justify-center gap-4 sm:gap-6">
+            <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl">
               Selecciona tu local favorito.
             </h2>
-            <div className="grid grid-cols-4 gap-4 ">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
               {props.stores?.map((store) => {
                 return (
                   <Card
-                    className="grid w-[35vh] space-y-0 overflow-hidden p-0 shadow-xl"
+                    className="w-full max-w-xs cursor-pointer overflow-hidden p-0 shadow-xl"
                     onClick={() => {
                       props.setStore(store);
                     }}
                     key={store.identifier}
                   >
-                    <CardHeader className="space-y-0 p-2">
-                      <CardTitle className="text-2xl">{store.name}</CardTitle>
-                      <CardDescription>{store.address}</CardDescription>
+                    <CardHeader className="p-2">
+                      <CardTitle className="text-sm sm:text-base md:text-lg lg:text-xl">
+                        {store.name}
+                      </CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
+                        {store.address}
+                      </CardDescription>
                     </CardHeader>
                     <img
-                      className="aspect-video object-cover"
+                      className="aspect-video w-full object-cover"
                       src={store.image ? store.image : "/placeholder.svg"}
-                    ></img>
+                      alt={`Image of ${store.name}`}
+                    />
                   </Card>
                 );
               })}

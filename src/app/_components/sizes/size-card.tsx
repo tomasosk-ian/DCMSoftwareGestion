@@ -61,7 +61,7 @@ export default function SizeCard(props: {
     <>
       {" "}
       {tarifa && (
-        <Card className="relative min-h-40 w-80 overflow-hidden rounded-lg bg-emerald-100 p-4 shadow-lg">
+        <Card className="xs:max-w-xs relative overflow-hidden rounded-lg bg-emerald-100 p-4 shadow-lg sm:max-w-sm md:max-w-md">
           <div
             className="absolute left-2 top-2 flex h-10 w-10 items-center justify-center rounded-full"
             style={{ backgroundColor: bgColor }}
@@ -75,7 +75,7 @@ export default function SizeCard(props: {
               ref={imgRef}
               src={props.size.image ? props.size.image : "/placeholder.svg"}
               alt={props.size.nombre!}
-              className="h-96 object-cover"
+              className="object-cover sm:max-w-sm md:h-44 md:max-w-md lg:h-80 lg:max-w-lg"
               crossOrigin="anonymous"
               onLoad={extractColor}
             />
@@ -87,18 +87,18 @@ export default function SizeCard(props: {
             </span>
           </div>
           {props.size.cantidad !== 0 && (
-            <div className="mt-2 flex items-center justify-between text-sm">
+            <div className="mt-2 flex items-center justify-between gap-4 text-sm">
               <span className=" text-gray-700">Número de lockers</span>
-              <div className="flex items-center">
+              <div className="flex items-center md:pr-1">
                 <button
-                  className="flex h-10 w-10 items-center justify-center rounded-l bg-orange-500 font-bold text-white hover:bg-orange-600"
+                  className="xs:h-6 xs:w-6 flex h-10 w-10 items-center justify-center rounded-l bg-orange-500 font-bold text-white hover:bg-orange-600 md:h-8 md:w-8"
                   disabled={props.disabledMinus}
                   onClick={props.onClickMinus}
                 >
                   -
                 </button>
                 <Input
-                  className="h-8 w-12 border-none bg-gray-200 text-center text-black"
+                  className="xs:h-6 xs:w-8 h-8 w-12 border-none bg-gray-200 text-center text-black md:h-8 md:w-10"
                   disabled={true}
                   value={props.value}
                   onChange={(e) => {
@@ -106,7 +106,7 @@ export default function SizeCard(props: {
                   }}
                 />
                 <button
-                  className="flex h-10 w-10 items-center justify-center rounded-r bg-orange-500 font-bold text-white hover:bg-orange-600"
+                  className="xs:h-6 xs:w-6 flex h-10 w-10 items-center justify-center rounded-r bg-orange-500 font-bold text-white hover:bg-orange-600 md:h-8 md:w-8"
                   disabled={props.disabledPlus}
                   onClick={props.onClickPlus}
                 >

@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 import { Client } from "~/server/api/routers/clients";
 import { Coin } from "~/server/api/routers/coin";
+import { Cupon } from "~/server/api/routers/cupones";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
@@ -30,9 +31,11 @@ export default function Payment(props: {
   endDate: string;
   setReserves: (reserves: Reserve[]) => void;
   setPagoOk: (pagoOk: boolean) => void;
+  cupon: Cupon | null | undefined;
 }) {
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();
+  const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
   const [transaction, setTransaction] = useState<Transaction>();
@@ -54,8 +57,9 @@ export default function Payment(props: {
           window.MobbexEmbed.close();
         },
         onPayment: async (data: any) => {
+          console.log("data.data", data.data);
           statusCode = parseInt(data.data.status.code);
-
+          const IdTransaction = parseInt(data.data.status.code);
           if (statusCode == 200) {
             try {
               props.setLoadingPay(true);
@@ -65,6 +69,7 @@ export default function Payment(props: {
                   if (reserve.IdTransaction) {
                     const response = await confirmarBox({
                       idToken: reserve.IdTransaction!,
+                      nReserve: props.nReserve,
                     });
                     if (response) {
                       token.push([
@@ -75,12 +80,18 @@ export default function Payment(props: {
                       await createTransaction({
                         ...transaction,
                         client: reserve.client,
+                        amount: props.total,
+                        nReserve: props.nReserve,
                       });
+                      if (props.cupon)
+                        useCupon({ identifier: props.cupon.identifier! });
                     }
 
                     return {
                       ...reserve,
                       Token1: response,
+                      idToken: reserve.IdTransaction!,
+                      nReserve: props.nReserve,
                     };
                   } else {
                     return reserve;

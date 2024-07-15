@@ -54,6 +54,22 @@ export const storeRouter = createTRPCRouter({
 
       return store;
     }),
+  getByNroSerie: publicProcedure
+    .input(
+      z.object({
+        nroSerie: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const store = await db.query.stores.findFirst({
+        where: eq(schema.stores.serieLocker, input.nroSerie),
+        with: {
+          city: true,
+        },
+      });
+
+      return store;
+    }),
 
   create: publicProcedure
     .input(

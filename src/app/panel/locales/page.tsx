@@ -7,7 +7,9 @@ export default async function Home() {
   const cities = await api.city.get.query();
   const stores = await api.store.get.query();
   const lockers = await api.locker.get.query();
-
+  if ("error" in lockers) {
+    return <Title>Error: {lockers.error}</Title>;
+  }
   return (
     <section className="space-y-2">
       <div className="flex justify-between">

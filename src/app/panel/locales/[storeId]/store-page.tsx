@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Locker } from "~/server/api/routers/lockers";
+import { TRPCError } from "@trpc/server";
 
 export default function StorePage(props: {
   store: Store;
@@ -239,9 +240,8 @@ function DeleteStore(props: { storeId: string }) {
         toast.success("Se ha eliminado la ciudad");
         router.push("../");
       })
-      .catch((e) => {
-        const error = asTRPCError(e)!;
-        toast.error(error.message);
+      .catch((e: TRPCError) => {
+        toast.error(e.message);
       });
   };
   return (

@@ -30,7 +30,6 @@ export const clientsRouter = createTRPCRouter({
       },
       {} as Record<string, typeof clients>,
     );
-    console.log(groupedByEmail);
     return groupedByEmail;
   }),
   create: publicProcedure

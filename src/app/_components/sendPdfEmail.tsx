@@ -44,8 +44,6 @@ export default function Component() {
 
       const pdfBase64 = pdfInstance.output("datauristring");
 
-      console.log("PDF Base64:", pdfBase64);
-
       //con este base64 lo mando a attachments en sendgrip
     } catch (error) {
       console.error("Error generating PDF:", error);
