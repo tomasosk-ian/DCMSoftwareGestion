@@ -129,8 +129,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   }
   return (
     <div className="container absolute">
-      <Badge>TESTING</Badge> {failedResponse && <AlertFailedResponse />}
-      {}
       <div className="flex flex-col items-center justify-center ">
         <StoreSelector
           stores={storess.data}
