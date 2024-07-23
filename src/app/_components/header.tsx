@@ -5,35 +5,6 @@ export default async function Home() {
         className="masthead inline-header center widgets full-height large-mobile-menu-icon dt-parent-menu-clickable show-sub-menu-on-hover show-device-logo show-mobile-logo top-0"
         role="banner"
       >
-        <div className="top-bar top-bar-empty top-bar-line-hide">
-          <div className="top-bar-bg"></div>
-          <div className="mini-widgets left-widgets"></div>
-          <div className="mini-widgets right-widgets">
-            <div className="soc-ico in-top-bar-right in-menu-second-switch disabled-bg custom-border border-on hover-disabled-bg hover-custom-border hover-border-on hide-on-desktop show-on-first-switch display-none">
-              <a
-                title="Instagram page opens in new window"
-                target="_blank"
-                className="instagram"
-              >
-                <span className="soc-font-icon"></span>
-                <span className="screen-reader-text">
-                  Instagram page opens in new window
-                </span>
-              </a>
-              <a
-                title="Facebook page opens in new window"
-                href="https://lockersurbanos.com.ar/#"
-                target="_blank"
-                className="facebook"
-              >
-                <span className="soc-font-icon"></span>
-                <span className="screen-reader-text">
-                  Facebook page opens in new window
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
         <header className="header-bar">
           <div className="branding">
             <div id="site-title" className="assistive-text">

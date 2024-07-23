@@ -59,9 +59,15 @@ export default function ReservePage(props: {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="w-auto overflow-hidden rounded-3xl bg-white shadow-md ">
-          <div className="flex bg-[#848484] px-6 pb-2 pt-3">
+          <div className="flex gap-5 bg-[#848484] px-6 pb-2 pt-3">
             <p className="text-lg font-bold text-white">
               Reserva n° {reserve[0]!.nReserve}
+            </p>
+            <p className="text-lg font-bold text-white">
+              {reserve[0]!.NroSerie}
+            </p>
+            <p className="px-5 text-lg font-bold text-white">
+              Box {reserve[0]!.IdBox}
             </p>
           </div>
           <div className="flex justify-between bg-gray-100 px-8 pb-2 pt-1">
