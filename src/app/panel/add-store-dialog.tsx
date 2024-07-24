@@ -89,7 +89,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
             />
           </div>
           <div className="flex">
-            <div className="col-6 pr-4">
+            {/* <div className="col-6 pr-4">
               <Label className="text-right">Local</Label>
               <Select
                 onValueChange={(value: string) => {
@@ -112,7 +112,7 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
             <div className="col-6">
               <Label className="text-right">Locker</Label>
               <Select
