@@ -84,7 +84,7 @@ export const cuponesRouter = createTRPCRouter({
       const fechaDesde = new Date(cupon?.fecha_desde || "");
       const fechaHasta = new Date(cupon?.fecha_hasta || "");
       if (cupon) {
-        if (currentDate > fechaDesde && currentDate < fechaHasta) {
+        if (currentDate >= fechaDesde && currentDate <= fechaHasta) {
           if (
             cupon?.cantidad_usos! > cupon?.usos! ||
             cupon?.cantidad_usos! == -1
