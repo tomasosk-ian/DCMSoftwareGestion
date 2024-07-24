@@ -43,8 +43,6 @@ export default function UserPage(props: { params: { userId: string } }) {
   }, [user]);
   useEffect(() => {
     setOrganizationId(organization?.id!);
-
-    console.log("organization", organization);
   }, [organization, membership]);
   const { mutateAsync: editUser, isLoading } = api.clerk.editUser.useMutation();
   const { mutateAsync: removeUserFromOrganization } =

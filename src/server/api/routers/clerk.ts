@@ -87,8 +87,6 @@ export const clerkRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("input.organizationId", input.organizationId);
-        console.log("input.userId", input.userId);
         const res =
           await clerkClient.organizations.deleteOrganizationMembership({
             organizationId: input.organizationId!,

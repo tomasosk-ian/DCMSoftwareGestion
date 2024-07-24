@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { asTRPCError } from "~/lib/errors";
 import { Button } from "~/components/ui/button";
+import QRCode from "react-qr-code";
 
 export default function ReservePage(props: {
   reserve: Reserves[];
@@ -65,9 +66,6 @@ export default function ReservePage(props: {
             </p>
             <p className="text-lg font-bold text-white">
               {reserve[0]!.NroSerie}
-            </p>
-            <p className="px-5 text-lg font-bold text-white">
-              Box {reserve[0]!.IdBox}
             </p>
           </div>
           <div className="flex justify-between bg-gray-100 px-8 pb-2 pt-1">
@@ -117,17 +115,34 @@ export default function ReservePage(props: {
           </div>
           <div className="flex justify-center bg-[#e2f0e9] py-1">
             <div className=" pb-3 pt-3 text-sm">
-              <div className="grid grid-cols-3 gap-x-28">
+              <div className="grid grid-cols-2 gap-x-28">
                 {reserve.map((r) => {
                   return (
                     <div
                       key={r.IdSize}
                       className="flex flex-col items-start text-sm"
                     >
-                      <div className="font-semibold">
+                      <div className="py-3 font-semibold">
+                        <p>
+                          <QRCode
+                            className="w-full"
+                            size={256}
+                            style={{ height: "auto", width: "50%" }}
+                            value={r.Token1?.toString() ?? "0"}
+                            viewBox={`0 0 256 256`}
+                          />
+                        </p>
                         <div className="flex items-center text-sm">
                           <p>Token ({getSize(r.IdSize!)})</p>
                           <p className="px-4 text-[#848484]">{r.Token1}</p>
+                        </div>{" "}
+                        <div className="flex items-center text-sm">
+                          <p>Box</p>
+                          <p className="px-4 text-[#848484]">
+                            {r.IdFisico ?? (
+                              <div className="text-xs">Sin asignar</div>
+                            )}
+                          </p>
                         </div>
                       </div>
                     </div>

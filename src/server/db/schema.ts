@@ -106,6 +106,7 @@ export const reservas = sqliteTable(
     NroSerie: text("NroSerie", { length: 255 }),
     IdSize: integer("IdSize"),
     IdBox: integer("IdBox"),
+    IdFisico: integer("IdFisico"),
     Token1: integer("Token1"),
     FechaCreacion: text("FechaCreacion", { length: 255 }),
     FechaInicio: text("FechaInicio", { length: 255 }),

@@ -69,26 +69,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import GetQR from "./get-qr";
 
-function getDaysFromDateUntilToday(startDate: string): number {
-  const start = new Date(startDate);
-  const today = new Date();
-
-  const diffInMs = today.getTime() - start.getTime();
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-  return diffInDays;
-}
-
-export function DataTableDemo(props: {
+export function MonitorDatatable(props: {
   data: Locker;
   reservas: Reserves[] | null;
   sizes: Size[];
 }) {
-  const { mutateAsync: postToken } = api.token.post.useMutation();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentToken, setCurrentToken] = useState<string | null>(null);
   const [generatedTokens, setGeneratedTokens] = useState<Map<number, string>>(
     new Map(),
   );
@@ -103,98 +90,6 @@ export function DataTableDemo(props: {
     });
     setGeneratedTokens(tokenMap);
   }, [props.data.tokens]);
-
-  function GetQR(props: { idLocker: number; idSize: number; idBox: number }) {
-    const fechaInicio = new Date();
-    fechaInicio.setHours(0, 0, 0, 0);
-
-    const fechaFin = new Date();
-    fechaFin.setHours(23, 59, 59, 999);
-    function post() {
-      const newToken = {
-        idLocker,
-        idSize,
-        idBox,
-        token1: Math.floor(100000 + Math.random() * 900000).toString(),
-        fechaCreacion: formatDate(new Date().toString()),
-        fechaInicio: formatDate(fechaInicio.toString()),
-        fechaFin: formatDate(fechaFin.toString()),
-        contador: 0,
-        cantidad: 1,
-        confirmado: true,
-        modo: "Por cantidad",
-        idBoxNavigation: null,
-        idLockerNavigation: null,
-        idSizeNavigation: null,
-      };
-      postToken({ token: newToken });
-      setGeneratedTokens(new Map(generatedTokens.set(idBox, newToken.token1)));
-      setCurrentToken(newToken.token1);
-    }
-    const { idLocker, idSize, idBox } = props;
-
-    const handleQRClick = async () => {
-      const existingToken = generatedTokens.get(idBox);
-      if (!existingToken) {
-        post();
-      } else {
-        setCurrentToken(existingToken);
-      }
-
-      setIsOpen(true);
-    };
-
-    return (
-      <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-        <AlertDialogTrigger asChild>
-          <Button
-            className="bg-transparent p-1 outline-none hover:bg-transparent"
-            onClick={handleQRClick}
-          >
-            <QrCode color="black" />
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              <div className="pb-4">
-                <RotateCw
-                  className="float-right cursor-pointer "
-                  onClick={async () => post()}
-                />
-              </div>
-              <div
-                style={{
-                  height: "auto",
-                  margin: "0 auto",
-                  maxWidth: 128,
-                  width: "100%",
-                }}
-              >
-                <QRCode
-                  className="w-full"
-                  size={512}
-                  style={{ height: "auto", width: "100%" }}
-                  value={currentToken ?? ""}
-                  viewBox={`0 0 512 512`}
-                />
-              </div>
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              <div className="flex w-full items-center justify-center pt-4 text-5xl font-bold">
-                {currentToken}
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsOpen(false)}>
-              Aceptar
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  }
 
   const router = useRouter();
   const { sizes, reservas } = props;
@@ -255,9 +150,9 @@ export function DataTableDemo(props: {
                 <AlertCircle color="red" />
               </div>
               <GetQR
-                idLocker={row.original.idLocker}
-                idSize={row.getValue("idSize")}
-                idBox={row.getValue("id")}
+                row={row}
+                generatedTokens={generatedTokens}
+                setGeneratedTokens={setGeneratedTokens}
               />
             </div>
           ) : (
@@ -285,19 +180,19 @@ export function DataTableDemo(props: {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={
-                  reservas?.find(
-                    (r) =>
-                      r.Token1?.toString() ==
-                      (props.data.tokens?.find(
-                        (x) => x.idBox == row.getValue("id"),
-                      )?.token1 ?? ""),
-                  )?.identifier
+                  reservas?.find((r) => r.IdBox == row.getValue("id"))
+                    ?.identifier
                     ? false
                     : true
                 }
                 onClick={() => {
+                  console.log("el id es", row.getValue("id"));
+                  console.log(props.reservas);
                   router.push(
-                    `/panel/reservas/${reservas?.find((r) => r.Token1?.toString() == props.data.tokens?.find((x) => x.idBox == row.getValue("id"))?.token1)?.nReserve}`,
+                    `/panel/reservas/${
+                      reservas?.find((r) => r.IdBox == row.getValue("id"))
+                        ?.nReserve
+                    }`,
                   );
                 }}
               >

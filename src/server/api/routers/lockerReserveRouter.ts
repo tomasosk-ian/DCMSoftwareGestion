@@ -49,7 +49,6 @@ export const lockerReserveRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log(`${env.SERVER_URL}/api/token/reservar/${input.NroSerie}`);
       const reservationResponse = await fetch(
         `${env.SERVER_URL}/api/token/reservar/${input.NroSerie}`,
         {

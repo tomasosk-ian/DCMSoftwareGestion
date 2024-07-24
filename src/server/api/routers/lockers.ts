@@ -1,8 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { env } from "~/env";
+import { db, schema } from "~/server/db";
+import { eq } from "drizzle-orm";
+import { checkBoxAssigned } from "./reserves";
 
-const tokenValidator = z.object({
+export const tokenValidator = z.object({
   id: z.number().nullable().optional(),
   idLocker: z.number().nullable().optional(),
   idSize: z.number().nullable().optional(),
@@ -19,7 +22,7 @@ const tokenValidator = z.object({
   idLockerNavigation: z.any().nullable().optional(),
   idSizeNavigation: z.any().nullable().optional(),
 });
-const boxesValidator = z.object({
+export const boxesValidator = z.object({
   id: z.number().nullable().optional(),
   idFisico: z.number().nullable().optional(),
   idLocker: z.number(),
@@ -45,7 +48,7 @@ const boxesValidator = z.object({
 });
 
 // Define lockerValidator schema
-const lockerValidator = z.object({
+export const lockerValidator = z.object({
   id: z.number(),
   nroSerieLocker: z.string(),
   lastUpdateTime: z.string().nullable().optional(),
@@ -71,31 +74,24 @@ export type Token = z.infer<typeof tokenValidator>;
 
 export const lockerRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    console.log(
-      "sizeResponsssssse",
+    const locerResponse = await fetch(
       `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
     );
-    const sizeResponse = await fetch(
-      `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
-    );
-    console.log("sizeResponse.ok", sizeResponse.ok);
-    if (!sizeResponse.ok) {
-      const errorResponse = await sizeResponse.json();
+    if (!locerResponse.ok) {
+      const errorResponse = await locerResponse.json();
       return { error: errorResponse.message || "Unknown error" };
     }
 
-    const reservedBoxData = await sizeResponse.json();
-    console.log("reservedBoxData", reservedBoxData);
+    const reservedBoxData = await locerResponse.json();
     // Validate the response data against the lockerValidator schema
     const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
-    console.log("validatedData.success", validatedData.success);
     if (!validatedData.success) {
       // If the data is not an array, wrap it in an array
       const singleLocker = lockerValidator.safeParse(reservedBoxData);
 
       throw null;
     }
-    console.log("validatedData.data", validatedData.data[0]?.boxes);
+    await checkBoxAssigned();
     return validatedData.data;
   }),
 });

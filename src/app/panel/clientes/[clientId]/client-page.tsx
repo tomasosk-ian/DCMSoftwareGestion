@@ -105,11 +105,7 @@ export default function ClientPage({ client }: { client: Client }) {
                   </div>{" "}
                   <div>
                     <Label htmlFor="name">Email</Label>
-                    <Input
-                      id="name"
-                      value={email!}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
+                    <Input id="name" value={email!} disabled={true} />
                   </div>{" "}
                   <div>
                     <Label htmlFor="name">Prefijo</Label>
@@ -141,16 +137,17 @@ export default function ClientPage({ client }: { client: Client }) {
                 {reservas?.map((reserva) => {
                   return (
                     <ListTile
-                      // href={`/dashboard/admin/global/products/${channel.id}`}
+                      className="border-none"
+                      href={`/panel/reservas/${reserva.nReserve}`}
                       leading={reserva.IdTransaction}
-                      title={reserva.identifier}
+                      title={`Fecha inicio: ${reserva.FechaInicio}. Fecha fin: ${reserva.FechaFin}`}
                     />
                   );
                 })}
               </List>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-3" className="border-none">
+          {/* <AccordionItem value="item-3" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar cliente</h2>
             </AccordionTrigger>
@@ -159,7 +156,7 @@ export default function ClientPage({ client }: { client: Client }) {
                 <DeleteChannel clientId={client.identifier!} />
               </div>
             </AccordionContent>
-          </AccordionItem>
+          </AccordionItem> */}
         </Accordion>
       </section>
     </LayoutContainer>

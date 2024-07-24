@@ -14,7 +14,6 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const sizeRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    console.log("sizeResponse", `${env.SERVER_URL}/api/size`);
     const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
     // Handle the response from the external API
@@ -68,10 +67,6 @@ export const sizeRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      console.log(
-        "sizeResponse4",
-        `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
-      );
       const sizeResponse = await fetch(
         `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
       );
@@ -86,7 +81,6 @@ export const sizeRouter = createTRPCRouter({
       const reservedBoxData = await sizeResponse.json();
 
       const validatedData = responseValidator.parse(reservedBoxData);
-      console.log("validatedData4", validatedData);
       await Promise.all(
         validatedData.map(async (v) => {
           const fee = await db.query.feeData.findFirst({

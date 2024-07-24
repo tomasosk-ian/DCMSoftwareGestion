@@ -54,16 +54,23 @@ export default function ReservesComponent(props: {
   const columns: ColumnDef<[string, Reserves[]]>[] = [
     {
       accessorKey: "1",
+      header: "N° Reserva",
+      cell: ({ row }) => (
+        <div className="lowercase">{row.original[1][0]?.nReserve}</div>
+      ),
+    },
+    {
+      accessorKey: "2",
       header: "Locker",
       cell: ({ row }) => (
         <div className="lowercase">{row.original[1][0]?.NroSerie}</div>
       ),
     },
     {
-      accessorKey: "2",
+      accessorKey: "3",
       header: "Email",
       cell: ({ row }) => (
-        <div className="lowercase">{row.original[1][0]?.clients?.email}</div> // Asegúrate de ajustar esto al campo de email correcto
+        <div className="lowercase">{row.original[1][0]?.clients?.email}</div>
       ),
     },
   ];

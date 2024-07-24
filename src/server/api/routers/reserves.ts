@@ -10,12 +10,15 @@ import {
 import { reservas, transactions } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
+import { env } from "~/env";
+import { lockerValidator } from "./lockers";
 
 export type Reserve = {
   identifier: string;
   NroSerie: string;
   IdSize: number;
   IdBox: string | null;
+  IdFisico: string | null;
   Token1: string | null;
   FechaCreacion: string;
   FechaInicio: string;
@@ -31,6 +34,7 @@ export type GroupedReserves = {
 
 export const reserveRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
+    await checkBoxAssigned();
     const result = await ctx.db.query.reservas.findMany({
       with: { clients: true },
       where: (reservas) => isNotNull(reservas.Token1),
@@ -46,6 +50,8 @@ export const reserveRouter = createTRPCRouter({
     return groupedByNReserve;
   }),
   getActive: publicProcedure.query(async ({ ctx }) => {
+    await checkBoxAssigned();
+
     const result = await db.query.reservas.findMany({
       where: (reservas) => isNotNull(reservas.Token1),
       with: { clients: true },
@@ -74,6 +80,8 @@ export const reserveRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
+      await checkBoxAssigned();
+
       const reserve = await db.query.reservas.findMany({
         where: eq(schema.reservas.nReserve, input.nReserve),
         with: { clients: true },
@@ -81,7 +89,9 @@ export const reserveRouter = createTRPCRouter({
 
       return reserve;
     }),
-  list: publicProcedure.query(({ ctx }) => {
+  list: publicProcedure.query(async ({ ctx }) => {
+    await checkBoxAssigned();
+
     ctx.db.select().from(reservas);
     const result = ctx.db.query.reservas.findMany({
       orderBy: (reservas, { desc }) => [desc(reservas.identifier)],
@@ -118,3 +128,39 @@ export const reserveRouter = createTRPCRouter({
 });
 
 export type Reserves = RouterOutputs["reserve"]["getBynReserve"][number];
+
+export async function checkBoxAssigned() {
+  // check if a token has a new box assigned
+
+  const locerResponse = await fetch(
+    `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
+  );
+  if (!locerResponse.ok) {
+    const errorResponse = await locerResponse.json();
+    return { error: errorResponse.message || "Unknown error" };
+  }
+
+  const reservedBoxData = await locerResponse.json();
+  // Validate the response data against the lockerValidator schema
+  const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
+  if (!validatedData.success) {
+    // If the data is not an array, wrap it in an array
+
+    throw null;
+  }
+  validatedData.data.map(async (locker) => {
+    locker.tokens?.map(async (token) => {
+      if (token.idBox != null) {
+        const idFisico = locker.boxes.find(
+          (box) => box.id == token.idBox,
+        )?.idFisico;
+        await db
+          .update(schema.reservas)
+          .set({ IdFisico: idFisico, IdBox: token.idBox })
+          .where(eq(schema.reservas.Token1!, parseInt(token.token1 ?? "0")));
+      }
+    });
+  });
+
+  //fin check
+}
