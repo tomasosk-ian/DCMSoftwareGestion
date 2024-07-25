@@ -64,7 +64,7 @@ export default function CuponPage(props: { cupon: Cupon }) {
           : parseFloat(data.porcentaje),
       });
       toast.success("Cupón actualizado correctamente");
-      router.push("/panel/cupones");
+      router.refresh();
     } catch (error) {
       toast.error("Error al actualizar el cupón");
     }

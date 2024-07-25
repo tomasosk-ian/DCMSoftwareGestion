@@ -77,22 +77,25 @@ export const cuponesRouter = createTRPCRouter({
       const cupon = await db.query.cuponesData.findFirst({
         where: eq(schema.cuponesData.codigo, input.codigo),
       });
-      console.log(cupon?.cantidad_usos);
-      console.log(cupon?.usos);
 
-      const currentDate = new Date();
-      const fechaDesde = new Date(cupon?.fecha_desde || "");
-      const fechaHasta = new Date(cupon?.fecha_hasta || "");
       if (cupon) {
+        const currentDate = new Date();
+        const fechaDesde = new Date(cupon?.fecha_desde || "");
+        const fechaHasta = new Date(cupon?.fecha_hasta!);
+
+        // Ajustar fechaHasta para incluir todo el día en la zona horaria local
+        fechaHasta.setDate(fechaHasta.getDate() + 1);
+
         if (currentDate >= fechaDesde && currentDate <= fechaHasta) {
           if (
-            cupon?.cantidad_usos! > cupon?.usos! ||
-            cupon?.cantidad_usos! == -1
+            cupon.cantidad_usos! > cupon.usos! ||
+            cupon.cantidad_usos! === -1
           ) {
             return cupon;
           }
         }
       }
+
       return null;
     }),
   change: publicProcedure
