@@ -7,11 +7,12 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { reservas, transactions } from "~/server/db/schema";
+import { reservas, reservasToClients, transactions } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 import { env } from "~/env";
 import { lockerValidator } from "./lockers";
+import { Input } from "~/components/ui/input";
 
 export type Reserve = {
   identifier: string;
@@ -96,14 +97,23 @@ export const reserveRouter = createTRPCRouter({
         clientId: z.number(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       await checkBoxAssigned();
-
-      const reserve = await db.query.reservas.findMany({
-        where: eq(schema.reservas.client, input.clientId),
+      const result = await ctx.db.query.reservas.findMany({
+        with: { clients: true },
+        where: (reservas) => isNotNull(reservas.Token1),
       });
-
-      return reserve;
+      const groupedByNReserve = result.reduce((acc: any, reserva) => {
+        const nReserve = reserva.nReserve!;
+        if (!acc[nReserve]) {
+          acc[nReserve] = [];
+        }
+        if (reserva.client == input.clientId) {
+          acc[nReserve].push(reserva);
+        }
+        return acc;
+      }, {});
+      return groupedByNReserve;
     }),
   list: publicProcedure.query(async ({ ctx }) => {
     await checkBoxAssigned();
@@ -115,6 +125,22 @@ export const reserveRouter = createTRPCRouter({
     });
     return result;
   }),
+  reservesToClients: publicProcedure
+    .input(
+      z.object({
+        clientId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await db
+        .insert(schema.reservasToClients)
+        .values({
+          clientId: input.clientId,
+        })
+        .returning();
+
+      return result[0]?.identifier;
+    }),
   change: publicProcedure
     .input(
       z.object({

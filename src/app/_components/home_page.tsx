@@ -47,6 +47,8 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [cupon, setCupon] = useState<Cupon>();
   const { mutateAsync: reservarBox } =
     api.lockerReserve.reserveBox.useMutation();
+  const { mutateAsync: reserveToClient } =
+    api.reserve.reservesToClients.useMutation();
   const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
@@ -206,8 +208,15 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                           const clientResponse = await createClient(
                             client,
                           ).then(async (res: any) => {
+                            //creo una reserva para este cliente y seteo el numero de reserva
+                            console.log("TEST 1111");
+                            const nreserve = await reserveToClient({
+                              clientId: res.id,
+                            });
+                            setNReserve(nreserve!);
                             await Promise.all(
                               reserves.map(async (reserve: Reserve) => {
+                                //creo items para esta reserva
                                 reserve.client = client.email;
                                 const response = parseInt(
                                   await reservarBox(reserve),
@@ -224,7 +233,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                             return res;
                           });
                           if (!failed) {
-                            setNReserve(clientResponse.id);
                             setReserva(true);
                             const checkoutNumber = await test({
                               amount: total,

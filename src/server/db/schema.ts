@@ -98,7 +98,25 @@ export const sizes = sqliteTable(
     compoundKey: primaryKey(vt.id),
   }),
 );
-
+export const reservasToClients = sqliteTable(
+  "test_reservasToClients",
+  {
+    identifier: integer("id").primaryKey({ autoIncrement: true }),
+    clientId: integer("clientId"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+export const reservasToClientsRelations = relations(
+  reservasToClients,
+  ({ one }) => ({
+    clients: one(clients, {
+      fields: [reservasToClients.clientId],
+      references: [clients.identifier],
+    }),
+  }),
+);
 export const reservas = sqliteTable(
   "test_reservas",
   {

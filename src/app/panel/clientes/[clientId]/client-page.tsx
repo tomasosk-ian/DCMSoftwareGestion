@@ -32,6 +32,7 @@ import { UploadButton } from "~/utils/uploadthing";
 import { Client } from "~/server/api/routers/clients";
 import { List, ListTile } from "~/components/list";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
+import { Reserves } from "~/server/api/routers/reserves";
 
 export default function ClientPage({ client }: { client: Client }) {
   const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function ClientPage({ client }: { client: Client }) {
   const [telefono, setTelefono] = useState(client!.telefono);
   const { mutateAsync: renameclient, isLoading } =
     api.client.change.useMutation();
-  const { data: reservas } = api.lockerReserve.get.useQuery({
+  const { data: reservasRecord } = api.reserve.getByClient.useQuery({
     clientId: client.identifier!,
   });
   const router = useRouter();
@@ -134,16 +135,19 @@ export default function ClientPage({ client }: { client: Client }) {
             </AccordionTrigger>
             <AccordionContent>
               <List className="border-none">
-                {reservas?.map((reserva) => {
-                  return (
-                    <ListTile
-                      className="border-none"
-                      href={`/panel/reservas/${reserva.nReserve}`}
-                      leading={reserva.IdTransaction}
-                      title={`Fecha inicio: ${reserva.FechaInicio}. Fecha fin: ${reserva.FechaFin}`}
-                    />
-                  );
-                })}
+                {reservasRecord &&
+                  Object.entries(reservasRecord).map(([key, reservas]) => {
+                    const reservasArray = reservas as Reserves[];
+                    return reservasArray.map((reserva: Reserves) => (
+                      <ListTile
+                        key={reserva.nReserve}
+                        className="border-none"
+                        href={`/panel/reservas/${reserva.nReserve}`}
+                        leading={reserva.nReserve}
+                        title={`Fecha inicio: ${reserva.FechaInicio}. Fecha fin: ${reserva.FechaFin}`}
+                      />
+                    ));
+                  })}
               </List>
             </AccordionContent>
           </AccordionItem>
