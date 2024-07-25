@@ -10,13 +10,13 @@ import { clients } from "~/server/db/schema";
 export const clientsRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
     const result = ctx.db.query.clients.findMany({
-      orderBy: (client, { desc }) => [desc(client.email)],
+      orderBy: (client, { asc }) => [asc(client.email)],
     });
     return result;
   }),
   getByEmail: publicProcedure.query(async ({ ctx }) => {
     const clients = await ctx.db.query.clients.findMany({
-      orderBy: (client, { desc }) => [desc(client.email)],
+      orderBy: (client, { asc }) => [asc(client.email)],
     });
 
     // Group by email using JavaScript

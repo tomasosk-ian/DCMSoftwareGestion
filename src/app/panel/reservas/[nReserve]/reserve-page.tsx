@@ -30,7 +30,7 @@ export default function ReservePage(props: {
   reserve: Reserves[];
   sizes: Size[];
 }) {
-  const router = useRouter();
+  const { data: stores } = api.store.get.useQuery();
 
   const { reserve } = props;
   if (reserve.length <= 0) return <Title>No se encontró la reserva</Title>;
@@ -65,7 +65,9 @@ export default function ReservePage(props: {
               Reserva n° {reserve[0]!.nReserve}
             </p>
             <p className="text-lg font-bold text-white">
-              {reserve[0]!.NroSerie}
+              {stores &&
+                stores?.find((x) => x.serieLocker == reserve[0]!.NroSerie)
+                  ?.name}
             </p>
           </div>
           <div className="flex justify-between bg-gray-100 px-8 pb-2 pt-1">
