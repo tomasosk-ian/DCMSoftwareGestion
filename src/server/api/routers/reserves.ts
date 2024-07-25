@@ -49,6 +49,7 @@ export const reserveRouter = createTRPCRouter({
     }, {});
     return groupedByNReserve;
   }),
+
   getActive: publicProcedure.query(async ({ ctx }) => {
     await checkBoxAssigned();
 
@@ -85,6 +86,21 @@ export const reserveRouter = createTRPCRouter({
       const reserve = await db.query.reservas.findMany({
         where: eq(schema.reservas.nReserve, input.nReserve),
         with: { clients: true },
+      });
+
+      return reserve;
+    }),
+  getByClient: publicProcedure
+    .input(
+      z.object({
+        clientId: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      await checkBoxAssigned();
+
+      const reserve = await db.query.reservas.findMany({
+        where: eq(schema.reservas.client, input.clientId),
       });
 
       return reserve;

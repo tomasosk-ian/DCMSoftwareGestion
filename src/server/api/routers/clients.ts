@@ -10,13 +10,13 @@ import { clients } from "~/server/db/schema";
 export const clientsRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
     const result = ctx.db.query.clients.findMany({
-      orderBy: (client, { desc }) => [desc(client.identifier)],
+      orderBy: (client, { desc }) => [desc(client.email)],
     });
     return result;
   }),
   getByEmail: publicProcedure.query(async ({ ctx }) => {
     const clients = await ctx.db.query.clients.findMany({
-      orderBy: (client, { desc }) => [desc(client.identifier)],
+      orderBy: (client, { desc }) => [desc(client.email)],
     });
 
     // Group by email using JavaScript
@@ -44,17 +44,23 @@ export const clientsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // TODO: verificar permisos
-
-      const result = await db.insert(schema.clients).values({
-        name: input.name,
-        surname: input.surname,
-        email: input.email,
-        prefijo: input.prefijo,
-        telefono: input.telefono,
+      const client = await ctx.db.query.clients.findFirst({
+        where: eq(schema.clients.email, input.email!),
       });
-      const id = parseInt(result.lastInsertRowid?.toString()!);
-
-      return { id };
+      if (!client) {
+        const result = await db.insert(schema.clients).values({
+          name: input.name,
+          surname: input.surname,
+          email: input.email,
+          prefijo: input.prefijo,
+          telefono: input.telefono,
+        });
+        const id = parseInt(result.lastInsertRowid?.toString()!);
+        return { id };
+      } else {
+        const id = parseInt(client.identifier?.toString()!);
+        return { id };
+      }
     }),
   getById: publicProcedure
     .input(

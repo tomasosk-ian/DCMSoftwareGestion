@@ -51,23 +51,29 @@ export default function ReservesComponent(props: {
   activesReserves: Record<number, Reserves[]>;
   allReserves: Record<number, Reserves[]>;
 }) {
+  const { data: stores } = api.store.get.useQuery();
   const columns: ColumnDef<[string, Reserves[]]>[] = [
     {
-      accessorKey: "1",
+      accessorKey: "N° Reserva",
       header: "N° Reserva",
       cell: ({ row }) => (
         <div className="lowercase">{row.original[1][0]?.nReserve}</div>
       ),
     },
     {
-      accessorKey: "2",
-      header: "Locker",
+      accessorKey: "Local",
+      header: "Local",
       cell: ({ row }) => (
-        <div className="lowercase">{row.original[1][0]?.NroSerie}</div>
+        <div className="lowercase">
+          {
+            stores?.find((x) => x.serieLocker == row.original[1][0]?.NroSerie)
+              ?.name
+          }
+        </div>
       ),
     },
     {
-      accessorKey: "3",
+      accessorKey: "Email",
       header: "Email",
       cell: ({ row }) => (
         <div className="lowercase">{row.original[1][0]?.clients?.email}</div>
