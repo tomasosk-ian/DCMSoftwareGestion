@@ -38,7 +38,8 @@ export const reserveRouter = createTRPCRouter({
     await checkBoxAssigned();
     const result = await ctx.db.query.reservas.findMany({
       with: { clients: true },
-      where: (reservas) => isNotNull(reservas.Token1),
+      where: (reservas) =>
+        and(isNotNull(reservas.nReserve), isNotNull(reservas.Token1)),
     });
     const groupedByNReserve = result.reduce((acc: any, reserva) => {
       const nReserve = reserva.nReserve!;
@@ -55,7 +56,8 @@ export const reserveRouter = createTRPCRouter({
     await checkBoxAssigned();
 
     const result = await db.query.reservas.findMany({
-      where: (reservas) => isNotNull(reservas.Token1),
+      where: (reservas) =>
+        and(isNotNull(reservas.nReserve), isNotNull(reservas.Token1)),
       with: { clients: true },
     });
 
@@ -85,7 +87,13 @@ export const reserveRouter = createTRPCRouter({
       await checkBoxAssigned();
 
       const reserve = await db.query.reservas.findMany({
-        where: eq(schema.reservas.nReserve, input.nReserve),
+        where: (reservas) =>
+          and(
+            isNotNull(reservas.nReserve),
+            isNotNull(reservas.Token1),
+            eq(schema.reservas.nReserve, input.nReserve),
+          ),
+
         with: { clients: true },
       });
 
@@ -101,7 +109,8 @@ export const reserveRouter = createTRPCRouter({
       await checkBoxAssigned();
       const result = await ctx.db.query.reservas.findMany({
         with: { clients: true },
-        where: (reservas) => isNotNull(reservas.Token1),
+        where: (reservas) =>
+          and(isNotNull(reservas.nReserve), isNotNull(reservas.Token1)),
       });
       const groupedByNReserve = result.reduce((acc: any, reserva) => {
         const nReserve = reserva.nReserve!;

@@ -14,6 +14,7 @@ export default async function Home() {
           return (
             <ListTile
               href={`/panel/clientes/${values[0]?.identifier}`}
+              leading={values[0]?.name}
               title={key}
             />
           );

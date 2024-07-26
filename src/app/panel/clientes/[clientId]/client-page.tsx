@@ -46,6 +46,7 @@ export default function ClientPage({ client }: { client: Client }) {
   const { data: reservasRecord } = api.reserve.getByClient.useQuery({
     clientId: client.identifier!,
   });
+  const { data: stores } = api.store.get.useQuery();
   const router = useRouter();
 
   async function handleChange() {
@@ -144,7 +145,10 @@ export default function ClientPage({ client }: { client: Client }) {
                         className="border-none"
                         href={`/panel/reservas/${reserva.nReserve}`}
                         leading={reserva.nReserve}
-                        title={`Fecha inicio: ${reserva.FechaInicio}. Fecha fin: ${reserva.FechaFin}`}
+                        title={`Local: ${
+                          stores?.find((x) => x.serieLocker == reserva.NroSerie)
+                            ?.name
+                        }. Fecha inicio: ${reserva.FechaInicio?.split("T")[0]}. Fecha fin: ${reserva.FechaFin?.split("T")[0]}`}
                       />
                     ));
                   })}
