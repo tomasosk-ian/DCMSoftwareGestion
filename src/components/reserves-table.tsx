@@ -33,48 +33,47 @@ export default function ReservesTable(props: {
   stores: Store[];
 }) {
   const router = useRouter();
+  const { reserves } = props;
+
+  // Convierte el objeto reserves a una matriz de objetos Reserves
+  const reservesArray = Object.values(reserves).flat();
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  // const [pagination, setPagination] = useState<PaginationState>({
-  //   pageIndex: 0,
-  //   pageSize: 5,
-  // });
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 5,
+  });
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const columns: ColumnDef<[string, Reserves[]]>[] = [
+  const columns: ColumnDef<Reserves>[] = [
     {
-      accessorKey: "N° Reserva",
+      accessorKey: "nReserve",
       header: "N° Reserva",
       cell: ({ row }) => (
-        <div className="lowercase">{row.original[1][0]?.nReserve}</div>
+        <div className="lowercase">{row.original.nReserve}</div>
       ),
     },
     {
-      accessorKey: "Local",
-      header: "Local",
+      accessorKey: "NroSerie",
+      header: "NroSerie",
       cell: ({ row }) => (
-        <div className="lowercase">
-          {
-            props.stores?.find(
-              (x) => x.serieLocker == row.original[1][0]?.NroSerie,
-            )?.name
-          }
-        </div>
+        <div className="lowercase">{row.original.NroSerie}</div>
       ),
     },
     {
-      accessorKey: "Email",
+      accessorKey: "clients",
       header: "Email",
       cell: ({ row }) => (
-        <div className="lowercase">{row.original[1][0]?.clients?.email}</div>
+        <div className="lowercase">{row.original.clients?.email}</div>
       ),
     },
+    // Agrega más columnas según sea necesario
   ];
 
   const table = useReactTable({
-    data: Object.entries(props.reserves),
+    data: reservesArray,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -84,49 +83,43 @@ export default function ReservesTable(props: {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    // onPaginationChange: setPagination,
+    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
-      // pagination,
+      pagination,
     },
+    // manualPagination: true, // Añadir esta línea para paginación manual
+    autoResetPageIndex: false,
+    pageCount: Math.ceil(reservesArray.length / pagination.pageSize), // Calcular el número de páginas
   });
 
   return (
     <div className="w-full px-4 py-2">
-      <div className="w-full rounded-md border ">
+      <div className="w-full rounded-md border">
         <Table className="">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.original[1][0]?.nReserve}
-                  onClick={() =>
-                    router.push(
-                      `/panel/reservas/${row.original[1][0]?.nReserve}`,
-                    )
-                  }
-                >
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
