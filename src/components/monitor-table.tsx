@@ -136,15 +136,10 @@ export function MonitorDatatable(props: {
         <div className="flex items-center justify-center p-0">
           {row.getValue("ocupacion") &&
           (new Date(
-            props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-              ?.fechaFin ?? "",
+            reservas?.find((r) => r.IdBox == row.getValue("id"))?.FechaFin ??
+              "",
           ).getTime() < new Date().getTime() ||
-            !reservas?.find(
-              (r) =>
-                r.Token1?.toString() ==
-                (props.data.tokens?.find((x) => x.idBox == row.getValue("id"))
-                  ?.token1 ?? ""),
-            )?.FechaFin) ? (
+            !reservas?.find((r) => r.IdBox == row.getValue("id"))?.FechaFin) ? (
             <div className="flex items-center space-x-5">
               <div className="animate-pulse lowercase">
                 <AlertCircle color="red" />
@@ -237,32 +232,6 @@ export function MonitorDatatable(props: {
 
   return (
     <div className="w-full px-4 py-2">
-      <div className="flex items-center py-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value: any) =>
-                    column.toggleVisibility(!!value)
-                  }
-                >
-                  {column.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
       <div className="w-full rounded-md border">
         <Table className="">
           <TableHeader>

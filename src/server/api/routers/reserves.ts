@@ -127,9 +127,8 @@ export const reserveRouter = createTRPCRouter({
   list: publicProcedure.query(async ({ ctx }) => {
     await checkBoxAssigned();
 
-    ctx.db.select().from(reservas);
     const result = ctx.db.query.reservas.findMany({
-      orderBy: (reservas, { desc }) => [desc(reservas.identifier)],
+      orderBy: (reservas, { desc }) => [desc(reservas.FechaCreacion)],
       with: { clients: true },
     });
     return result;
