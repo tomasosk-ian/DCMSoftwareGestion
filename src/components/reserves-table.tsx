@@ -15,7 +15,6 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { Reserves } from "~/server/api/routers/reserves";
-import { api } from "~/trpc/react";
 import {
   Table,
   TableBody,
@@ -38,6 +37,19 @@ export default function ReservesTable(props: {
   // Convierte el objeto reserves a una matriz de objetos Reserves
   const reservesArray = Object.values(reserves).flat();
 
+  // Filtrar duplicados por nReserve
+  const uniqueReservesArray = reservesArray.reduce(
+    (acc: Reserves[], current) => {
+      const x = acc.find((item) => item.nReserve === current.nReserve);
+      if (!x) {
+        return acc.concat([current]);
+      } else {
+        return acc;
+      }
+    },
+    [],
+  );
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -56,10 +68,14 @@ export default function ReservesTable(props: {
       ),
     },
     {
-      accessorKey: "NroSerie",
-      header: "NroSerie",
+      accessorKey: "Local",
+      header: "Local",
       cell: ({ row }) => (
-        <div className="lowercase">{row.original.NroSerie}</div>
+        <div className="lowercase">
+          {props.stores &&
+            props.stores.find((x) => x.serieLocker == row.original.NroSerie)
+              ?.name}
+        </div>
       ),
     },
     {
@@ -73,7 +89,7 @@ export default function ReservesTable(props: {
   ];
 
   const table = useReactTable({
-    data: reservesArray,
+    data: uniqueReservesArray,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -93,7 +109,7 @@ export default function ReservesTable(props: {
     },
     // manualPagination: true, // Añadir esta línea para paginación manual
     autoResetPageIndex: false,
-    pageCount: Math.ceil(reservesArray.length / pagination.pageSize), // Calcular el número de páginas
+    pageCount: Math.ceil(uniqueReservesArray.length / pagination.pageSize), // Calcular el número de páginas
   });
 
   return (
@@ -119,7 +135,13 @@ export default function ReservesTable(props: {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  onClick={() =>
+                    router.push(`/panel/reservas/${row.original.nReserve}`)
+                  }
+                  className="hover:cursor-pointer hover:bg-gray-200"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(

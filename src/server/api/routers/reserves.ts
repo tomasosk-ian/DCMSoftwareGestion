@@ -149,6 +149,10 @@ export const reserveRouter = createTRPCRouter({
 
       return result[0]?.identifier;
     }),
+  getReservesToClients: publicProcedure.query(async () => {
+    const result = db.query.reservas.findMany();
+    return result;
+  }),
   change: publicProcedure
     .input(
       z.object({
