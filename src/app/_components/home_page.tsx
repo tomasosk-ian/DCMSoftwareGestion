@@ -134,11 +134,21 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     <div className="container absolute">
       {failedResponse && <AlertFailedResponse />}
       <div className="flex flex-col items-center justify-center ">
-        <StoreSelector
-          stores={storess.data}
-          store={store}
-          setStore={setStore}
-        />
+        {!store && (
+          <div>
+            <StoreSelector
+              stores={storess.data}
+              store={store}
+              setStore={setStore}
+            />
+            <Button
+              className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
+              onClick={() => router.push("/extension")}
+            >
+              Extender reserva
+            </Button>
+          </div>
+        )}
         {store && (
           <div>
             <DateComponent
@@ -299,12 +309,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             </div>
           </div>
         )}
-        <Button
-          className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
-          onClick={() => router.push("/extension")}
-        >
-          Extender reserva
-        </Button>
       </div>
     </div>
   );
