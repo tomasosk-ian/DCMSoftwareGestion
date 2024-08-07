@@ -161,7 +161,7 @@ export default function Extension(props: { sizes: Size[] }) {
                   startDate={startDate!}
                   endDate={endDate!}
                   reserves={[reserve]}
-                  total={100}
+                  total={total}
                   setTotal={setTotal}
                   coin={coin!}
                   setCoin={setCoin}
