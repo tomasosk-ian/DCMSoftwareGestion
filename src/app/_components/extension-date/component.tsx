@@ -84,7 +84,7 @@ export default function DateComponent(props: {
                 onSelect={(e) => {
                   const toDate = e?.to!;
                   const days = differenceInDays(toDate, range?.from!);
-                  props.setDays(days);
+                  props.setDays(days + 1);
                   setRange({ to: e?.to!, from: range?.from });
                 }}
                 numberOfMonths={2}
