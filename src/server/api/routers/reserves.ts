@@ -13,6 +13,7 @@ import { db, schema } from "~/server/db";
 import { env } from "~/env";
 import { lockerValidator } from "./lockers";
 import { Input } from "~/components/ui/input";
+import { getClientByEmail } from "./lockerReserveRouter";
 
 export type Reserve = {
   identifier: string | null;
@@ -180,6 +181,49 @@ export const reserveRouter = createTRPCRouter({
     const result = db.query.reservas.findMany();
     return result;
   }),
+  create: publicProcedure
+    .input(
+      z.object({
+        IdLocker: z.number().nullable().optional(),
+        NroSerie: z.string().nullable(),
+        IdSize: z.number().nullable(),
+        IdBox: z.number().nullable(),
+        Token1: z.number().nullable(),
+        FechaCreacion: z.string().nullable(),
+        FechaInicio: z.string().nullable(),
+        FechaFin: z.string().nullable(),
+        Contador: z.number().nullable(),
+        Confirmado: z.boolean().nullable().optional(),
+        Modo: z.string().nullable().optional(),
+        Cantidad: z.number().optional(),
+        IdTransaction: z.number().optional(),
+        client: z.string().nullable().optional(),
+        identifier: z.string().nullable().optional(),
+        nReserve: z.number().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const client = await getClientByEmail(input.client!);
+      const identifier = createId();
+
+      await db.insert(schema.reservas).values({
+        identifier,
+        NroSerie: input.NroSerie,
+        IdSize: input.IdSize,
+        IdBox: input.IdBox,
+        Token1: input.Token1,
+        FechaCreacion: new Date().toISOString(),
+        FechaInicio: input.FechaInicio,
+        FechaFin: input.FechaFin,
+        Contador: input.Contador,
+        Confirmado: input.Confirmado,
+        Modo: input.Modo,
+        Cantidad: input.Cantidad,
+        IdTransaction: input.IdTransaction,
+        client: client?.email,
+        nReserve: input.nReserve,
+      });
+    }),
   updateReserve: publicProcedure
     .input(
       z.object({

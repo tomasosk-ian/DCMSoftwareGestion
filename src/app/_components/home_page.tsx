@@ -135,18 +135,22 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       {failedResponse && <AlertFailedResponse />}
       <div className="flex flex-col items-center justify-center ">
         {!store && (
-          <div>
-            <StoreSelector
-              stores={storess.data}
-              store={store}
-              setStore={setStore}
-            />
-            <Button
-              className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
-              onClick={() => router.push("/extension")}
-            >
-              Extender reserva
-            </Button>
+          <div className="flex flex-col items-center justify-center ">
+            <div className="flex flex-col items-center justify-center ">
+              <StoreSelector
+                stores={storess.data}
+                store={store}
+                setStore={setStore}
+              />{" "}
+            </div>
+            <div className="flex flex-col items-center justify-center ">
+              <Button
+                className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
+                onClick={() => router.push("/extension")}
+              >
+                Extender reserva
+              </Button>
+            </div>{" "}
           </div>
         )}
         {store && (

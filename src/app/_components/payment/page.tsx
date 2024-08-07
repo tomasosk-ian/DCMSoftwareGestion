@@ -36,8 +36,7 @@ export default function Payment(props: {
 }) {
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();
-  const { mutateAsync: updateReserve } =
-    api.reserve.updateReserve.useMutation();
+  const { mutateAsync: createReserve } = api.reserve.create.useMutation();
   const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
@@ -100,13 +99,25 @@ export default function Payment(props: {
                         useCupon({ identifier: props.cupon.identifier! });
                     }
                     if (props.isExt) {
-                      const updatedReserve = await updateReserve({
-                        identifier: reserve?.identifier!,
+                      const updatedReserve = await createReserve({
+                        Contador: reserve.Contador,
+                        FechaCreacion: reserve.FechaCreacion,
+                        FechaInicio: reserve?.FechaInicio!,
                         FechaFin: format(
                           props.endDate,
                           "yyyy-MM-dd'T'23:59:59",
                         ),
-                        FechaInicio: reserve?.FechaInicio!,
+                        IdBox: reserve.IdBox,
+                        IdSize: reserve.IdSize,
+                        NroSerie: reserve.NroSerie,
+                        Token1: reserve.Token1,
+                        Cantidad: reserve.Cantidad,
+                        client: reserve.client,
+                        Confirmado: reserve.Confirmado,
+                        IdLocker: reserve.IdLocker,
+                        IdTransaction: IdTransaction,
+                        Modo: reserve.Modo,
+                        nReserve: props.nReserve,
                       });
                       if (props.setReserves)
                         props.setReserves([updatedReserve!]);

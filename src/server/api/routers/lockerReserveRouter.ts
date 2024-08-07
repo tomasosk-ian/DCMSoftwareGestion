@@ -5,7 +5,7 @@ import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 
-const getClientByEmail = async (email: string) => {
+export const getClientByEmail = async (email: string) => {
   const client = await db.query.clients.findFirst({
     where: eq(schema.clients.email, email),
   });
