@@ -14,7 +14,7 @@ export const clientsRouter = createTRPCRouter({
     });
     return result;
   }),
-  getByEmail: publicProcedure.query(async ({ ctx }) => {
+  getGroupedByEmail: publicProcedure.query(async ({ ctx }) => {
     const clients = await ctx.db.query.clients.findMany({
       orderBy: (client, { asc }) => [asc(client.email)],
     });
@@ -65,15 +65,30 @@ export const clientsRouter = createTRPCRouter({
   getById: publicProcedure
     .input(
       z.object({
-        identifier: z.number(),
+        identifier: z.number().optional(),
       }),
     )
     .query(async ({ input }) => {
-      const channel = await db.query.clients.findFirst({
-        where: eq(schema.clients.identifier, input.identifier),
+      if (input.identifier) {
+        const client = await db.query.clients.findFirst({
+          where: eq(schema.clients.identifier, input.identifier),
+        });
+
+        return client;
+      }
+    }),
+  getByEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const client = await db.query.clients.findFirst({
+        where: eq(schema.clients.email, input.email),
       });
 
-      return channel;
+      return client;
     }),
   change: publicProcedure
     .input(

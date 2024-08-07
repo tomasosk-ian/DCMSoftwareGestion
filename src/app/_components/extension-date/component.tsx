@@ -6,26 +6,39 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import ButtonCustomComponent from "../../../components/buttonCustom";
 import { ChevronRightIcon } from "lucide-react";
+import { api } from "~/trpc/react";
+import { Reserve } from "~/server/api/routers/reserves";
+import { Client } from "~/server/api/routers/clients";
+import { Store } from "~/server/api/routers/store";
 
 export default function DateComponent(props: {
-  startDate: string;
+  startDate: string | undefined;
   setStartDate: (startDate: string) => void;
-  endDate: string;
+  endDate: string | undefined;
   setEndDate: (endDate: string) => void;
   days: number;
   setDays: (days: number) => void;
+  token: number;
+  email: string;
+  setReserve: (reserve: Reserve) => void;
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
-  useEffect(() => {
-    const fromDate = new Date();
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date();
-    toDate.setHours(23, 59, 0, 0);
-    props.setDays(1);
 
-    setRange({ from: fromDate, to: toDate });
-  }, []);
+  const { data: reserve } = api.reserve.getByToken.useQuery({
+    token: props.token,
+    email: props.email,
+  });
+  useEffect(() => {
+    if (reserve) {
+      const today = new Date();
+      today.setHours(23, 59, 0, 0);
+      const fromDate = new Date(reserve.FechaFin!);
+      // const days = differenceInDays(today, fromDate);
+      // props.setDays(days + 1);
+      setRange({ from: fromDate });
+    }
+  }, [reserve]);
   function getDays() {
     if (range) {
       const fromDate = range.from!;
@@ -37,24 +50,39 @@ export default function DateComponent(props: {
   }
   function handleClick() {
     const today = Date.now();
-    // props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
+    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'23:00:00"));
+    console.log("la reserva essss handleClick", reserve);
+    // const updatedReserve = updateReserve({
+    //   identifier: reserve?.identifier!,
+    //   FechaFin: format(range!.to!, "yyyy-MM-dd'T'23:59:59"),
+    //   FechaInicio: reserve?.FechaInicio!,
+    // });
+    props.setReserve(reserve!);
+
     getDays();
   }
   function onlyToday() {
     const today = Date.now();
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
+    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'23:00:00"));
+    // const updatedReserve = updateReserve({
+    //   identifier: reserve?.identifier!,
+    //   FechaFin: format(today, "yyyy-MM-dd'T'23:59:59"),
+    //   FechaInicio: reserve?.FechaInicio!,
+    // });
+    // updatedReserve.then(async (res) => {
+    props.setReserve(reserve!);
+    // });
     getDays();
   }
-  if (!range) return <div>cargando...</div>;
+  if (!reserve) return <div>cargando...</div>;
   return (
     <div>
       {!props.endDate && (
         <div className="container flex flex-col items-center justify-center gap-6 ">
           <h2 className="text-3xl font-semibold">
-            ¿Cuántos días necesitas tu locker?
+            ¿Hasta cuándo querés extender tu reserva?
           </h2>
           <div className="justify-center">
             <div className="w-full">
@@ -62,17 +90,15 @@ export default function DateComponent(props: {
                 mode="range"
                 selected={range}
                 onSelect={(e) => {
-                  const currentDate = new Date();
-                  currentDate.setHours(0, 0, 0, 0);
-                  const fromDate = currentDate;
                   const toDate = e?.to!;
-                  const days = differenceInDays(toDate, fromDate);
+                  const days = differenceInDays(toDate, range?.from!);
                   props.setDays(days + 1);
                   setRange(e);
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>
-                  date < new Date(new Date().setHours(0, 0, 0, 0))
+                  date <
+                  new Date(new Date(reserve.FechaFin!).setHours(0, 0, 0, 0))
                 }
                 initialFocus
               />
@@ -86,7 +112,11 @@ export default function DateComponent(props: {
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
-                <ButtonCustomComponent onClick={onlyToday} text={`Solo hoy`} />
+                <ButtonCustomComponent
+                  disabled={new Date() <= new Date(reserve.FechaFin!)}
+                  onClick={onlyToday}
+                  text={`Solo hoy`}
+                />
               </div>
             </div>
           </div>

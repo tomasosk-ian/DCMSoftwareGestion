@@ -134,7 +134,7 @@ export const reservas = sqliteTable(
     Modo: text("Modo", { length: 255 }),
     Cantidad: integer("Cantidad"),
     IdTransaction: integer("IdTransaction"),
-    client: integer("client"),
+    client: text("client", { length: 255 }),
     nReserve: integer("nReserve"),
   },
   (vt) => ({
@@ -145,7 +145,7 @@ export const reservas = sqliteTable(
 export const reservasRelations = relations(reservas, ({ one }) => ({
   clients: one(clients, {
     fields: [reservas.client],
-    references: [clients.identifier],
+    references: [clients.email],
   }),
 }));
 

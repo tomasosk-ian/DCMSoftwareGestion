@@ -13,7 +13,7 @@ import { api } from "~/trpc/react";
 
 declare global {
   interface Window {
-    MobbexEmbed: any; // Aquí deberías utilizar el tipo correcto si está disponible
+    MobbexEmbed: any;
   }
 }
 
@@ -29,12 +29,15 @@ export default function Payment(props: {
   store: Store;
   startDate: string;
   endDate: string;
-  setReserves: (reserves: Reserve[]) => void;
+  setReserves: ((reserves: Reserve[]) => void) | null;
   setPagoOk: (pagoOk: boolean) => void;
   cupon: Cupon | null | undefined;
+  isExt: boolean;
 }) {
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();
+  const { mutateAsync: updateReserve } =
+    api.reserve.updateReserve.useMutation();
   const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
@@ -70,13 +73,23 @@ export default function Payment(props: {
                     const response = await confirmarBox({
                       idToken: reserve.IdTransaction!,
                       nReserve: props.nReserve,
+                      isExt: props.isExt,
+                      newEndDate: props.endDate,
                     });
                     if (response) {
-                      token.push([
-                        response,
-                        props.sizes.find((x) => x.id == reserve.IdSize)
-                          ?.nombre! ?? "",
-                      ]);
+                      if (props.isExt) {
+                        token.push([
+                          props.reserves[0]?.Token1!,
+                          props.sizes.find((x) => x.id == reserve.IdSize)
+                            ?.nombre! ?? "",
+                        ]);
+                      } else {
+                        token.push([
+                          response,
+                          props.sizes.find((x) => x.id == reserve.IdSize)
+                            ?.nombre! ?? "",
+                        ]);
+                      }
                       await createTransaction({
                         ...transaction,
                         client: reserve.client,
@@ -86,7 +99,12 @@ export default function Payment(props: {
                       if (props.cupon)
                         useCupon({ identifier: props.cupon.identifier! });
                     }
-
+                    const updatedReserve = await updateReserve({
+                      identifier: reserve?.identifier!,
+                      FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
+                      FechaInicio: reserve?.FechaInicio!,
+                    });
+                    if (props.setReserves) props.setReserves([updatedReserve!]);
                     return {
                       ...reserve,
                       Token1: response,
@@ -98,11 +116,12 @@ export default function Payment(props: {
                   }
                 }),
               );
-              props.setReserves(updatedReserves);
+              if (props.setReserves) props.setReserves(updatedReserves);
+              console.log("EL CLIENTE QUE QUIERO???", props.client);
               await sendEmail({
                 to: props.client.email!,
                 token,
-                client: props.client.name!,
+                client: props.client.name ?? "",
                 price: props.total,
                 coin: props.coin.description,
                 local: props.store!.name!,

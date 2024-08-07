@@ -25,14 +25,14 @@ export default function Booking(props: {
   reserves: Reserve[];
   total: number;
   setTotal: (total: number) => void;
-
   coin: Coin;
   setCoin: (coin: Coin) => void;
   coins: Coin[];
   sizes: Size[];
   cupon: Cupon | undefined;
+  isExt: boolean;
 }) {
-  const fees = api.fee.get.useQuery();
+  const { data: fees } = api.fee.get.useQuery();
 
   const [subTotal, setSubTotal] = useState<number>(0);
   const [groupedItems, setGroupedItems] = useState<GroupedItem[]>();
@@ -41,11 +41,12 @@ export default function Booking(props: {
     const grouped = props.reserves.reduce((acc, item) => {
       if (item.Cantidad === 1) {
         const existing = acc.find((group) => group.IdSize === item.IdSize);
-        const days = daysBetweenDates(item.FechaInicio!, item.FechaFin!);
-        const fee = fees.data!.find((f: Fee) => f.size == item.IdSize)!;
-        const coin = props.coins.find((c: Coin) => c.identifier == fee.coin)!;
-        props.setCoin(coin);
-
+        const days = daysBetweenDates(props.startDate!, props.endDate!);
+        const fee = fees?.find((f: Fee) => f.size == item.IdSize)!;
+        if (fee) {
+          const coin = props.coins.find((c: Coin) => c.identifier == fee.coin)!;
+          props.setCoin(coin);
+        }
         if (existing) {
           existing.Cantidad += item.Cantidad;
         } else {
@@ -53,10 +54,10 @@ export default function Booking(props: {
             IdSize: item.IdSize!,
             Cantidad: item.Cantidad,
             Days: days,
-            Fee: fee,
-            FirstDayTotal: fee.value!,
+            Fee: fee ?? null,
+            FirstDayTotal: fee?.value!,
             RestDaysTotal:
-              ((days - 1) * fee.value! * (100 - fee.discount!)) / 100,
+              ((days - 1) * fee?.value! * (100 - fee?.discount!)) / 100,
           });
         }
       }
@@ -79,7 +80,7 @@ export default function Booking(props: {
     props.setTotal(newTotal);
     setSubTotal(newTotal);
     setGroupedItems(updatedItems);
-  }, []);
+  }, [fees]);
 
   useEffect(() => {
     if (props.cupon?.tipo_descuento == "fijo") {
@@ -196,7 +197,7 @@ export default function Booking(props: {
                       <div className="flex justify-between text-sm">
                         <span>Días adicionales {size.Days! - 1}</span>
                         <span className="text-red-500">
-                          -{size.Fee.discount}% aplicado
+                          -{size.Fee?.discount ?? 0}% aplicado
                         </span>
                         <span>{size.RestDaysTotal ?? 0}</span>
                       </div>

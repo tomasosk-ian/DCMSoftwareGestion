@@ -3,7 +3,7 @@ import { List, ListTile } from "~/components/list";
 import { api } from "~/trpc/server";
 
 export default async function Home() {
-  const clientes = await api.client.getByEmail.query();
+  const clientes = await api.client.getGroupedByEmail.query();
   return (
     <section className="space-y-2">
       <div className="flex justify-between">

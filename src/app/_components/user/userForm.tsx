@@ -22,7 +22,7 @@ import { Cupon } from "~/server/api/routers/cupones";
 export default function UserForm(props: {
   client: Client;
   setClient: (client: Client) => void;
-  setCupon: (cupon: Cupon) => void;
+  setCupon: ((cupon: Cupon) => void) | null;
   errors: {
     name: string;
     surname: string;
@@ -30,23 +30,27 @@ export default function UserForm(props: {
     prefijo: string;
     telefono: string;
     terms: string;
-  };
-  setErrors: (errors: {
-    name: string;
-    surname: string;
-    email: string;
-    prefijo: string;
-    telefono: string;
-    terms: string;
-  }) => void;
-  terms: boolean;
-  setTerms: (terms: boolean) => void;
+  } | null;
+  setErrors:
+    | ((errors: {
+        name: string;
+        surname: string;
+        email: string;
+        prefijo: string;
+        telefono: string;
+        terms: string;
+      }) => void)
+    | null;
+  terms: boolean | null;
+  setTerms: ((terms: boolean) => void) | null;
+  editable: boolean;
 }) {
   const { mutateAsync: useCupon } = api.cupones.getByCode.useMutation();
   const [phones, setPhones] = useState<Record<string, number>[]>();
   const [discount, setDiscount] = useState<string>("");
   const [discountCode, setDiscountCode] = useState<string>("");
   const [applyButton, setApplyButton] = useState<boolean>();
+
   useEffect(() => {
     const phoneNumbers: Record<string, number>[] = [];
     Object.entries(countries).forEach(([countryCode, countryData]) => {
@@ -57,32 +61,33 @@ export default function UserForm(props: {
         phoneNumbers.push({ [countryCode]: phone[0]! });
       }
     });
-
     setPhones(phoneNumbers);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    props.setClient({ ...props.client, [name]: value });
-    props.setErrors({ ...props.errors, [name]: "" });
+    if (props.setClient) props.setClient({ ...props.client, [name]: value });
+    if (props.setErrors && props.errors)
+      props.setErrors({ ...props.errors, [name]: "" });
   };
   function applyDiscount() {
     const response = useCupon({
       codigo: discountCode,
     }).then((cupon) => {
       if (cupon) {
-        props.setCupon(cupon);
+        if (props.setCupon) props.setCupon(cupon);
         setApplyButton(true);
       }
     });
   }
-
+  if (!props.client) return <div>cargando...</div>;
   return (
     <div className="grid grid-cols-1 gap-4 rounded-lg bg-[#F0F0F0] p-6 shadow-md md:grid-cols-12 md:px-3 md:py-6">
       <h2 className="col-span-1 text-lg font-bold text-black md:col-span-12">
         Completá tus datos
       </h2>
       <Input
+        disabled={!props.editable}
         className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-6"
         placeholder="Nombre"
         name="name"
@@ -90,6 +95,7 @@ export default function UserForm(props: {
         onChange={handleChange}
       />
       <Input
+        disabled={!props.editable}
         className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-6"
         placeholder="Apellido"
         name="surname"
@@ -97,12 +103,13 @@ export default function UserForm(props: {
         onChange={handleChange}
       />
       <span className="col-span-1 text-red-500 md:col-span-6">
-        {props.errors.name}
+        {props.errors?.name}
       </span>
       <span className="col-span-1 text-red-500 md:col-span-6">
-        {props.errors.surname}
+        {props.errors?.surname}
       </span>
       <Input
+        disabled={!props.editable}
         className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-12"
         placeholder="Email"
         name="email"
@@ -110,16 +117,20 @@ export default function UserForm(props: {
         onChange={handleChange}
       />
       <span className="col-span-1 text-red-500 md:col-span-12">
-        {props.errors.email}
+        {props.errors?.email}
       </span>
       <div className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-4">
         <Select
+          disabled={!props.editable}
+          value={props.client.prefijo!.toString()}
           onValueChange={(value: string) => {
-            props.setClient({
-              ...props.client,
-              prefijo: parseInt(value),
-            });
-            props.setErrors({ ...props.errors, prefijo: "" });
+            if (props.setClient)
+              props.setClient({
+                ...props.client,
+                prefijo: parseInt(value),
+              });
+            if (props.setErrors && props.errors)
+              props.setErrors({ ...props.errors, prefijo: "" });
           }}
         >
           <SelectTrigger className="w-full">
@@ -142,22 +153,25 @@ export default function UserForm(props: {
         </Select>
       </div>
       <Input
+        disabled={!props.editable}
         className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-8"
         placeholder="Telefono"
         name="telefono"
         value={props.client.telefono ? props.client.telefono : 0}
         onChange={(e) => {
           const { name, value } = e.target;
-          props.setClient({ ...props.client, [name]: parseInt(value) });
-          props.setErrors({ ...props.errors, [name]: "" });
+          if (props.setClient)
+            props.setClient({ ...props.client, [name]: parseInt(value) });
+          if (props.setErrors && props.errors)
+            props.setErrors({ ...props.errors, [name]: "" });
         }}
       />
-      {props.errors.prefijo && (
+      {props.errors?.prefijo && (
         <span className="col-span-1 text-red-500 md:col-span-4">
           {props.errors.prefijo}
         </span>
       )}
-      {props.errors.telefono && (
+      {props.errors?.telefono && (
         <span className="col-span-1 text-red-500 md:col-span-8">
           {props.errors.telefono}
         </span>
@@ -167,6 +181,7 @@ export default function UserForm(props: {
       </Label>
       <div className="col-span-1 flex md:col-span-12">
         <Input
+          disabled={!props.editable}
           className="flex-grow rounded-l-md rounded-r-none border-2 border-r-0 border-buttonPick px-2 focus:border-buttonHover focus:ring-0"
           placeholder="Aplicar cupón de descuento"
           value={discountCode}
@@ -186,7 +201,7 @@ export default function UserForm(props: {
         <Checkbox
           id="terms"
           onCheckedChange={(e: boolean) => {
-            props.setTerms(e);
+            if (props.setTerms) props.setTerms(e);
           }}
         />
         <label
@@ -205,7 +220,7 @@ export default function UserForm(props: {
             términos y condiciones
           </i>
         </label>
-        <span className="text-red-500">{props.errors.terms}</span>
+        <span className="text-red-500">{props.errors?.terms}</span>
       </div>
       <div className="col-span-1 text-center md:col-span-12">
         <label htmlFor="terms" className="text-sm">

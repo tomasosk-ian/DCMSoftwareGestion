@@ -15,17 +15,17 @@ import { lockerValidator } from "./lockers";
 import { Input } from "~/components/ui/input";
 
 export type Reserve = {
-  identifier: string;
-  NroSerie: string;
-  IdSize: number;
-  IdBox: string | null;
-  IdFisico: string | null;
-  Token1: string | null;
-  FechaCreacion: string;
-  FechaInicio: string;
-  FechaFin: string;
-  Contador: number;
-  clients: any; // Ajusta esto según la estructura de tu cliente
+  identifier: string | null;
+  NroSerie: string | null;
+  IdSize: number | null;
+  IdBox: number | null;
+  IdFisico: number | null;
+  Token1: number | null;
+  FechaCreacion: string | null;
+  FechaInicio: string | null;
+  FechaFin: string | null;
+  Contador: number | null;
+  client: string | null;
 };
 
 // Definir el tipo del resultado agrupado
@@ -99,6 +99,29 @@ export const reserveRouter = createTRPCRouter({
 
       return reserve;
     }),
+  getByToken: publicProcedure
+    .input(
+      z.object({
+        token: z.number(),
+        email: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      await checkBoxAssigned();
+
+      const reserve = await db.query.reservas.findFirst({
+        where: (reservas) =>
+          and(
+            isNotNull(reservas.nReserve),
+            eq(schema.reservas.Token1, input.token),
+            eq(schema.reservas.client, input.email),
+          ),
+
+        with: { clients: true },
+      });
+      console.log("ENTRA", reserve);
+      return reserve as Reserve;
+    }),
   getByClient: publicProcedure
     .input(
       z.object({
@@ -112,12 +135,16 @@ export const reserveRouter = createTRPCRouter({
         where: (reservas) =>
           and(isNotNull(reservas.nReserve), isNotNull(reservas.Token1)),
       });
+      const client = await db.query.clients.findFirst({
+        where: eq(schema.clients.identifier, input.clientId),
+      });
       const groupedByNReserve = result.reduce((acc: any, reserva) => {
         const nReserve = reserva.nReserve!;
         if (!acc[nReserve]) {
           acc[nReserve] = [];
         }
-        if (reserva.client == input.clientId) {
+
+        if (reserva.client == client?.email) {
           acc[nReserve].push(reserva);
         }
         return acc;
@@ -153,19 +180,21 @@ export const reserveRouter = createTRPCRouter({
     const result = db.query.reservas.findMany();
     return result;
   }),
-  change: publicProcedure
+  updateReserve: publicProcedure
     .input(
       z.object({
         identifier: z.string(),
-        name: z.string(),
-        image: z.string().nullable(),
+        FechaFin: z.string(),
+        FechaInicio: z.string(),
       }),
     )
-    .mutation(({ ctx, input }) => {
-      //   return ctx.db
-      //     .update(reservas)
-      //     .set({ name: input.name, image: input.image })
-      //     .where(eq(reservas.identifier, input.identifier));
+    .mutation(async ({ ctx, input }) => {
+      const response = await db
+        .update(reservas)
+        .set({ FechaFin: input.FechaFin, FechaInicio: input.FechaInicio })
+        .where(eq(reservas.identifier, input.identifier))
+        .returning();
+      return response[0] as Reserve;
     }),
 
   delete: publicProcedure

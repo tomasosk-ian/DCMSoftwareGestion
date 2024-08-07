@@ -66,8 +66,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   });
 
   const { mutateAsync: createClient } = api.client.create.useMutation();
-  const { mutateAsync: assignClientToReserve } =
-    api.lockerReserve.assignClientToReserve.useMutation();
+
   const [total, setTotal] = useState<number>(0);
   const [coin, setCoin] = useState<Coin>();
   const { mutateAsync: test } = api.mobbex.test.useMutation();
@@ -182,6 +181,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   terms={terms!}
                   setTerms={setTerms}
                   setCupon={setCupon}
+                  editable={true}
                 />
               </div>
               <div className="w-full lg:w-auto">
@@ -197,6 +197,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                   coins={coins!}
                   sizes={props.sizes}
                   cupon={cupon}
+                  isExt={false}
                 />
                 <div className="flex justify-end py-2">
                   <ButtonCustomComponent
@@ -219,7 +220,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                 //creo items para esta reserva
                                 reserve.client = client.email;
                                 const response = parseInt(
-                                  await reservarBox(reserve),
+                                  await reservarBox(reserve!),
                                 );
                                 if (!isNaN(response)) {
                                   reserve.IdTransaction = response;
@@ -274,6 +275,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 store={store!}
                 total={total}
                 cupon={cupon}
+                isExt={false}
               />
             )}
           </div>
@@ -289,11 +291,15 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                 coin={coin}
                 checkoutNumber={checkoutNumber!}
                 sizes={props.sizes}
+                endDate={undefined}
               />
             </div>
           </div>
         )}
       </div>
+      <a>
+        <ul>Extender reserva</ul>
+      </a>
     </div>
   );
 }

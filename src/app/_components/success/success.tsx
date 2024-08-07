@@ -21,6 +21,7 @@ export default function Success(props: {
   coin?: Coin;
   checkoutNumber: string;
   sizes: Size[];
+  endDate: string | undefined;
 }) {
   const { toPDF, targetRef } = usePDF({
     filename: `comprobante${props.checkoutNumber ? props.checkoutNumber : ""}.pdf`,
@@ -103,7 +104,9 @@ export default function Success(props: {
                   <div className=" flex justify-between text-sm">
                     <p>Retiro</p>
                     <p className="text-[#848484]">
-                      {formatDateToTextDate(props.reserves[0]?.FechaFin!)}
+                      {formatDateToTextDate(
+                        props.endDate ?? props.reserves[0]?.FechaFin!,
+                      )}
                     </p>
                   </div>
                 </div>
