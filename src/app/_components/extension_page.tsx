@@ -135,6 +135,7 @@ export default function Extension(props: { sizes: Size[] }) {
               token={token}
               email={email}
               setReserve={setReserve}
+              setFailed={setFailed}
             />
           </div>
         )}{" "}

@@ -21,11 +21,12 @@ export default function DateComponent(props: {
   token: number;
   email: string;
   setReserve: (reserve: Reserve) => void;
+  setFailed: (failed: boolean) => void;
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
 
-  const { data: reserve } = api.reserve.getByToken.useQuery({
+  const { data: reserve, isLoading } = api.reserve.getByToken.useQuery({
     token: props.token,
     email: props.email,
   });
@@ -38,7 +39,8 @@ export default function DateComponent(props: {
       // props.setDays(days + 1);
       setRange({ from: fromDate });
     }
-  }, [reserve]);
+    if (!reserve && !isLoading) props.setFailed(true);
+  }, [reserve, isLoading]);
   function getDays() {
     if (range) {
       const fromDate = range.from!;
@@ -53,11 +55,7 @@ export default function DateComponent(props: {
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
     props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'23:00:00"));
     console.log("la reserva essss handleClick", reserve);
-    // const updatedReserve = updateReserve({
-    //   identifier: reserve?.identifier!,
-    //   FechaFin: format(range!.to!, "yyyy-MM-dd'T'23:59:59"),
-    //   FechaInicio: reserve?.FechaInicio!,
-    // });
+
     props.setReserve(reserve!);
 
     getDays();
@@ -66,14 +64,8 @@ export default function DateComponent(props: {
     const today = Date.now();
     props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
     props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'23:00:00"));
-    // const updatedReserve = updateReserve({
-    //   identifier: reserve?.identifier!,
-    //   FechaFin: format(today, "yyyy-MM-dd'T'23:59:59"),
-    //   FechaInicio: reserve?.FechaInicio!,
-    // });
-    // updatedReserve.then(async (res) => {
+
     props.setReserve(reserve!);
-    // });
     getDays();
   }
   if (!reserve) return <div>cargando...</div>;

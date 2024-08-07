@@ -30,6 +30,7 @@ import { env } from "process";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
+import Extension from "./extension_page";
 
 export const Icons = {
   spinner: Loader2,
@@ -74,6 +75,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const { mutateAsync: test } = api.mobbex.test.useMutation();
   const { data: coins } = api.coin.get.useQuery();
   const [terms, setTerms] = useState<boolean>();
+  const [isExtension, setIsExtension] = useState<boolean>(false);
   const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
 
   const [errors, setErrors] = useState({
@@ -131,189 +133,198 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     );
   }
   return (
-    <div className="container absolute">
-      {failedResponse && <AlertFailedResponse />}
-      <div className="flex flex-col items-center justify-center ">
-        {!store && (
+    <>
+      {!isExtension && (
+        <div className="container absolute">
+          {failedResponse && <AlertFailedResponse />}
           <div className="flex flex-col items-center justify-center ">
-            <div className="flex flex-col items-center justify-center ">
-              <StoreSelector
-                stores={storess.data}
-                store={store}
-                setStore={setStore}
-              />{" "}
-            </div>
-            <div className="flex flex-col items-center justify-center ">
-              <Button
-                className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
-                onClick={() => router.push("/extension")}
-              >
-                Extender reserva
-              </Button>
-            </div>{" "}
-          </div>
-        )}
-        {store && (
-          <div>
-            <DateComponent
-              startDate={startDate!}
-              setStartDate={setStartDate}
-              endDate={endDate!}
-              setEndDate={setEndDate}
-              days={days}
-              setDays={setDays}
-            />
-          </div>
-        )}
-        {endDate && (
-          <SizeSelector
-            nroSerieLocker={store?.serieLocker!}
-            inicio={startDate}
-            fin={endDate!}
-            size={size}
-            setSize={setSize}
-            sizeSelected={sizeSelected}
-            setSizeSelected={setsizeSelected}
-            reserves={reserves}
-            setReserves={setReserves}
-            startDate={startDate!}
-            endDate={endDate!}
-            coins={coins!}
-            setFailedResponse={setFailedResponse}
-            failedResponse={failedResponse}
-            total={total}
-            setTotal={setTotal}
-          />
-        )}
-        {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
-        {sizeSelected && !reserva && !loadingPay && (
-          <div>
-            <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
-              <div className="w-full lg:w-auto">
-                <UserForm
-                  client={client}
-                  setClient={setClient}
-                  errors={errors}
-                  setErrors={setErrors}
-                  terms={terms!}
-                  setTerms={setTerms}
-                  setCupon={setCupon}
-                  editable={true}
+            {!store && (
+              <div className="flex flex-col items-center justify-center ">
+                <div className="flex flex-col items-center justify-center ">
+                  <StoreSelector
+                    stores={storess.data}
+                    store={store}
+                    setStore={setStore}
+                  />{" "}
+                </div>
+                <div className="flex flex-col items-center justify-center ">
+                  <Button
+                    className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
+                    onClick={() => setIsExtension(true)}
+                  >
+                    Extender reserva
+                  </Button>
+                </div>{" "}
+              </div>
+            )}
+            {store && (
+              <div>
+                <DateComponent
+                  startDate={startDate!}
+                  setStartDate={setStartDate}
+                  endDate={endDate!}
+                  setEndDate={setEndDate}
+                  days={days}
+                  setDays={setDays}
                 />
               </div>
-              <div className="w-full lg:w-auto">
-                <Booking
-                  store={store!}
-                  startDate={startDate!}
-                  endDate={endDate!}
-                  reserves={reserves!}
-                  total={total}
-                  setTotal={setTotal}
-                  coin={coin!}
-                  setCoin={setCoin}
-                  coins={coins!}
-                  sizes={props.sizes}
-                  cupon={cupon}
-                  isExt={false}
-                />
-                <div className="flex justify-end py-2">
-                  <ButtonCustomComponent
-                    text={"Continuar al pago"}
-                    onClick={async () => {
-                      try {
-                        let failed = false;
-                        if (handleSubmit()) {
-                          const clientResponse = await createClient(
-                            client,
-                          ).then(async (res: any) => {
-                            //creo una reserva para este cliente y seteo el numero de reserva
-                            console.log("TEST 1111");
-                            const nreserve = await reserveToClient({
-                              clientId: res.id,
-                            });
-                            setNReserve(nreserve!);
-                            await Promise.all(
-                              reserves.map(async (reserve: Reserve) => {
-                                //creo items para esta reserva
-                                reserve.client = client.email;
-                                const response = parseInt(
-                                  await reservarBox(reserve!),
+            )}
+            {endDate && (
+              <SizeSelector
+                nroSerieLocker={store?.serieLocker!}
+                inicio={startDate}
+                fin={endDate!}
+                size={size}
+                setSize={setSize}
+                sizeSelected={sizeSelected}
+                setSizeSelected={setsizeSelected}
+                reserves={reserves}
+                setReserves={setReserves}
+                startDate={startDate!}
+                endDate={endDate!}
+                coins={coins!}
+                setFailedResponse={setFailedResponse}
+                failedResponse={failedResponse}
+                total={total}
+                setTotal={setTotal}
+              />
+            )}
+            {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
+            {sizeSelected && !reserva && !loadingPay && (
+              <div>
+                <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
+                  <div className="w-full lg:w-auto">
+                    <UserForm
+                      client={client}
+                      setClient={setClient}
+                      errors={errors}
+                      setErrors={setErrors}
+                      terms={terms!}
+                      setTerms={setTerms}
+                      setCupon={setCupon}
+                      editable={true}
+                    />
+                  </div>
+                  <div className="w-full lg:w-auto">
+                    <Booking
+                      store={store!}
+                      startDate={startDate!}
+                      endDate={endDate!}
+                      reserves={reserves!}
+                      total={total}
+                      setTotal={setTotal}
+                      coin={coin!}
+                      setCoin={setCoin}
+                      coins={coins!}
+                      sizes={props.sizes}
+                      cupon={cupon}
+                      isExt={false}
+                    />
+                    <div className="flex justify-end py-2">
+                      <ButtonCustomComponent
+                        text={"Continuar al pago"}
+                        onClick={async () => {
+                          try {
+                            let failed = false;
+                            if (handleSubmit()) {
+                              const clientResponse = await createClient(
+                                client,
+                              ).then(async (res: any) => {
+                                //creo una reserva para este cliente y seteo el numero de reserva
+                                console.log("TEST 1111");
+                                const nreserve = await reserveToClient({
+                                  clientId: res.id,
+                                });
+                                setNReserve(nreserve!);
+                                await Promise.all(
+                                  reserves.map(async (reserve: Reserve) => {
+                                    //creo items para esta reserva
+                                    reserve.client = client.email;
+                                    const response = parseInt(
+                                      await reservarBox(reserve!),
+                                    );
+                                    if (!isNaN(response)) {
+                                      reserve.IdTransaction = response;
+                                    } else {
+                                      failed = true;
+                                      setFailedResponse(true);
+                                    }
+                                  }),
                                 );
-                                if (!isNaN(response)) {
-                                  reserve.IdTransaction = response;
-                                } else {
-                                  failed = true;
-                                  setFailedResponse(true);
-                                }
-                              }),
-                            );
 
-                            return res;
-                          });
-                          if (!failed) {
-                            setReserva(true);
-                            const checkoutNumber = await test({
-                              amount: total,
-                              reference: clientResponse.id.toString(),
-                              mail: client.email!,
-                              name: client.name!,
-                              identification: client.identifier!,
-                            });
-                            setCheckoutNumber(checkoutNumber);
+                                return res;
+                              });
+                              if (!failed) {
+                                setReserva(true);
+                                const checkoutNumber = await test({
+                                  amount: total,
+                                  reference: clientResponse.id.toString(),
+                                  mail: client.email!,
+                                  name: client.name!,
+                                  identification: client.identifier!,
+                                });
+                                setCheckoutNumber(checkoutNumber);
+                              }
+                            }
+                          } catch (error) {
+                            console.log(error);
                           }
-                        }
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }}
-                    after={true}
-                    icon={<ChevronRightIcon className="h-4 w-4 " />}
+                        }}
+                        after={true}
+                        icon={<ChevronRightIcon className="h-4 w-4 " />}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {reserva && !pagoOk && !loadingPay && (
+              <div className="flex flex-row-reverse">
+                {!loadingPay && (
+                  <Payment
+                    checkoutNumber={checkoutNumber!}
+                    setLoadingPay={setLoadingPay}
+                    client={client}
+                    coin={coin!}
+                    endDate={endDate!}
+                    startDate={startDate!}
+                    nReserve={nReserve}
+                    reserves={reserves}
+                    setPagoOk={setPagoOk}
+                    setReserves={setReserves}
+                    sizes={props.sizes}
+                    store={store!}
+                    total={total}
+                    cupon={cupon}
+                    isExt={false}
+                  />
+                )}
+              </div>
+            )}
+            {pagoOk && (
+              <div>
+                <div>
+                  <Success
+                    reserves={reserves}
+                    store={store!}
+                    nReserve={nReserve!}
+                    total={total}
+                    coin={coin}
+                    checkoutNumber={checkoutNumber!}
+                    sizes={props.sizes}
+                    endDate={undefined}
                   />
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-        {reserva && !pagoOk && !loadingPay && (
-          <div className="flex flex-row-reverse">
-            {!loadingPay && (
-              <Payment
-                checkoutNumber={checkoutNumber!}
-                setLoadingPay={setLoadingPay}
-                client={client}
-                coin={coin!}
-                endDate={endDate!}
-                startDate={startDate!}
-                nReserve={nReserve}
-                reserves={reserves}
-                setPagoOk={setPagoOk}
-                setReserves={setReserves}
-                sizes={props.sizes}
-                store={store!}
-                total={total}
-                cupon={cupon}
-                isExt={false}
-              />
             )}
           </div>
-        )}
-        {pagoOk && (
-          <div>
-            <div>
-              <Success
-                reserves={reserves}
-                store={store!}
-                nReserve={nReserve!}
-                total={total}
-                coin={coin}
-                checkoutNumber={checkoutNumber!}
-                sizes={props.sizes}
-                endDate={undefined}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+      {isExtension && (
+        <div className="container absolute">
+          <Extension sizes={props.sizes} />
+        </div>
+      )}
+    </>
   );
 }
