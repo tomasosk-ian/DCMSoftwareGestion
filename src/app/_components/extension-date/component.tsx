@@ -88,10 +88,7 @@ export default function DateComponent(props: {
                   setRange({ to: e?.to!, from: range?.from });
                 }}
                 numberOfMonths={2}
-                disabled={(date) =>
-                  date <
-                  new Date(new Date(reserve.FechaFin!).setHours(0, 0, 0, 0))
-                }
+                disabled={(date) => date < new Date()}
                 initialFocus
               />
             </div>
@@ -107,7 +104,7 @@ export default function DateComponent(props: {
                 <ButtonCustomComponent
                   disabled={new Date() <= new Date(reserve.FechaFin!)}
                   onClick={onlyToday}
-                  text={`Solo hoy`}
+                  text={`Hasta hoy`}
                 />
               </div>
             </div>
