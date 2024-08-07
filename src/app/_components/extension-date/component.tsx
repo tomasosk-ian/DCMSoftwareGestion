@@ -96,7 +96,11 @@ export default function DateComponent(props: {
               <div className="mb-2 px-1 md:mb-0 md:w-1/2 lg:w-1/4">
                 <ButtonCustomComponent
                   onClick={handleClick}
-                  disabled={range?.to == undefined}
+                  disabled={
+                    range?.to == undefined ||
+                    isNaN(props.days) ||
+                    props.days == 0
+                  }
                   text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
                 />
               </div>
