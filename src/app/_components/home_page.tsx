@@ -29,6 +29,7 @@ import UserForm from "./user/userForm";
 import { env } from "process";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
+import { useRouter } from "next/navigation";
 
 export const Icons = {
   spinner: Loader2,
@@ -53,6 +54,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failedResponse, setFailedResponse] = useState<boolean>(false);
+  const router = useRouter();
 
   const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
@@ -130,6 +132,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   }
   return (
     <div className="container absolute">
+      {failedResponse && <AlertFailedResponse />}
       <div className="flex flex-col items-center justify-center ">
         <StoreSelector
           stores={storess.data}
@@ -296,10 +299,13 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
             </div>
           </div>
         )}
+        <Button
+          className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
+          onClick={() => router.push("/extension")}
+        >
+          Extender reserva
+        </Button>
       </div>
-      <a>
-        <ul>Extender reserva</ul>
-      </a>
     </div>
   );
 }

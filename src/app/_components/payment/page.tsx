@@ -99,12 +99,18 @@ export default function Payment(props: {
                       if (props.cupon)
                         useCupon({ identifier: props.cupon.identifier! });
                     }
-                    const updatedReserve = await updateReserve({
-                      identifier: reserve?.identifier!,
-                      FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
-                      FechaInicio: reserve?.FechaInicio!,
-                    });
-                    if (props.setReserves) props.setReserves([updatedReserve!]);
+                    if (props.isExt) {
+                      const updatedReserve = await updateReserve({
+                        identifier: reserve?.identifier!,
+                        FechaFin: format(
+                          props.endDate,
+                          "yyyy-MM-dd'T'23:59:59",
+                        ),
+                        FechaInicio: reserve?.FechaInicio!,
+                      });
+                      if (props.setReserves)
+                        props.setReserves([updatedReserve!]);
+                    }
                     return {
                       ...reserve,
                       Token1: response,
