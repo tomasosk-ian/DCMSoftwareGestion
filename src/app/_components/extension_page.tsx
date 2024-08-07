@@ -53,6 +53,7 @@ export default function Extension(props: { sizes: Size[] }) {
   const [checkoutNumber, setCheckoutNumber] = useState<string>();
   const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
+  const [failed, setFailed] = useState<boolean>(false);
 
   const { data: coins } = api.coin.get.useQuery();
   const { data: sizes } = api.store.get.useQuery();
@@ -84,11 +85,33 @@ export default function Extension(props: { sizes: Size[] }) {
 
     return true;
   };
-  //   const { data: transaction } = api.transaction.getBynroReserve.useQuery({
-  //     nReserve: reserve[0]!.nReserve!,
-  //   });
+  function AlertFailedResponse() {
+    return (
+      <AlertDialog defaultOpen={true}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hubo un error.</AlertDialogTitle>
+            <AlertDialogDescription>
+              No se encuentra la reserva.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                location.reload();
+              }}
+            >
+              Aceptar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
   return (
     <div className="container absolute">
+      {failed && <AlertFailedResponse />}
+
       <div className="flex flex-col items-center justify-center ">
         {!email && <SelectEmail email={email} setEmail={setEmail} />}
         {email && !token && (
@@ -97,6 +120,7 @@ export default function Extension(props: { sizes: Size[] }) {
             email={email}
             setToken={setToken}
             setClient={setClient}
+            setFailed={setFailed}
           />
         )}
         {token && !reserve && (

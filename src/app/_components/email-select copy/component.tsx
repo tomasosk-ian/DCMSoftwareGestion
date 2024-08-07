@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 import ButtonCustomComponent from "~/components/buttonCustom";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Input } from "~/components/ui/input";
 import { Client } from "~/server/api/routers/clients";
 import { api } from "~/trpc/react";
@@ -11,10 +20,11 @@ export default function SelectToken(props: {
   email: string;
   setToken: (token: number) => void;
   setClient: (client: Client) => void;
+  setFailed: (failed: boolean) => void;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<number>();
-  const { data: client } = api.client.getByEmail.useQuery({
+  const { data: client, isLoading } = api.client.getByEmail.useQuery({
     email: props.email,
   });
   const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +39,10 @@ export default function SelectToken(props: {
   const handleSubmit = () => {
     if (token && token.toString().length === 6) {
       props.setToken(token!);
-      props.setClient(client!);
+      if (!isLoading) {
+        if (!client) props.setFailed(true);
+        props.setClient(client!);
+      }
     } else {
       setError("El token debe tener 6 dígitos.");
     }
