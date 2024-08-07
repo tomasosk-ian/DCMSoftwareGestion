@@ -44,6 +44,8 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
   const [serieLocker, setSerieLocker] = useState("");
   const [address, setAddress] = useState("");
   const [organizationName, setOrganizationName] = useState("");
+  const [description, setDescription] = useState("");
+
   const router = useRouter();
 
   async function handleCreate() {
@@ -54,6 +56,8 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
         cityId,
         address,
         organizationName,
+        serieLocker,
+        description,
       });
 
       toast.success("Local creado correctamente");
@@ -137,6 +141,15 @@ export function AddStoreDialog(props: { cities: City[]; lockers: Locker[] }) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          <div className="col-8 py-4">
+            <Label htmlFor="address">Descripción</Label>
+            <Input
+              id="Descripción"
+              placeholder="ej: Horario: 9 a 23 hs"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
           <div className="col-8 py-4">
             <Label htmlFor="address">Dirección</Label>

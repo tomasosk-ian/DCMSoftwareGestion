@@ -39,7 +39,8 @@ export default function storeSelector(props: {
                         {store.name}
                       </CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        {store.address}
+                        <p>{store.address}</p>
+                        <p>{store.description}</p>
                       </CardDescription>
                     </CardHeader>
                     <img

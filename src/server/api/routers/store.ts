@@ -79,6 +79,8 @@ export const storeRouter = createTRPCRouter({
         cityId: z.string().min(0).max(1023),
         address: z.string().min(0).max(1023),
         organizationName: z.string().min(0).max(1023),
+        serieLocker: z.string().min(0).max(1023),
+        description: z.string().min(0).max(1023),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -90,6 +92,8 @@ export const storeRouter = createTRPCRouter({
         cityId: input.cityId,
         address: input.address,
         organizationName: input.organizationName,
+        serieLocker: input.serieLocker,
+        description: input.description,
       });
 
       return { identifier };
@@ -104,6 +108,7 @@ export const storeRouter = createTRPCRouter({
         serieLocker: z.string().nullable(),
         address: z.string().min(0).max(1023).nullable(),
         organizationName: z.string().min(0).max(1023),
+        description: z.string().min(0).max(1023),
       }),
     )
     .mutation(({ ctx, input }) => {

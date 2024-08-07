@@ -84,6 +84,12 @@ export default function SizeCard(props: {
             <span className="text-gray-700">
               Primer día {props.coin.description}
               {tarifa.data?.value}
+            </span>{" "}
+          </div>
+          <div className="mt-1 flex justify-start text-sm">
+            <span className="text-gray-700">
+              Día adicional {props.coin.description}
+              {(tarifa.data?.value! * (100 - tarifa.data?.discount!)) / 100}
             </span>
           </div>
           {props.size.cantidad !== 0 && (

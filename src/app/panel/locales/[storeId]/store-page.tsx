@@ -54,6 +54,7 @@ export default function StorePage(props: {
   const [cityId, setCity] = useState(props.store.cityId!);
   const [serieLocker, setSerieLocker] = useState(props.store.serieLocker);
   const [address, setAddress] = useState(props.store.address);
+  const [description, setDescription] = useState(props.store.description ?? "");
   const [organizationName, setOrganizationName] = useState(
     props.store.organizationName!,
   );
@@ -73,6 +74,7 @@ export default function StorePage(props: {
         serieLocker,
         address,
         organizationName,
+        description,
       });
       toast.success("Se ha modificado el local.");
       router.refresh();
@@ -171,7 +173,14 @@ export default function StorePage(props: {
                       onChange={(e) => setAddress(e.target.value)}
                     />
                   </div>
-
+                  <div>
+                    <Label htmlFor="name">Descripción</Label>
+                    <Input
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div>
                   <div>
                     <Label htmlFor="name">Nombre de organización</Label>
                     <Input

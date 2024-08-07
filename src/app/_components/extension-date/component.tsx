@@ -92,8 +92,8 @@ export default function DateComponent(props: {
                 onSelect={(e) => {
                   const toDate = e?.to!;
                   const days = differenceInDays(toDate, range?.from!);
-                  props.setDays(days + 1);
-                  setRange(e);
+                  props.setDays(days);
+                  setRange({ to: e?.to!, from: range?.from });
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>
@@ -108,7 +108,7 @@ export default function DateComponent(props: {
                 <ButtonCustomComponent
                   onClick={handleClick}
                   disabled={range?.to == undefined}
-                  text={`Aplicar ${props.days} días`}
+                  text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">

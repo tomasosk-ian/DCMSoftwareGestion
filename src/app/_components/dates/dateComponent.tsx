@@ -22,7 +22,7 @@ export default function DateComponent(props: {
     fromDate.setHours(0, 0, 0, 0);
     const toDate = new Date();
     toDate.setHours(23, 59, 0, 0);
-    props.setDays(1);
+    props.setDays(0);
 
     setRange({ from: fromDate, to: toDate });
   }, []);
@@ -48,31 +48,27 @@ export default function DateComponent(props: {
     props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
     getDays();
   }
-  if (!range) return <div>cargando...</div>;
   return (
     <div>
       {!props.endDate && (
-        <div className="container flex flex-col items-center justify-center gap-6 ">
+        <div className="container flex flex-col items-center justify-center  ">
           <h2 className="text-3xl font-semibold">
             ¿Cuántos días necesitas tu locker?
           </h2>
+          <p>Reservas desde las 00:00 hs hasta las 23:59</p>
           <div className="justify-center">
             <div className="w-full">
               <Calendar
                 mode="range"
                 selected={range}
                 onSelect={(e) => {
-                  const currentDate = new Date();
-                  currentDate.setHours(0, 0, 0, 0);
-                  const fromDate = currentDate;
-                  const toDate = e?.to!;
-                  const days = differenceInDays(toDate, fromDate);
+                  const days = differenceInDays(e?.to!, e?.from!);
                   props.setDays(days + 1);
-                  setRange(e);
+                  setRange({ to: e?.to!, from: range?.from });
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>
-                  date < new Date(new Date().setHours(0, 0, 0, 0))
+                  date <= new Date(new Date().setHours(0, 0, 0, 0))
                 }
                 initialFocus
               />
@@ -82,7 +78,7 @@ export default function DateComponent(props: {
                 <ButtonCustomComponent
                   onClick={handleClick}
                   disabled={range?.to == undefined}
-                  text={`Aplicar ${props.days} días`}
+                  text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
