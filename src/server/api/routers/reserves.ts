@@ -117,6 +117,7 @@ export const reserveRouter = createTRPCRouter({
             eq(schema.reservas.Token1, input.token),
             eq(schema.reservas.client, input.email),
           ),
+        orderBy: (reservas, { desc }) => [desc(reservas.FechaCreacion)],
 
         with: { clients: true },
       });
