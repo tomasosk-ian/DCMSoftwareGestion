@@ -138,7 +138,7 @@ export const lockerReserveRouter = createTRPCRouter({
         console.log("reservedBoxData", reservedBoxData);
         return reservedBoxData;
       } else {
-        console.log("ENTRA EN NO ISEXT");
+        console.log("ENTRA EN ISEXT");
 
         const reservationResponse = await fetch(
           `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate}`,
