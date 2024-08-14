@@ -38,7 +38,7 @@ export const lockerReserveRouter = createTRPCRouter({
         NroSerie: z.string().nullable(),
         IdSize: z.number().nullable(),
         IdBox: z.number().nullable(),
-        Token1: z.number().nullable(),
+        Token1: z.number().nullable().optional(),
         FechaCreacion: z.string().nullable(),
         FechaInicio: z.string().nullable(),
         FechaFin: z.string().nullable(),
@@ -53,6 +53,7 @@ export const lockerReserveRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      console.log("JSON.stringify(input)", JSON.stringify(input));
       const reservationResponse = await fetch(
         `${env.SERVER_URL}/api/token/reservar/${input.NroSerie}`,
         {
@@ -63,6 +64,10 @@ export const lockerReserveRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         },
+      );
+      console.log(
+        "ASDASDASDDSSADADSADSASDADSKSADJDSAJADSJASJSADJDSA",
+        reservationResponse,
       );
 
       // Handle the response from the external API
@@ -84,7 +89,7 @@ export const lockerReserveRouter = createTRPCRouter({
         NroSerie: input.NroSerie,
         IdSize: input.IdSize,
         IdBox: input.IdBox,
-        Token1: input.Token1,
+        Token1: input.Token1 ?? null,
         FechaCreacion: new Date().toISOString(),
         FechaInicio: input.FechaInicio,
         FechaFin: input.FechaFin,

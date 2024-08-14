@@ -68,71 +68,86 @@ export default function Payment(props: {
               let token: [number, string][] = [];
               const updatedReserves = await Promise.all(
                 props.reserves.map(async (reserve) => {
-                  if (reserve.IdTransaction) {
-                    const response = await confirmarBox({
+                  if (!reserve.IdTransaction) {
+                    return reserve;
+                  }
+
+                  let response;
+                  //si no es extension, el idtransaction es con el que se confirma el box. si es extension, el idtransaction es el de mobbex
+                  if (!props.isExt) {
+                    // Cuando isExt es false
+                    response = await confirmarBox({
                       idToken: reserve.IdTransaction!,
                       nReserve: props.nReserve,
                       isExt: props.isExt,
                       newEndDate: props.endDate,
                     });
+
                     if (response) {
-                      if (props.isExt) {
-                        token.push([
-                          props.reserves[0]?.Token1!,
-                          props.sizes.find((x) => x.id == reserve.IdSize)
-                            ?.nombre! ?? "",
-                        ]);
-                      } else {
-                        token.push([
-                          response,
-                          props.sizes.find((x) => x.id == reserve.IdSize)
-                            ?.nombre! ?? "",
-                        ]);
-                      }
+                      token.push([
+                        response,
+                        props.sizes.find((x) => x.id === reserve.IdSize)
+                          ?.nombre! ?? "",
+                      ]);
+
                       await createTransaction({
                         ...transaction,
                         client: reserve.client,
                         amount: props.total,
                         nReserve: props.nReserve,
                       });
-                      if (props.cupon)
+
+                      if (props.cupon) {
                         useCupon({ identifier: props.cupon.identifier! });
+                      }
                     }
-                    if (props.isExt) {
-                      const updatedReserve = await createReserve({
-                        Contador: reserve.Contador,
-                        FechaCreacion: reserve.FechaCreacion,
-                        FechaInicio: reserve?.FechaInicio!,
-                        FechaFin: format(
-                          props.endDate,
-                          "yyyy-MM-dd'T'23:59:59",
-                        ),
-                        IdBox: reserve.IdBox,
-                        IdSize: reserve.IdSize,
-                        NroSerie: reserve.NroSerie,
-                        Token1: reserve.Token1,
-                        Cantidad: reserve.Cantidad,
-                        client: reserve.client,
-                        Confirmado: reserve.Confirmado,
-                        IdLocker: reserve.IdLocker,
-                        IdTransaction: IdTransaction,
-                        Modo: reserve.Modo,
-                        nReserve: props.nReserve,
-                      });
-                      if (props.setReserves)
-                        props.setReserves([updatedReserve!]);
-                    }
-                    return {
-                      ...reserve,
-                      Token1: response,
-                      idToken: reserve.IdTransaction!,
-                      nReserve: props.nReserve,
-                    };
                   } else {
-                    return reserve;
+                    // Cuando isExt es true
+                    response = reserve.Token1;
+
+                    token.push([
+                      reserve.Token1!,
+                      props.sizes.find((x) => x.id === reserve.IdSize)
+                        ?.nombre! ?? "",
+                    ]);
+
+                    const updatedReserve = await createReserve({
+                      Contador: reserve.Contador,
+                      FechaCreacion: reserve.FechaCreacion,
+                      FechaInicio: reserve?.FechaInicio!,
+                      FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
+                      IdBox: reserve.IdBox,
+                      IdSize: reserve.IdSize,
+                      NroSerie: reserve.NroSerie,
+                      Token1: reserve.Token1,
+                      Cantidad: reserve.Cantidad,
+                      client: reserve.client,
+                      Confirmado: reserve.Confirmado,
+                      IdLocker: reserve.IdLocker,
+                      IdTransaction: reserve.IdTransaction!,
+                      Modo: reserve.Modo,
+                      nReserve: props.nReserve,
+                    });
+                    await createTransaction({
+                      ...transaction,
+                      client: reserve.client,
+                      amount: props.total,
+                      nReserve: props.nReserve,
+                    });
+                    if (props.setReserves) {
+                      props.setReserves([updatedReserve!]);
+                    }
                   }
+
+                  return {
+                    ...reserve,
+                    Token1: response,
+                    idToken: reserve.IdTransaction!,
+                    nReserve: props.nReserve,
+                  };
                 }),
               );
+
               if (props.setReserves) props.setReserves(updatedReserves);
               console.log("EL CLIENTE QUE QUIERO???", props.client);
               await sendEmail({

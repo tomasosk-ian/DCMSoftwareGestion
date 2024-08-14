@@ -59,6 +59,7 @@ export const transactionRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const channel = await db.query.transactions.findFirst({
         where: eq(schema.transactions.nReserve, input.nReserve),
+        orderBy: (transaction, { desc }) => [desc(transaction.confirmedAt)],
       });
       return channel;
     }),

@@ -220,7 +220,7 @@ export default function UserForm(props: {
             términos y condiciones
           </i>
         </label>
-        <span className="text-red-500">{props.errors?.terms}</span>
+        <span className="text-xxs text-red-500">{props.errors?.terms}</span>
       </div>
       {/* <div className="col-span-1 text-center md:col-span-12">
         <label htmlFor="terms" className="text-sm">

@@ -32,7 +32,7 @@ import { Input } from "~/components/ui/input";
 import SelectEmail from "./email-select/component";
 import SelectToken from "./email-select copy/component";
 import DateExtension from "./extension-date/component";
-import { Reserve } from "~/server/api/routers/reserves";
+import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 
 export const Icons = {
   spinner: Loader2,
@@ -54,7 +54,14 @@ export default function Extension(props: { sizes: Size[] }) {
   const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failed, setFailed] = useState<boolean>(false);
-
+  const [errors, setErrors] = useState({
+    name: "",
+    surname: "",
+    email: "",
+    prefijo: "",
+    telefono: "",
+    terms: "",
+  });
   const { data: coins } = api.coin.get.useQuery();
   const { data: sizes } = api.store.get.useQuery();
   const { data: stores } = api.store.get.useQuery();
@@ -77,11 +84,16 @@ export default function Extension(props: { sizes: Size[] }) {
     const newErrors = {
       name: client.name ? "" : "Nombre es obligatorio",
       surname: client.surname ? "" : "Apellido es obligatorio",
-      email: client.email!,
+      email: client.email ? "" : "Apellido es obligatorio",
       prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
       telefono: client.telefono ? "" : "Telefono es obligatorio",
       terms: terms ? "" : "Debe aceptar los términos y condiciones",
     };
+    // Si hay errores, retorna false
+    if (Object.values(newErrors).some((error) => error)) {
+      if (setErrors) setErrors(newErrors);
+      return false;
+    }
 
     return true;
   };
@@ -147,8 +159,8 @@ export default function Extension(props: { sizes: Size[] }) {
                 <UserForm
                   client={client}
                   setClient={setClient}
-                  errors={null}
-                  setErrors={null}
+                  errors={errors}
+                  setErrors={setErrors}
                   terms={terms}
                   setTerms={setTerms}
                   setCupon={null}
@@ -182,14 +194,6 @@ export default function Extension(props: { sizes: Size[] }) {
                             clientId: client.identifier,
                           });
                           setNReserve(nreserve!);
-
-                          const response = parseInt(await reservarBox(reserve));
-                          // if (!isNaN(response)) {
-                          //   reserve.IdTransaction = response;
-                          // } else {
-                          //   failed = true;
-                          //   setFailedResponse(true);
-                          // }
 
                           if (!failed) {
                             const checkoutNumber = await test({
