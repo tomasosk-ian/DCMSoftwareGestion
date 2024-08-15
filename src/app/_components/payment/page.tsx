@@ -74,14 +74,14 @@ export default function Payment(props: {
 
                   let response;
                   //si no es extension, el idtransaction es con el que se confirma el box. si es extension, el idtransaction es el de mobbex
+                  response = await confirmarBox({
+                    idToken: reserve.IdTransaction!,
+                    nReserve: props.nReserve,
+                    isExt: props.isExt,
+                    newEndDate: props.endDate,
+                  });
                   if (!props.isExt) {
                     // Cuando isExt es false
-                    response = await confirmarBox({
-                      idToken: reserve.IdTransaction!,
-                      nReserve: props.nReserve,
-                      isExt: props.isExt,
-                      newEndDate: props.endDate,
-                    });
 
                     if (response) {
                       token.push([
