@@ -68,8 +68,8 @@ export default function Extension(props: { sizes: Size[] }) {
   const [terms, setTerms] = useState<boolean>(false);
   const { mutateAsync: reserveToClient } =
     api.reserve.reservesToClients.useMutation();
-  const { mutateAsync: reservarBox } =
-    api.lockerReserve.reserveBox.useMutation();
+  const { mutateAsync: reserveExtesion } =
+    api.lockerReserve.reserveExtesion.useMutation();
   const { mutateAsync: test } = api.mobbex.test.useMutation();
 
   const [client, setClient] = useState<Client>({
@@ -195,6 +195,25 @@ export default function Extension(props: { sizes: Size[] }) {
                           });
                           setNReserve(nreserve!);
 
+                          reserve.client = client.email;
+                          console.log(
+                            "RESERVE TOKEN IS",
+                            reserve.IdTransaction,
+                          );
+                          const response = parseInt(
+                            await reserveExtesion({
+                              idToken: reserve.IdTransaction!,
+                              newEndDate: endDate,
+                            }),
+                          );
+                          console.log("response is", response);
+                          if (!isNaN(response)) {
+                            reserve.IdTransaction = response;
+                          } else {
+                            failed = true;
+                            setFailed(true);
+                          }
+                          setReserve(reserve);
                           if (!failed) {
                             const checkoutNumber = await test({
                               amount: total,

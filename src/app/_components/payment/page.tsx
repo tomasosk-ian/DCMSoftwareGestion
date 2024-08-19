@@ -77,40 +77,27 @@ export default function Payment(props: {
                   response = await confirmarBox({
                     idToken: reserve.IdTransaction!,
                     nReserve: props.nReserve,
-                    isExt: props.isExt,
-                    newEndDate: props.endDate,
                   });
-                  if (!props.isExt) {
-                    // Cuando isExt es false
 
-                    if (response) {
-                      token.push([
-                        response,
-                        props.sizes.find((x) => x.id === reserve.IdSize)
-                          ?.nombre! ?? "",
-                      ]);
-
-                      await createTransaction({
-                        ...transaction,
-                        client: reserve.client,
-                        amount: props.total,
-                        nReserve: props.nReserve,
-                      });
-
-                      if (props.cupon) {
-                        useCupon({ identifier: props.cupon.identifier! });
-                      }
-                    }
-                  } else {
-                    // Cuando isExt es true
-                    response = reserve.Token1;
-
+                  if (response) {
                     token.push([
-                      reserve.Token1!,
+                      response,
                       props.sizes.find((x) => x.id === reserve.IdSize)
                         ?.nombre! ?? "",
                     ]);
 
+                    await createTransaction({
+                      ...transaction,
+                      client: reserve.client,
+                      amount: props.total,
+                      nReserve: props.nReserve,
+                    });
+
+                    if (props.cupon) {
+                      useCupon({ identifier: props.cupon.identifier! });
+                    }
+                  }
+                  if (props.isExt) {
                     const updatedReserve = await createReserve({
                       Contador: reserve.Contador,
                       FechaCreacion: reserve.FechaCreacion,
@@ -128,12 +115,7 @@ export default function Payment(props: {
                       Modo: reserve.Modo,
                       nReserve: props.nReserve,
                     });
-                    await createTransaction({
-                      ...transaction,
-                      client: reserve.client,
-                      amount: props.total,
-                      nReserve: props.nReserve,
-                    });
+
                     if (props.setReserves) {
                       props.setReserves([updatedReserve!]);
                     }
@@ -150,6 +132,7 @@ export default function Payment(props: {
 
               if (props.setReserves) props.setReserves(updatedReserves);
               console.log("EL CLIENTE QUE QUIERO???", props.client);
+              console.log("EL TOKEN QUE QUIERO???", token);
               await sendEmail({
                 to: props.client.email!,
                 token,

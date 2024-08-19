@@ -70,7 +70,10 @@ export const sizeRouter = createTRPCRouter({
       const sizeResponse = await fetch(
         `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
       );
-
+      console.log(
+        "sizeResponse",
+        `${env.SERVER_URL}/api/token/disponibilidadlocker/${input.nroSerieLocker}/${input.inicio}/${input.fin}`,
+      );
       // Handle the response from the external API
       if (!sizeResponse.ok) {
         const errorResponse = await sizeResponse.json();
