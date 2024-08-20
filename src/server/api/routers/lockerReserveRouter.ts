@@ -192,27 +192,34 @@ export const lockerReserveRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       console.log("ENTRA EN ISEXT");
+      console.log("input.idToken", input.idToken);
 
-      const reservationResponse = await fetch(
-        `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      try {
+        const reservationResponse = await fetch(
+          `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}), // Enviar un cuerpo vacío
           },
-        },
-      );
+        );
 
-      if (!reservationResponse.ok) {
-        const errorResponse = await reservationResponse.json();
-        console.log(errorResponse);
-        return errorResponse.message || "Unknown error";
+        if (!reservationResponse.ok) {
+          const errorResponse = await reservationResponse.json();
+          console.error("Error en la respuesta del servidor:", errorResponse);
+          return errorResponse.message || "Unknown error";
+        }
+
+        const reservedBoxData = await reservationResponse.json();
+
+        console.log("reservedBoxData", reservedBoxData);
+        return reservedBoxData;
+      } catch (error) {
+        console.error("Error en la solicitud de extensión:", error);
+        return "Error inesperado en la solicitud";
       }
-
-      const reservedBoxData = await reservationResponse.json();
-
-      console.log("extendedBoxData", reservedBoxData);
-      return reservedBoxData;
     }),
 });
 
