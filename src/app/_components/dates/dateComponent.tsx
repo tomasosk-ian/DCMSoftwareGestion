@@ -1,11 +1,9 @@
-import { Title } from "~/components/title";
 import { Calendar } from "~/components/ui/calendar";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { useEffect, useState } from "react";
-import { Button } from "~/components/ui/button";
 import ButtonCustomComponent from "../../../components/buttonCustom";
-import { ChevronRightIcon } from "lucide-react";
+import { es } from "date-fns/locale";
 
 export default function DateComponent(props: {
   startDate: string;
@@ -71,13 +69,18 @@ export default function DateComponent(props: {
                   date <= new Date(new Date().setHours(0, 0, 0, 0))
                 }
                 initialFocus
+                locale={es}
               />
             </div>
             <div className="flex flex-col pt-1 md:flex-row-reverse md:justify-between">
               <div className="mb-2 px-1 md:mb-0 md:w-1/2 lg:w-1/4">
                 <ButtonCustomComponent
                   onClick={handleClick}
-                  disabled={range?.to == undefined}
+                  disabled={
+                    range?.to == undefined ||
+                    isNaN(props.days) ||
+                    props.days == 0
+                  }
                   text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
                 />
               </div>

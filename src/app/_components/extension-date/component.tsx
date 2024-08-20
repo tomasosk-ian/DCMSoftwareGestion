@@ -1,15 +1,11 @@
-import { Title } from "~/components/title";
 import { Calendar } from "~/components/ui/calendar";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { useEffect, useState } from "react";
-import { Button } from "~/components/ui/button";
 import ButtonCustomComponent from "../../../components/buttonCustom";
-import { ChevronRightIcon } from "lucide-react";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/reserves";
-import { Client } from "~/server/api/routers/clients";
-import { Store } from "~/server/api/routers/store";
+import { es } from "date-fns/locale";
 
 export default function DateComponent(props: {
   startDate: string | undefined;
@@ -90,6 +86,7 @@ export default function DateComponent(props: {
                 numberOfMonths={2}
                 disabled={(date) => date < new Date()}
                 initialFocus
+                locale={es}
               />
             </div>
             <div className="flex flex-col pt-1 md:flex-row-reverse md:justify-between">
