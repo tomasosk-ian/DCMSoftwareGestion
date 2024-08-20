@@ -122,7 +122,6 @@ export default function UserForm(props: {
       <div className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-4">
         <Select
           disabled={!props.editable}
-          value={props.client.prefijo!.toString()}
           onValueChange={(value: string) => {
             if (props.setClient)
               props.setClient({
@@ -134,7 +133,7 @@ export default function UserForm(props: {
           }}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Seleccione" />
+            <SelectValue placeholder="Cod País" />
           </SelectTrigger>
           <SelectContent className="max-h-60 w-64">
             <SelectGroup>
@@ -155,9 +154,9 @@ export default function UserForm(props: {
       <Input
         disabled={!props.editable}
         className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-8"
-        placeholder="Telefono"
+        placeholder="Celular"
         name="telefono"
-        value={props.client.telefono ? props.client.telefono : 0}
+        // value={props.client.telefono ? props.client.telefono : "telefono"}
         onChange={(e) => {
           const { name, value } = e.target;
           if (props.setClient)
@@ -177,7 +176,7 @@ export default function UserForm(props: {
         </span>
       )}
       <Label className="col-span-1 text-xs text-buttonPick md:col-span-12">
-        Añade tu código de descuento
+        Si tenés un cupón de descuento completalo aquí{" "}
       </Label>
       <div className="col-span-1 flex md:col-span-12">
         <Input

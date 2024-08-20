@@ -140,6 +140,7 @@ export default function Payment(props: {
                 price: props.total,
                 coin: props.coin.description,
                 local: props.store!.name!,
+                address: props.store!.address ?? "",
                 nReserve: props.nReserve,
                 from: formatDateToTextDate(props.startDate!),
                 until: formatDateToTextDate(props.endDate!),

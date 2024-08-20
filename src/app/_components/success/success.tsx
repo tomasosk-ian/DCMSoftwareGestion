@@ -68,14 +68,18 @@ export default function Success(props: {
                     <p className="text-[#848484]">{props.nReserve}</p>
                   </div>
                   <div className=" flex justify-between text-sm">
-                    <p>Local</p>
-                    <p className="text-[#848484]">{props.store.name}</p>
-                  </div>
-                  <div className=" flex justify-between text-sm">
                     <p>Organización</p>
                     <p className="text-[#848484]">
                       {props.store.organizationName}
                     </p>
+                  </div>
+                  <div className=" flex justify-between text-sm">
+                    <p>Local</p>
+                    <p className="text-[#848484]">{props.store.name}</p>
+                  </div>
+                  <div className=" flex justify-between text-sm">
+                    <p>Dirección</p>
+                    <p className="text-[#848484]">{props.store.address}</p>
                   </div>
                 </div>
                 <hr className="border-[#848484] py-1" />

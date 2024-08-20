@@ -16,6 +16,7 @@ export const emailRouter = createTRPCRouter({
         coin: z.string().optional().nullable(),
         client: z.string(),
         local: z.string(),
+        address: z.string(),
         nReserve: z.number(),
         from: z.string(),
         until: z.string(),
@@ -59,7 +60,7 @@ export const emailRouter = createTRPCRouter({
          
           <body>
           <p>Estimado/a ${input.client},</p>
-          <p>Nos complace confirmar que tu reserva en ${input.local} ha sido exitosamente procesada.</p>
+          <p>Nos complace confirmar que tu reserva en ${input.local} en ${input.address} ha sido exitosamente procesada. </p>
 
 
           <p><strong>N° Reserva</strong></p>
