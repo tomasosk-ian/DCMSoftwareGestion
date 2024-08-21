@@ -90,7 +90,7 @@ export const lockerReserveRouter = createTRPCRouter({
         IdSize: input.IdSize,
         IdBox: input.IdBox,
         Token1: input.Token1 ?? null,
-        FechaCreacion: new Date().toISOString(),
+        FechaCreacion: input.FechaCreacion,
         FechaInicio: input.FechaInicio,
         FechaFin: input.FechaFin,
         Contador: input.Contador,

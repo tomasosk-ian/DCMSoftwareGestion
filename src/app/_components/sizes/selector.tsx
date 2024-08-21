@@ -115,7 +115,7 @@ export default function SizeSelector(props: {
               IdSize: parseInt(id),
               IdBox: null,
               Token1: null,
-              FechaCreacion: format(Date.now(), "yyyy-MM-dd'T'00:00:00"),
+              FechaCreacion: format(new Date(), "yyyy-MM-dd'T'00:00:00"),
               FechaInicio: props.startDate!,
               FechaFin: props.endDate!,
               Contador: -1,
