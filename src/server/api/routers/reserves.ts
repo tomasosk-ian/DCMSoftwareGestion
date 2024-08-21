@@ -53,6 +53,30 @@ export const reserveRouter = createTRPCRouter({
     return groupedByNReserve;
   }),
 
+  // getActive: publicProcedure.query(async ({ ctx }) => {
+  //   await checkBoxAssigned();
+
+  //   const result = await db.query.reservas.findMany({
+  //     where: (reservas) =>
+  //       and(isNotNull(reservas.nReserve), isNotNull(reservas.Token1)),
+  //     with: { clients: true },
+  //   });
+
+  //   const actives = result.filter(
+  //     (x) => new Date(x.FechaFin!).getTime() >= new Date().getTime(),
+  //   );
+
+  //   const groupedByNReserve = actives.reduce((acc: any, reserva) => {
+  //     const nReserve = reserva.nReserve!;
+  //     if (!acc[nReserve]) {
+  //       acc[nReserve] = [];
+  //     }
+  //     acc[nReserve].push(reserva);
+  //     return acc;
+  //   }, {});
+
+  //   return groupedByNReserve;
+  // }),
   getActive: publicProcedure.query(async ({ ctx }) => {
     await checkBoxAssigned();
 
@@ -62,8 +86,22 @@ export const reserveRouter = createTRPCRouter({
       with: { clients: true },
     });
 
+    const now = new Date();
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const endOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
+
     const actives = result.filter(
-      (x) => new Date(x.FechaFin!).getTime() >= new Date().getTime(),
+      (x) =>
+        new Date(x.FechaFin!).getTime() >= startOfDay.getTime() &&
+        new Date(x.FechaFin!).getTime() < endOfDay.getTime(),
     );
 
     const groupedByNReserve = actives.reduce((acc: any, reserva) => {
