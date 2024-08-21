@@ -1,7 +1,8 @@
 import { eq, lt, gt, isNotNull, and } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
-
+import { format, startOfDay, endOfDay, isAfter, isBefore } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -62,8 +63,22 @@ export const reserveRouter = createTRPCRouter({
   //     with: { clients: true },
   //   });
 
+  //   const now = new Date();
+  //   const startOfDay = new Date(
+  //     now.getFullYear(),
+  //     now.getMonth(),
+  //     now.getDate(),
+  //   );
+  //   const endOfDay = new Date(
+  //     now.getFullYear(),
+  //     now.getMonth(),
+  //     now.getDate() + 1,
+  //   );
+
   //   const actives = result.filter(
-  //     (x) => new Date(x.FechaFin!).getTime() >= new Date().getTime(),
+  //     (x) =>
+  //       new Date(x.FechaFin!).getTime() >= startOfDay.getTime() &&
+  //       new Date(x.FechaFin!).getTime() < endOfDay.getTime(),
   //   );
 
   //   const groupedByNReserve = actives.reduce((acc: any, reserva) => {
@@ -87,22 +102,18 @@ export const reserveRouter = createTRPCRouter({
     });
 
     const now = new Date();
-    const startOfDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-    const endOfDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1,
-    );
 
-    const actives = result.filter(
-      (x) =>
-        new Date(x.FechaFin!).getTime() >= startOfDay.getTime() &&
-        new Date(x.FechaFin!).getTime() < endOfDay.getTime(),
-    );
+    // Obtener el inicio y fin del día utilizando la configuración de idioma español
+    const startOfDayLocale = startOfDay(now);
+    const endOfDayLocale = endOfDay(now);
+
+    const actives = result.filter((x) => {
+      const fechaFin = new Date(x.FechaFin!);
+      return (
+        isAfter(fechaFin, startOfDayLocale) &&
+        isBefore(fechaFin, endOfDayLocale)
+      );
+    });
 
     const groupedByNReserve = actives.reduce((acc: any, reserva) => {
       const nReserve = reserva.nReserve!;
@@ -115,7 +126,6 @@ export const reserveRouter = createTRPCRouter({
 
     return groupedByNReserve;
   }),
-
   getBynReserve: publicProcedure
     .input(
       z.object({
