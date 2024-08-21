@@ -221,6 +221,7 @@ export default function Extension(props: { sizes: Size[] }) {
                               mail: client.email!,
                               name: client.name!,
                               identification: client.identifier!,
+                              cantidad: 1,
                             });
                             setCheckoutNumber(checkoutNumber);
                           }

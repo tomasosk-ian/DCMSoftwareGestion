@@ -262,6 +262,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                   mail: client.email!,
                                   name: client.name!,
                                   identification: client.identifier!,
+                                  cantidad: reserves.length,
                                 });
                                 setCheckoutNumber(checkoutNumber);
                               }

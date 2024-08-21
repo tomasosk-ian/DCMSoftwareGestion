@@ -1,5 +1,6 @@
 import { mobbex } from "mobbex";
 import { z } from "zod";
+import { env } from "~/env";
 
 import {
   createTRPCRouter,
@@ -16,6 +17,7 @@ export const mobbexRouter = createTRPCRouter({
         mail: z.string(),
         name: z.string(),
         identification: z.number(),
+        cantidad: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -25,12 +27,14 @@ export const mobbexRouter = createTRPCRouter({
         apiKey: "MG6cQtZdWShlZ9MObv98AloWZKUVBv3WwYmpfzOS",
         accessToken: "a4a78473-14cb-4810-b716-02f003c183bb",
       });
+      const test = env.NODE_ENV == "test" || env.NODE_ENV == "development";
+      console.log;
       const checkout = {
         total: input.amount!,
         currency: "ARS",
         reference: `REF${input.reference}${fourDigitString}`,
         description: "Descripción de la Venta",
-        test: true,
+        test,
         customer: {
           email: `${input.mail}`,
           name: `${input.name}`,
@@ -40,12 +44,12 @@ export const mobbexRouter = createTRPCRouter({
           {
             image:
               "https://www.mobbex.com/wp-content/uploads/2019/03/web_logo.png",
-            quantity: 2,
-            description: "Mi Producto",
-            total: 10000,
+            quantity: input.cantidad,
+            description: "Lockers",
+            total: input.amount,
           },
         ],
-        options: { domain: "test.com" },
+        options: { domain: "https://lockersurbanos.com.ar/" },
         return_url: "https://mobbex.com/sale/return?session=56789",
         webhook: "https://mobbex.com/sale/webhook?user=1234",
       };
