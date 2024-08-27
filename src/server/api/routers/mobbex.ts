@@ -27,9 +27,9 @@ export const mobbexRouter = createTRPCRouter({
         apiKey: "MG6cQtZdWShlZ9MObv98AloWZKUVBv3WwYmpfzOS",
         accessToken: "a4a78473-14cb-4810-b716-02f003c183bb",
       });
-      const test = env.NODE_ENV == "test" || env.NODE_ENV == "development";
+      const test = env.APP_ENV == "test" || env.APP_ENV == "development";
       console.log("test node env", test);
-      console.log("env.NODE_ENV", env.NODE_ENV);
+      console.log("env.NODE_ENV", env.APP_ENV);
       const checkout = {
         total: input.amount!,
         currency: "ARS",

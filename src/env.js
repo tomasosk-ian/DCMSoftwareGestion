@@ -17,6 +17,9 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    APP_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
     // Add ` on ID and SECRET if you want to make sure they're not empty
     AZURE_CLIENT_ID: z.string(),
     AZURE_CLIENT_SECRET: z.string(),
@@ -59,6 +62,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+    APP_ENV: process.env.APP_ENV,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
