@@ -1,6 +1,6 @@
 import { mobbex } from "mobbex";
+import { env } from "process";
 import { z } from "zod";
-import { env } from "~/env";
 
 import {
   createTRPCRouter,
