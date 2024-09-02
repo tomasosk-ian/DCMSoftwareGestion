@@ -34,7 +34,7 @@ export default function TableToolbar<TData, TValue>({
 
   return (
     <div className="flex flex-row justify-between items-center w-full">
-      <div className="w-full max-w-sm flex items-center place-content-center py-4 relative">
+      <div className="w-full max-w-sm flex items-center place-content-center  relative">
         {searchColumn !== undefined && table.getColumn(searchColumn ?? "") && (
           <>
             <Input

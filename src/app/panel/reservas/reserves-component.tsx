@@ -5,6 +5,8 @@ import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Reserves } from "~/server/api/routers/reserves";
 import { api } from "~/trpc/server";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
 export default async function ReservesComponent(props: {
   activesReserves: Record<number, Reserves[]>;
@@ -20,7 +22,7 @@ export default async function ReservesComponent(props: {
       .map((reserve) => ({
         nReserve: reserve.nReserve,
         storeName: stores.find(store => store.serieLocker === reserve.NroSerie)?.name || "-",
-        client: reserve.clients?.email || "-",
+        client: reserve.client || "-",
       }));
   };
 

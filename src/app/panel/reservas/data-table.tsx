@@ -22,6 +22,7 @@ import {
 } from "~/components/ui/newTable";
 import { ReserveTableRecord, columns } from "./columns";
 import TableToolbar from "~/components/tanstack/table-toolbar";
+import { DataTablePagination } from "~/components/tanstack/pagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,59 +54,63 @@ export function DataTable<TData extends ReserveTableRecord>({
   };
 
   return (
-    <>
+    <div className="w-full p-4 space-y-4">
+      {/* Barra de búsqueda */}
       <TableToolbar
         table={table}
-        searchColumn={"client"}  // Buscar por email
+        searchColumn={"client"}
         columns={table.getAllColumns()}
       />
 
-      <div className="rounded-md border">
-        <Table>
+      {/* Tabla de reservas */}
+      <div className="overflow-x-auto rounded-md border shadow-md">
+        <Table className="min-w-full divide-y divide-gray-200">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                className="rounded-lg bg-[#F7F7F7] hover:bg-[#F7F7F7]"
-                key={headerGroup.id}
-              >
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+              <TableRow className="bg-gray-50" key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className="text-center text-sm font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="bg-white divide-y divide-gray-200">
             {table.getRowModel().rows?.length ? (
-              <>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={() => handleRowClick(row)}
-                    className="border-x-0 border-b-2 border-gray-200 hover:cursor-pointer hover:bg-[#d7d3d395]"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </>
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  onClick={() => handleRowClick(row)}
+                  className="hover:bg-gray-100 cursor-pointer"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className=" whitespace-nowrap text-sm font-medium text-gray-900 text-right"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center text-sm text-gray-500"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -113,6 +118,7 @@ export function DataTable<TData extends ReserveTableRecord>({
           </TableBody>
         </Table>
       </div>
-    </>
+      <DataTablePagination table={table} />
+    </div>
   );
 }
