@@ -1,16 +1,32 @@
 import * as React from "react";
 
+
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Reserves } from "~/server/api/routers/reserves";
-
-import ReservesTable from "~/components/reserves-table";
 import { api } from "~/trpc/server";
 
 export default async function ReservesComponent(props: {
   activesReserves: Record<number, Reserves[]>;
   allReserves: Record<number, Reserves[]>;
 }) {
+  // Obtener las tiendas (stores) del servidor
   const stores = await api.store.get.query();
+
+  // Función para formatear las reservas, agregando el nombre del local correspondiente
+  const formatReserves = (reserves: Record<number, Reserves[]>) => {
+    return Object.values(reserves)
+      .flat()
+      .map((reserve) => ({
+        nReserve: reserve.nReserve,
+        storeName: stores.find(store => store.serieLocker === reserve.NroSerie)?.name || "-",
+        client: reserve.clients?.email || "-",
+      }));
+  };
+
+  // Datos formateados de reservas activas y todas las reservas
+  const activeReservesData = formatReserves(props.activesReserves);
+  const allReservesData = formatReserves(props.allReserves);
 
   return (
     <section className="space-y-2">
@@ -20,11 +36,12 @@ export default async function ReservesComponent(props: {
           <TabsTrigger value="all">Todas</TabsTrigger>
         </TabsList>
         <TabsContent value="active">
-          <ReservesTable reserves={props.activesReserves} stores={stores} />
-        </TabsContent>{" "}
+          {/* Reemplaza ReservesTable por DataTable */}
+          <DataTable columns={columns} data={activeReservesData} />
+        </TabsContent>
         <TabsContent value="all">
-          {" "}
-          <ReservesTable reserves={props.allReserves} stores={stores} />
+          {/* Reemplaza ReservesTable por DataTable */}
+          <DataTable columns={columns} data={allReservesData} />
         </TabsContent>
       </Tabs>
     </section>

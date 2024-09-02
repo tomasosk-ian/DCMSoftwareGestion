@@ -34,7 +34,7 @@ export default function AppLayout(props: AppLayoutProps) {
       <aside className="fixed bottom-0 left-0 top-[50px] hidden max-h-full w-[250px] overflow-y-auto border-r md:block">
         {props.sidenav}
       </aside>
-      <main className="relative mt-[70px] p-3 md:ml-[250px] md:p-10">
+      <main className="relative mt-[50px] p-1 md:ml-[250px]">
         {props.children}
       </main>
     </div>
