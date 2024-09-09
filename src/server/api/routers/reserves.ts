@@ -101,7 +101,7 @@ export const reserveRouter = createTRPCRouter({
       with: { clients: true },
     });
 
-    const now = new Date();
+    const now = new Date().getTime() - 3 * 60 * 60 * 1000;
 
     // Obtener el inicio y fin del día utilizando la configuración de idioma español
     const startOfDayLocale = startOfDay(now);
