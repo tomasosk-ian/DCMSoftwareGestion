@@ -61,6 +61,7 @@ export default function Extension(props: { sizes: Size[] }) {
     prefijo: "",
     telefono: "",
     terms: "",
+    dni:""
   });
   const { data: coins } = api.coin.get.useQuery();
   const { data: sizes } = api.store.get.useQuery();
@@ -79,6 +80,7 @@ export default function Extension(props: { sizes: Size[] }) {
     email: "",
     prefijo: 0,
     telefono: 0,
+    dni:0
   });
   const handleSubmit = () => {
     const newErrors = {
@@ -88,6 +90,7 @@ export default function Extension(props: { sizes: Size[] }) {
       prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
       telefono: client.telefono ? "" : "Telefono es obligatorio",
       terms: terms ? "" : "Debe aceptar los términos y condiciones",
+      dni:client.dni?"":"Debe ingresar un DNI/Pasaporte válido"
     };
     // Si hay errores, retorna false
     if (Object.values(newErrors).some((error) => error)) {
@@ -220,7 +223,9 @@ export default function Extension(props: { sizes: Size[] }) {
                               reference: client.identifier.toString(),
                               mail: client.email!,
                               name: client.name!,
-                              identification: client.identifier!,
+                              uid: client.identifier!,
+                              phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
+                              identification: 43717944,
                               cantidad: 1,
                             });
                             setCheckoutNumber(checkoutNumber);

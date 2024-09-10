@@ -48,6 +48,7 @@
     "countries-list": "^3.1.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.28.6",
     "embla-carousel-react": "^8.2.0",
     "lucide-react": "^0.321.0",
@@ -86,6 +87,8 @@
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "tailwindcss": "^3.4.10",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.0",
     "typescript": "^5.5.4"
   },
   "ct3aMetadata": {

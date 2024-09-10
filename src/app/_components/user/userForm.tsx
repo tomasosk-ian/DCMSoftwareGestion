@@ -30,6 +30,7 @@ export default function UserForm(props: {
     prefijo: string;
     telefono: string;
     terms: string;
+    dni:string;
   } | null;
   setErrors:
     | ((errors: {
@@ -38,7 +39,8 @@ export default function UserForm(props: {
         email: string;
         prefijo: string;
         telefono: string;
-        terms: string;
+        terms: string;    dni:string;
+
       }) => void)
     | null;
   terms: boolean | null;
@@ -110,14 +112,31 @@ export default function UserForm(props: {
       </span>
       <Input
         disabled={!props.editable}
-        className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-12"
+        className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-6"
         placeholder="Email"
         name="email"
         value={props.client.email!.toLowerCase()}
         onChange={handleChange}
       />
-      <span className="col-span-1 text-red-500 md:col-span-12">
+         <Input
+        disabled={!props.editable}
+        className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-6"
+        placeholder="DNI/PASAPORTE"
+        name="dni"
+        value={props.client.dni ? props.client.dni : undefined}
+        onChange={(e) => {
+          const { name, value } = e.target;
+          if (props.setClient)
+            props.setClient({ ...props.client, [name]: parseInt(value) });
+          if (props.setErrors && props.errors)
+            props.setErrors({ ...props.errors, [name]: "" });
+        }}
+      />
+      <span className="col-span-1 text-red-500 md:col-span-6">
         {props.errors?.email}
+      </span>
+      <span className="col-span-1 text-red-500 md:col-span-6">
+        {props.errors?.dni}
       </span>
       <div className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-4">
         <Select
@@ -156,7 +175,7 @@ export default function UserForm(props: {
         className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-8"
         placeholder="Celular"
         name="telefono"
-        // value={props.client.telefono ? props.client.telefono : "telefono"}
+        value={props.client.telefono ? props.client.telefono : undefined}
         onChange={(e) => {
           const { name, value } = e.target;
           if (props.setClient)

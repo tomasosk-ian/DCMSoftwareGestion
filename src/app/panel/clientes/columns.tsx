@@ -13,6 +13,8 @@ export type ClientTableRecord = {
   email: string | null;
   prefijo: number | null;
   telefono: number | null;
+  dni: number | null;
+  
 };
 
 export const columns: ColumnDef<ClientTableRecord>[] = [

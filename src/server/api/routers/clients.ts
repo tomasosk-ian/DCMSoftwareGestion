@@ -40,6 +40,7 @@ export const clientsRouter = createTRPCRouter({
         email: z.string().min(0).max(1023).nullable().optional(),
         prefijo: z.number().nullable().optional(),
         telefono: z.number().nullable().optional(),
+        dni: z.number().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -54,6 +55,7 @@ export const clientsRouter = createTRPCRouter({
           email: input.email,
           prefijo: input.prefijo,
           telefono: input.telefono,
+          dni:input.dni
         });
         const id = parseInt(result.lastInsertRowid?.toString()!);
         return { id };
@@ -99,6 +101,7 @@ export const clientsRouter = createTRPCRouter({
         email: z.string().min(0).max(1023).optional().nullable(),
         prefijo: z.number().optional().nullable(),
         telefono: z.number().optional().nullable(),
+        dni: z.number().nullable().optional(),
       }),
     )
     .mutation(({ ctx, input }) => {

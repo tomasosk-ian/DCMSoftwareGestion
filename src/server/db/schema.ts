@@ -30,6 +30,7 @@ export const clients = sqliteTable(
     email: text("email", { length: 255 }),
     prefijo: integer("prefijo"),
     telefono: integer("telefono"),
+    dni: integer("dni"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),

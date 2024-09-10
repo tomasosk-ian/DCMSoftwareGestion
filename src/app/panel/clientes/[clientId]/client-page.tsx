@@ -41,6 +41,7 @@ export default function ClientPage({ client }: { client: Client }) {
   const [email, setEmail] = useState(client!.email);
   const [prefijo, setPrefijo] = useState(client!.prefijo);
   const [telefono, setTelefono] = useState(client!.telefono);
+  const [dni, setDni] = useState(client!.dni);
   const { mutateAsync: renameclient, isLoading } =
     api.client.change.useMutation();
   const { data: reservasRecord } = api.reserve.getByClient.useQuery({
@@ -124,6 +125,14 @@ export default function ClientPage({ client }: { client: Client }) {
                       type="number"
                       value={telefono!}
                       onChange={(e) => setTelefono(parseInt(e.target.value))}
+                    />
+                  </div>  <div>
+                    <Label htmlFor="dni">DNI</Label>
+                    <Input
+                      id="dni"
+                      type="dni"
+                      value={dni!}
+                      onChange={(e) => setDni(parseInt(e.target.value))}
                     />
                   </div>
                 </div>

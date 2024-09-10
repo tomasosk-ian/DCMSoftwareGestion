@@ -66,6 +66,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     email: "",
     prefijo: 0,
     telefono: 0,
+    dni:0
   });
 
   const { mutateAsync: createClient } = api.client.create.useMutation();
@@ -85,6 +86,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     prefijo: "",
     telefono: "",
     terms: "",
+    dni:"",
   });
   const isValidEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,8 +98,9 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       surname: client.surname ? "" : "Apellido es obligatorio",
       email: isValidEmail(client.email!) ? "" : "Correo electrónico no válido",
       prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
-      telefono: client.telefono ? "" : "Telefono es obligatorio",
+      telefono: client.telefono ? "" : "Debe ingresar un telefono válido",
       terms: terms ? "" : "Debe aceptar los términos y condiciones",
+      dni:client.dni?"":"Debe ingresar un DNI/Pasaporte válido"
     };
 
     if (Object.values(newErrors).some((error) => error)) {
@@ -254,6 +257,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
 
                                 return res;
                               });
+                              console.log("DNI IS",client.dni)
                               if (!failed) {
                                 setReserva(true);
                                 const checkoutNumber = await test({
@@ -261,8 +265,10 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                   reference: clientResponse.id.toString(),
                                   mail: client.email!,
                                   name: client.name!,
-                                  identification: client.identifier!,
+                                  uid: client.identifier!,
                                   cantidad: reserves.length,
+                                  phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
+                                  identification: client.dni??0,
                                 });
                                 setCheckoutNumber(checkoutNumber);
                               }
