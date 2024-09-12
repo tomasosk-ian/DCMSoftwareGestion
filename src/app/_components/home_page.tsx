@@ -64,7 +64,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     email: "",
     prefijo: 0,
     telefono: 0,
-    dni: "0",
+    dni: "",
   });
 
   const { mutateAsync: createClient } = api.client.create.useMutation();
@@ -240,7 +240,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                     const response = await reservarBox(
                                       reserve!,
                                     );
-                                    console.log("RESPONSE IS ASDASD", response);
                                     const IdTransaction = parseInt(response);
                                     if (!isNaN(IdTransaction)) {
                                       reserve.IdTransaction = IdTransaction;
@@ -265,7 +264,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
 
                                 return res;
                               });
-                              console.log("DNI IS", client.dni);
                               if (!failed) {
                                 setReserva(true);
                                 const checkoutNumber = await test({
