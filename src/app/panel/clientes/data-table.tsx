@@ -61,11 +61,7 @@ export function DataTable<TData extends ClientTableRecord>({
   });
 
   const allColumns = table.getAllColumns();
-  const desiredColumns = ["Marca", "Plan", "UN", "Modalidad"];
-  const filteredColumns = Array.from(allColumns).filter((column) =>
-    desiredColumns.includes(column.id!),
-  );
-  console.log(filteredColumns);
+
   const handleRowClick = (row: Row<TData>) => {
     const linked = (link: string) => {
       window.location.href = link;
@@ -75,20 +71,13 @@ export function DataTable<TData extends ClientTableRecord>({
 
   return (
     <>
-      <TableToolbar
-        table={table}
-        searchColumn={"name"}
-        columns={filteredColumns}
-      />
+      <TableToolbar table={table} searchColumn={"name"} columns={allColumns} />
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                className="rounded-lg  "
-                key={headerGroup.id}
-              >
+              <TableRow className="rounded-lg  " key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
