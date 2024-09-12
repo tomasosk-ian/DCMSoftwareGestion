@@ -21,17 +21,14 @@ import {
 import { ChevronRightIcon, Loader2 } from "lucide-react";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
-import { Badge } from "~/components/ui/badge";
 import Payment from "./payment/page";
 import { Coin } from "~/server/api/routers/coin";
 import { useState } from "react";
 import UserForm from "./user/userForm";
-import { env } from "process";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
-import { response } from "express";
 
 export const Icons = {
   spinner: Loader2,
