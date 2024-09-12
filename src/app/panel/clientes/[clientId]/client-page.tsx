@@ -126,13 +126,14 @@ export default function ClientPage({ client }: { client: Client }) {
                       value={telefono!}
                       onChange={(e) => setTelefono(parseInt(e.target.value))}
                     />
-                  </div>  <div>
-                    <Label htmlFor="dni">DNI</Label>
+                  </div>{" "}
+                  <div>
+                    <Label htmlFor="dni">DNI/PASAPORTE</Label>
                     <Input
                       id="dni"
                       type="dni"
                       value={dni!}
-                      onChange={(e) => setDni(parseInt(e.target.value))}
+                      onChange={(e) => setDni(e.target.value)}
                     />
                   </div>
                 </div>

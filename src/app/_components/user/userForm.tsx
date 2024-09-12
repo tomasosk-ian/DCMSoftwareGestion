@@ -30,7 +30,7 @@ export default function UserForm(props: {
     prefijo: string;
     telefono: string;
     terms: string;
-    dni:string;
+    dni: string;
   } | null;
   setErrors:
     | ((errors: {
@@ -39,8 +39,8 @@ export default function UserForm(props: {
         email: string;
         prefijo: string;
         telefono: string;
-        terms: string;    dni:string;
-
+        terms: string;
+        dni: string;
       }) => void)
     | null;
   terms: boolean | null;
@@ -118,16 +118,16 @@ export default function UserForm(props: {
         value={props.client.email!.toLowerCase()}
         onChange={handleChange}
       />
-         <Input
+      <Input
         disabled={!props.editable}
         className="col-span-1 rounded border-2 border-buttonPick focus:border-buttonPick md:col-span-6"
         placeholder="DNI/PASAPORTE"
         name="dni"
-        value={props.client.dni ? props.client.dni : undefined}
+        value={props.client.dni ? props.client.dni : ""}
         onChange={(e) => {
           const { name, value } = e.target;
           if (props.setClient)
-            props.setClient({ ...props.client, [name]: parseInt(value) });
+            props.setClient({ ...props.client, [name]: value });
           if (props.setErrors && props.errors)
             props.setErrors({ ...props.errors, [name]: "" });
         }}

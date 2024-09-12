@@ -18,7 +18,7 @@ export const mobbexRouter = createTRPCRouter({
         uid: z.number(),
         phone: z.string(),
         name: z.string(),
-        identification: z.number(),
+        identification: z.string(),
         cantidad: z.number(),
       }),
     )
@@ -29,7 +29,7 @@ export const mobbexRouter = createTRPCRouter({
         apiKey: "MG6cQtZdWShlZ9MObv98AloWZKUVBv3WwYmpfzOS",
         accessToken: "a4a78473-14cb-4810-b716-02f003c183bb",
       });
-      console.log("input.identification",input.identification);
+      console.log("input.identification", input.identification);
       const test = env.APP_ENV == "test" || env.APP_ENV == "development";
       const checkout = {
         total: input.amount!,
@@ -41,7 +41,7 @@ export const mobbexRouter = createTRPCRouter({
           email: `${input.mail}`,
           name: `${input.name}`,
           uid: `${input.uid}`,
-          identification: `${input.identification}`,
+          identification: input.identification,
           phone: `${input.phone}`,
         },
         items: [

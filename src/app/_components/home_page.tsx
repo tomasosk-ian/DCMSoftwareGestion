@@ -31,6 +31,7 @@ import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
+import { response } from "express";
 
 export const Icons = {
   spinner: Loader2,
@@ -56,7 +57,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failedResponse, setFailedResponse] = useState<boolean>(false);
   const router = useRouter();
-
+  const [responseError, setResponseError] = useState<string>();
   const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
   const [client, setClient] = useState<Client>({
@@ -66,7 +67,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     email: "",
     prefijo: 0,
     telefono: 0,
-    dni:0
+    dni: "0",
   });
 
   const { mutateAsync: createClient } = api.client.create.useMutation();
@@ -86,7 +87,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     prefijo: "",
     telefono: "",
     terms: "",
-    dni:"",
+    dni: "",
   });
   const isValidEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -100,7 +101,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
       prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
       telefono: client.telefono ? "" : "Debe ingresar un telefono válido",
       terms: terms ? "" : "Debe aceptar los términos y condiciones",
-      dni:client.dni?"":"Debe ingresar un DNI/Pasaporte válido"
+      dni: client.dni ? "" : "Debe ingresar un DNI/Pasaporte válido",
     };
 
     if (Object.values(newErrors).some((error) => error)) {
@@ -117,10 +118,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Hubo un error.</AlertDialogTitle>
-            <AlertDialogDescription>
-              Alguien reservó su locker mientras ud. operaba. Se reiniciará la
-              selección.
-            </AlertDialogDescription>
+            <AlertDialogDescription>{responseError}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
@@ -234,7 +232,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                 client,
                               ).then(async (res: any) => {
                                 //creo una reserva para este cliente y seteo el numero de reserva
-                                console.log("TEST 1111");
                                 const nreserve = await reserveToClient({
                                   clientId: res.id,
                                 });
@@ -243,12 +240,26 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                   reserves.map(async (reserve: Reserve) => {
                                     //creo items para esta reserva
                                     reserve.client = client.email;
-                                    const response = parseInt(
-                                      await reservarBox(reserve!),
+                                    const response = await reservarBox(
+                                      reserve!,
                                     );
-                                    if (!isNaN(response)) {
-                                      reserve.IdTransaction = response;
+                                    console.log("RESPONSE IS ASDASD", response);
+                                    const IdTransaction = parseInt(response);
+                                    if (!isNaN(IdTransaction)) {
+                                      reserve.IdTransaction = IdTransaction;
                                     } else {
+                                      if (
+                                        response ==
+                                        "El locker está desconectado"
+                                      )
+                                        setResponseError(
+                                          "El sistema de reservas se encuentra temporalmente fuera de servicio. Por favor, intente en unos minutos. Disculpe las molestias.",
+                                        );
+                                      else
+                                        setResponseError(
+                                          "Alguien reservó su locker mientras ud. operaba. Se reiniciará la selección.",
+                                        );
+
                                       failed = true;
                                       setFailedResponse(true);
                                     }
@@ -257,7 +268,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
 
                                 return res;
                               });
-                              console.log("DNI IS",client.dni)
+                              console.log("DNI IS", client.dni);
                               if (!failed) {
                                 setReserva(true);
                                 const checkoutNumber = await test({
@@ -268,7 +279,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
                                   uid: client.identifier!,
                                   cantidad: reserves.length,
                                   phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
-                                  identification: client.dni??0,
+                                  identification: client.dni ?? "0",
                                 });
                                 setCheckoutNumber(checkoutNumber);
                               }
