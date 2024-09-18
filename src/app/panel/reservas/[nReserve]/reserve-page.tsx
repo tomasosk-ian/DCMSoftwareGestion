@@ -29,6 +29,7 @@ import QRCode from "react-qr-code";
 export default function ReservePage(props: {
   reserve: Reserves[];
   sizes: Size[];
+  transaction: any;
 }) {
   const { data: stores } = api.store.get.useQuery();
 
@@ -37,13 +38,6 @@ export default function ReservePage(props: {
   const { data: store } = api.store.getByNroSerie.useQuery({
     nroSerie: reserve[0]!.NroSerie!,
   });
-  const { data: transaction, isLoading } =
-    api.transaction.getBynroReserve.useQuery({
-      nReserve: reserve[0]?.nReserve!,
-    });
-
-  console.log("Transaction Query Result: ", transaction);
-  console.log("nReserve passed: ", reserve[0]?.nReserve);
 
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
@@ -55,7 +49,7 @@ export default function ReservePage(props: {
     return size!.nombre;
   }
   if (reserve.length <= 0) return <Title>No se encontró la reserva</Title>;
-  if (!transaction)
+  if (!props.transaction)
     return (
       <div>
         <Loader2 className="animate-spin" />
@@ -163,7 +157,9 @@ export default function ReservePage(props: {
             <p className="font-bold text-black">Total</p>
             <div className="flex items-baseline">
               <p className="text-xs font-bold text-black"> ARS </p>
-              <p className=" font-bold text-black">{transaction?.amount}</p>
+              <p className=" font-bold text-black">
+                {props.transaction?.amount}
+              </p>
             </div>
           </div>
         </div>

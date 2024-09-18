@@ -37,10 +37,12 @@ export default function SelectToken(props: {
   };
 
   const handleSubmit = () => {
+    console.log("TOKEN IS", token);
     if (token && token.toString().length === 6) {
       props.setToken(token!);
       if (!isLoading) {
         if (!client) props.setFailed(true);
+        console.log("client is", client);
         props.setClient(client!);
       }
     } else {
