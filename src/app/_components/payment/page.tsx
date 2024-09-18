@@ -59,7 +59,6 @@ export default function Payment(props: {
           window.MobbexEmbed.close();
         },
         onPayment: async (data: any) => {
-          console.log("data.data", data.data);
           statusCode = parseInt(data.data.status.code);
           const IdTransaction = parseInt(data.data.status.code);
           if (statusCode == 200) {
@@ -131,8 +130,7 @@ export default function Payment(props: {
               );
 
               if (props.setReserves) props.setReserves(updatedReserves);
-              console.log("EL CLIENTE QUE QUIERO???", props.client);
-              console.log("EL TOKEN QUE QUIERO???", token);
+
               await sendEmail({
                 to: props.client.email!,
                 token,

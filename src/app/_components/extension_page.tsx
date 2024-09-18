@@ -199,17 +199,14 @@ export default function Extension(props: { sizes: Size[] }) {
                           setNReserve(nreserve!);
 
                           reserve.client = client.email;
-                          console.log(
-                            "RESERVE TOKEN IS",
-                            reserve.IdTransaction,
-                          );
+
                           const response = parseInt(
                             await reserveExtesion({
                               idToken: reserve.IdTransaction!,
                               newEndDate: endDate,
                             }),
                           );
-                          console.log("response is", response);
+
                           if (!isNaN(response)) {
                             reserve.IdTransaction = response;
                           } else {

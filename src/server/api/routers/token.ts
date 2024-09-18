@@ -29,7 +29,6 @@ export const tokenRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log("RESPONSE TOKEN", input.token);
       const reservationResponse = await fetch(`${env.SERVER_URL}/api/token`, {
         method: "POST",
         headers: {
@@ -37,7 +36,6 @@ export const tokenRouter = createTRPCRouter({
         },
         body: JSON.stringify(input.token),
       });
-      console.log("reservationResponse", reservationResponse);
       return "OK";
     }),
 });

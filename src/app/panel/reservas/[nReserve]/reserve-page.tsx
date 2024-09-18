@@ -37,9 +37,14 @@ export default function ReservePage(props: {
   const { data: store } = api.store.getByNroSerie.useQuery({
     nroSerie: reserve[0]!.NroSerie!,
   });
-  const { data: transaction } = api.transaction.getBynroReserve.useQuery({
-    nReserve: reserve[0]!.nReserve!,
-  });
+  const { data: transaction, isLoading } =
+    api.transaction.getBynroReserve.useQuery({
+      nReserve: reserve[0]?.nReserve!,
+    });
+
+  console.log("Transaction Query Result: ", transaction);
+  console.log("nReserve passed: ", reserve[0]?.nReserve);
+
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM", { locale: es });

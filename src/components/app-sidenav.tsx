@@ -17,7 +17,6 @@ import { About } from "./about-dialog";
 import { Button } from "./ui/button";
 
 export default function AppSidenav(props: { isAdmin: boolean }) {
-  console.log(props.isAdmin);
   return (
     <div className="text-xs">
       <Sidenav>

@@ -34,7 +34,11 @@ export const Icons = {
   spinner: Loader2,
 };
 
-export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
+export default function HomePage(props: {
+  cities: City[];
+  sizes: Size[];
+  stores: Store[];
+}) {
   const [store, setStore] = useState<Store | null>(null);
   const [size, setSize] = useState<Size | null>(null);
   const [sizeSelected, setsizeSelected] = useState(false);
@@ -49,7 +53,6 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
     api.lockerReserve.reserveBox.useMutation();
   const { mutateAsync: reserveToClient } =
     api.reserve.reservesToClients.useMutation();
-  const storess = api.store.get.useQuery();
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failedResponse, setFailedResponse] = useState<boolean>(false);
@@ -140,7 +143,7 @@ export default function HomePage(props: { cities: City[]; sizes: Size[] }) {
               <div className="flex flex-col items-center justify-center ">
                 <div className="flex flex-col items-center justify-center ">
                   <StoreSelector
-                    stores={storess.data}
+                    stores={props.stores}
                     store={store}
                     setStore={setStore}
                   />{" "}

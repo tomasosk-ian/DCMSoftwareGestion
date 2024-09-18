@@ -9,12 +9,12 @@ import {
 } from "~/components/ui/card";
 import { Store } from "~/server/api/routers/store";
 
-export default function storeSelector(props: {
+export default function StoreSelector(props: {
   stores: Store[] | undefined;
   store: Store | null;
   setStore: (store: Store) => void;
 }) {
-  if (props.stores?.length == 0) {
+  if (!props.stores || props.stores.length === 0) {
     return <Title>No hay locales disponibles.</Title>;
   } else {
     return (
@@ -25,7 +25,9 @@ export default function storeSelector(props: {
               Selecciona tu local favorito.
             </h2>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {props.stores?.map((store) => {
+              {props.stores.map((store) => {
+                const key =
+                  store.identifier ?? store.identifier ?? Math.random();
                 return (
                   <Card
                     className="w-full max-w-xs cursor-pointer overflow-hidden p-0 shadow-xl"
@@ -39,8 +41,9 @@ export default function storeSelector(props: {
                         {store.name}
                       </CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        <p>{store.address}</p>
-                        <p>{store.description}</p>
+                        {store.address}
+                        <br />
+                        {store.description}
                       </CardDescription>
                     </CardHeader>
                     <img

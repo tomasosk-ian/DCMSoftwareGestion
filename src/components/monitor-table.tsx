@@ -181,8 +181,6 @@ export function MonitorDatatable(props: {
                     : true
                 }
                 onClick={() => {
-                  console.log("el id es", row.getValue("id"));
-                  console.log(props.reservas);
                   router.push(
                     `/panel/reservas/${
                       reservas?.find((r) => r.IdBox == row.getValue("id"))

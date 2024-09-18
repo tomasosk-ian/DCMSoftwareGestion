@@ -53,7 +53,6 @@ export const lockerReserveRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log("JSON.stringify(input)", JSON.stringify(input));
       const reservationResponse = await fetch(
         `${env.SERVER_URL}/api/token/reservar/${input.NroSerie}`,
         {
@@ -64,10 +63,6 @@ export const lockerReserveRouter = createTRPCRouter({
           },
           body: JSON.stringify(input),
         },
-      );
-      console.log(
-        "ASDASDASDDSSADADSADSASDADSKSADJDSAJADSJASJSADJDSA",
-        reservationResponse,
       );
 
       // Handle the response from the external API
@@ -114,7 +109,6 @@ export const lockerReserveRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log("id transaction is", input.idToken);
       // if (!input.isExt) {
       const reservationResponse = await fetch(
         `${env.SERVER_URL}/api/token/confirmar`,
@@ -141,7 +135,6 @@ export const lockerReserveRouter = createTRPCRouter({
         .update(schema.reservas)
         .set({ Token1: reservedBoxData, nReserve: input.nReserve })
         .where(eq(schema.reservas.IdTransaction, input.idToken));
-      console.log("reservedBoxData", reservedBoxData);
       return reservedBoxData;
       // }
       // else {
@@ -191,9 +184,6 @@ export const lockerReserveRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log("ENTRA EN ISEXT");
-      console.log("input.idToken", input.idToken);
-
       try {
         const reservationResponse = await fetch(
           `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
@@ -214,7 +204,6 @@ export const lockerReserveRouter = createTRPCRouter({
 
         const reservedBoxData = await reservationResponse.json();
 
-        console.log("reservedBoxData", reservedBoxData);
         return reservedBoxData;
       } catch (error) {
         console.error("Error en la solicitud de extensión:", error);
