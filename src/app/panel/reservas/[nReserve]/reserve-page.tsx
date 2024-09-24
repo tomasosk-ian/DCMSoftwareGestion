@@ -8,8 +8,16 @@ import { api } from "~/trpc/react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Size } from "~/server/api/routers/sizes";
-import { Loader2, LoaderIcon } from "lucide-react";
-import { MouseEventHandler } from "react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Edit,
+  Loader2,
+  LoaderIcon,
+  Save,
+  X,
+} from "lucide-react";
+import { MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -23,21 +31,32 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { asTRPCError } from "~/lib/errors";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import QRCode from "react-qr-code";
+import { DayPicker } from "react-day-picker";
+import { cn } from "~/lib/utils";
 
 export default function ReservePage(props: {
   reserve: Reserves[];
   sizes: Size[];
   transaction: any;
+  isAdmin: boolean;
 }) {
   const { data: stores } = api.store.get.useQuery();
-
+  const [edit, setEdit] = useState(false);
   const { reserve } = props;
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    new Date(reserve[0]?.FechaFin!),
+  );
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    new Date(reserve[0]?.FechaInicio!),
+  );
   if (reserve.length <= 0) return <Title>No se encontró la reserva</Title>;
   const { data: store } = api.store.getByNroSerie.useQuery({
     nroSerie: reserve[0]!.NroSerie!,
   });
+  const { mutateAsync: updateReserve } =
+    api.reserve.updateReserve.useMutation();
 
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
@@ -55,6 +74,21 @@ export default function ReservePage(props: {
         <Loader2 className="animate-spin" />
       </div>
     );
+  function handleSave() {
+    if (startDate && endDate) {
+      updateReserve({
+        identifier: reserve[0]!.identifier!,
+        FechaInicio: startDate.toISOString(),
+        FechaFin: endDate.toISOString(),
+      }).then(() => {
+        setEdit(false);
+      });
+    }
+  }
+  function handleCancel() {
+    setStartDate(new Date(reserve[0]?.FechaInicio!));
+    setEndDate(new Date(reserve[0]?.FechaFin!));
+  }
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -68,6 +102,35 @@ export default function ReservePage(props: {
                 stores?.find((x) => x.serieLocker == reserve[0]!.NroSerie)
                   ?.name}
             </p>
+            {props.isAdmin &&
+              (!edit ? (
+                <div className="ml-auto">
+                  <Button
+                    onClick={() => setEdit(true)}
+                    variant="ghost"
+                    className="hover:bg-slate-300"
+                  >
+                    <Edit />
+                  </Button>
+                </div>
+              ) : (
+                <div className="ml-auto">
+                  <Button
+                    onClick={() => setEdit(false)}
+                    variant="ghost"
+                    className="hover:bg-green-200"
+                  >
+                    <Save onClick={handleSave} />
+                  </Button>
+                  <Button
+                    onClick={() => setEdit(false)}
+                    variant="ghost"
+                    className="hover:bg-red-200"
+                  >
+                    <X onClick={handleCancel} />
+                  </Button>
+                </div>
+              ))}
           </div>
           <div className="flex justify-between bg-gray-100 px-8 pb-2 pt-1">
             <div className="  ">
@@ -104,14 +167,107 @@ export default function ReservePage(props: {
               <p className=" mt-0 text-base font-bold text-orange-500">
                 {store?.organizationName}
               </p>
-              <p className=" mb-0 mt-3 text-xxs">Fecha inicio </p>
-              <p className=" mt-0 text-base font-bold text-orange-500">
-                {formatDateToTextDate(reserve[0]!.FechaInicio ?? "")}
-              </p>{" "}
-              <p className=" mb-0 mt-3 text-xxs">Fecha fin </p>
-              <p className=" mt-0 text-base font-bold text-orange-500">
-                {formatDateToTextDate(reserve[0]!.FechaFin ?? "")}
-              </p>
+              {!edit ? (
+                <>
+                  <p className="mb-0 mt-3 text-xxs">Fecha inicio</p>
+                  <p className="mt-0 text-base font-bold text-orange-500">
+                    {formatDateToTextDate(startDate?.toISOString() ?? "")}
+                  </p>
+                  <p className="mb-0 mt-3 text-xxs">Fecha fin</p>
+                  <p className="mt-0 text-base font-bold text-orange-500">
+                    {formatDateToTextDate(endDate?.toISOString() ?? "")}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mb-0 mt-3 text-xxs">Fecha inicio</p>
+                  <DayPicker
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    showOutsideDays={true}
+                    className={cn("p-3")}
+                    classNames={{
+                      months:
+                        "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                      month: "space-y-4",
+                      caption: "flex justify-center pt-1 relative items-center",
+                      caption_label: "text-sm font-medium",
+                      nav: "space-x-1 flex items-center",
+                      nav_button: cn(
+                        buttonVariants({ variant: "outline" }),
+                        "h-7 w-7 bg-buttonPick rounded-full p-0 opacity-50 hover:opacity-100",
+                      ),
+                      nav_button_previous: "absolute left-1",
+                      nav_button_next: "absolute right-1",
+                      table: "w-full border-collapse space-y-1",
+                      head_row: "flex",
+                      head_cell:
+                        "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
+                      row: "flex w-full mt-2",
+                      cell: cn(
+                        "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md",
+                        "[&:has([aria-selected])]:rounded-md",
+                      ),
+                      day: cn(
+                        buttonVariants({ variant: "ghost" }),
+                        "h-8 w-8 p-0 font-normal aria-selected:opacity-100",
+                      ),
+                      day_selected:
+                        "bg-buttonHover text-primary-foreground hover:bg-buttonHover hover:text-primary-foreground focus:bg-buttonPick focus:text-primary-foreground",
+                      day_today: "bg-accent text-accent-foreground",
+                      day_outside: "text-muted-foreground opacity-50",
+                    }}
+                    components={{
+                      IconLeft: () => <ChevronLeftIcon className="h-4 w-4" />,
+                      IconRight: () => <ChevronRightIcon className="h-4 w-4" />,
+                    }}
+                  />
+                  <p className="mb-0 mt-3 text-xxs">Fecha fin</p>
+                  <DayPicker
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    showOutsideDays={true}
+                    className={cn("p-3")}
+                    classNames={{
+                      months:
+                        "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                      month: "space-y-4",
+                      caption: "flex justify-center pt-1 relative items-center",
+                      caption_label: "text-sm font-medium",
+                      nav: "space-x-1 flex items-center",
+                      nav_button: cn(
+                        buttonVariants({ variant: "outline" }),
+                        "h-7 w-7 bg-buttonPick rounded-full p-0 opacity-50 hover:opacity-100",
+                      ),
+                      nav_button_previous: "absolute left-1",
+                      nav_button_next: "absolute right-1",
+                      table: "w-full border-collapse space-y-1",
+                      head_row: "flex",
+                      head_cell:
+                        "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
+                      row: "flex w-full mt-2",
+                      cell: cn(
+                        "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md",
+                        "[&:has([aria-selected])]:rounded-md",
+                      ),
+                      day: cn(
+                        buttonVariants({ variant: "ghost" }),
+                        "h-8 w-8 p-0 font-normal aria-selected:opacity-100",
+                      ),
+                      day_selected:
+                        "bg-buttonHover text-primary-foreground hover:bg-buttonHover hover:text-primary-foreground focus:bg-buttonPick focus:text-primary-foreground",
+                      day_today: "bg-accent text-accent-foreground",
+                      day_outside: "text-muted-foreground opacity-50",
+                    }}
+                    components={{
+                      IconLeft: () => <ChevronLeftIcon className="h-4 w-4" />,
+                      IconRight: () => <ChevronRightIcon className="h-4 w-4" />,
+                    }}
+                  />
+                </>
+              )}
             </div>
           </div>
           <div className="flex justify-center bg-[#e2f0e9] py-1">
@@ -141,7 +297,7 @@ export default function ReservePage(props: {
                           <p>Box</p>
                           <p className="px-4 text-[#848484]">
                             {r.IdFisico ?? (
-                              <div className="text-xs">Sin asignar</div>
+                              <a className="text-xs">Sin asignar</a>
                             )}
                           </p>
                         </div>

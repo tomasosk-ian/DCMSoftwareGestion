@@ -1,11 +1,14 @@
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import ReservePage from "./reserve-page";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function Reserve(props: { params: { nReserve: string } }) {
   const reserve = await api.reserve.getBynReserve.query({
     nReserve: parseInt(props.params.nReserve),
   });
+  const isAdmin = auth().protect().sessionClaims.metadata.role == "admin";
+
   const sizes = await api.size.get.query();
   const transaction = await api.transaction.getBynroReserve.query({
     nReserve: reserve[0]!.nReserve!,
@@ -17,6 +20,11 @@ export default async function Reserve(props: { params: { nReserve: string } }) {
   }
 
   return (
-    <ReservePage reserve={reserve} sizes={sizes} transaction={transaction} />
+    <ReservePage
+      reserve={reserve}
+      sizes={sizes}
+      transaction={transaction}
+      isAdmin={isAdmin}
+    />
   );
 }
