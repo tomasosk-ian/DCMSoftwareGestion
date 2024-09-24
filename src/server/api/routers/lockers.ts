@@ -74,10 +74,6 @@ export type Token = z.infer<typeof tokenValidator>;
 
 export const lockerRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    console.log(
-      "AAAAAAAA",
-      `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
-    );
     const locerResponse = await fetch(
       `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
     );
