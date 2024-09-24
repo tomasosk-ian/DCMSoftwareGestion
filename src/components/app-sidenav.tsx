@@ -11,6 +11,7 @@ import {
   UserIcon,
   LayoutDashboardIcon,
   PercentCircleIcon,
+  AreaChartIcon,
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { About } from "./about-dialog";
@@ -34,6 +35,11 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
         {props.isAdmin && (
           <SidenavItem icon={<KeyRound />} disabled={true}>
             Permisos
+          </SidenavItem>
+        )}
+        {props.isAdmin && (
+          <SidenavItem icon={<AreaChartIcon />} disabled={true}>
+            Reportes
           </SidenavItem>
         )}
         <SidenavSeparator>Administración</SidenavSeparator>
