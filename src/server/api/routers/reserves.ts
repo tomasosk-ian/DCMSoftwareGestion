@@ -109,10 +109,7 @@ export const reserveRouter = createTRPCRouter({
 
     const actives = result.filter((x) => {
       const fechaFin = new Date(x.FechaFin!);
-      return (
-        isAfter(fechaFin, startOfDayLocale) &&
-        isBefore(fechaFin, endOfDayLocale)
-      );
+      return isAfter(fechaFin, startOfDayLocale);
     });
 
     const groupedByNReserve = actives.reduce((acc: any, reserva) => {

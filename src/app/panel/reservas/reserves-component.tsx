@@ -1,7 +1,5 @@
 import * as React from "react";
 
-
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Reserves } from "~/server/api/routers/reserves";
 import { api } from "~/trpc/server";
@@ -17,17 +15,31 @@ export default async function ReservesComponent(props: {
 
   // Función para formatear las reservas, agregando el nombre del local correspondiente
   const formatReserves = (reserves: Record<number, Reserves[]>) => {
+    const seenReserves = new Set<number>(); // Set para rastrear los nReserve únicos
+
     return Object.values(reserves)
       .flat()
+      .filter((reserve) => {
+        // Si el nReserve ya está en el Set, lo filtramos (no lo incluimos)
+        if (seenReserves.has(reserve.nReserve ?? 0)) {
+          return false;
+        }
+        // Si no está en el Set, lo agregamos y permitimos que pase el filtro
+        seenReserves.add(reserve.nReserve ?? 0);
+        return true;
+      })
       .map((reserve) => ({
         nReserve: reserve.nReserve,
-        storeName: stores.find(store => store.serieLocker === reserve.NroSerie)?.name || "-",
+        storeName:
+          stores.find((store) => store.serieLocker === reserve.NroSerie)
+            ?.name || "-",
         client: reserve.client || "-",
       }));
   };
 
   // Datos formateados de reservas activas y todas las reservas
   const activeReservesData = formatReserves(props.activesReserves);
+  console.log("activeReservesData: ", activeReservesData);
   const allReservesData = formatReserves(props.allReserves);
 
   return (
