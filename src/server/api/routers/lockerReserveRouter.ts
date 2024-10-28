@@ -185,6 +185,9 @@ export const lockerReserveRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
+        console.log(
+          `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
+        );
         const reservationResponse = await fetch(
           `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
           {
