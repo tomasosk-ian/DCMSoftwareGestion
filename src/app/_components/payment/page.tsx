@@ -79,11 +79,43 @@ export default function Payment(props: {
                   });
 
                   if (response) {
-                    token.push([
-                      response,
-                      props.sizes.find((x) => x.id === reserve.IdSize)
-                        ?.nombre! ?? "",
-                    ]);
+                    if (props.isExt) {
+                      token.push([
+                        reserve.Token1!,
+                        props.sizes.find((x) => x.id === reserve.IdSize)
+                          ?.nombre! ?? "",
+                      ]);
+                      const updatedReserve = await createReserve({
+                        Contador: reserve.Contador,
+                        FechaCreacion: reserve.FechaCreacion,
+                        FechaInicio: reserve?.FechaInicio!,
+                        FechaFin: format(
+                          props.endDate,
+                          "yyyy-MM-dd'T'23:59:59",
+                        ),
+                        IdBox: reserve.IdBox,
+                        IdSize: reserve.IdSize,
+                        NroSerie: reserve.NroSerie,
+                        Token1: reserve.Token1,
+                        Cantidad: reserve.Cantidad,
+                        client: reserve.client,
+                        Confirmado: reserve.Confirmado,
+                        IdLocker: reserve.IdLocker,
+                        IdTransaction: reserve.IdTransaction!,
+                        Modo: reserve.Modo,
+                        nReserve: props.nReserve,
+                      });
+
+                      if (props.setReserves) {
+                        props.setReserves([updatedReserve!]);
+                      }
+                    } else {
+                      token.push([
+                        response,
+                        props.sizes.find((x) => x.id === reserve.IdSize)
+                          ?.nombre! ?? "",
+                      ]);
+                    }
 
                     await createTransaction({
                       ...transaction,
@@ -96,29 +128,7 @@ export default function Payment(props: {
                       useCupon({ identifier: props.cupon.identifier! });
                     }
                   }
-                  if (props.isExt) {
-                    const updatedReserve = await createReserve({
-                      Contador: reserve.Contador,
-                      FechaCreacion: reserve.FechaCreacion,
-                      FechaInicio: reserve?.FechaInicio!,
-                      FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
-                      IdBox: reserve.IdBox,
-                      IdSize: reserve.IdSize,
-                      NroSerie: reserve.NroSerie,
-                      Token1: reserve.Token1,
-                      Cantidad: reserve.Cantidad,
-                      client: reserve.client,
-                      Confirmado: reserve.Confirmado,
-                      IdLocker: reserve.IdLocker,
-                      IdTransaction: reserve.IdTransaction!,
-                      Modo: reserve.Modo,
-                      nReserve: props.nReserve,
-                    });
-
-                    if (props.setReserves) {
-                      props.setReserves([updatedReserve!]);
-                    }
-                  }
+                  console.log("HELLO");
 
                   return {
                     ...reserve,
@@ -130,7 +140,7 @@ export default function Payment(props: {
               );
 
               if (props.setReserves) props.setReserves(updatedReserves);
-
+              console.log("TOKENS", token);
               await sendEmail({
                 to: props.client.email!,
                 token,

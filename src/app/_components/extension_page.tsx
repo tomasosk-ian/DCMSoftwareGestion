@@ -1,12 +1,6 @@
 "use client";
-import { City } from "~/server/api/routers/city";
-import { Button } from "~/components/ui/button";
-import StoreSelector from "./store/selector";
-import { Store } from "~/server/api/routers/store";
 import { Size } from "~/server/api/routers/sizes";
-import SizeSelector from "./sizes/selector";
 import { api } from "~/trpc/react";
-import DateComponent from "./dates/dateComponent";
 import Booking from "./booking/booking";
 import {
   AlertDialog,
@@ -20,15 +14,11 @@ import {
 import { ChevronRightIcon, Loader2 } from "lucide-react";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
-import { Badge } from "~/components/ui/badge";
 import Payment from "./payment/page";
 import { Coin } from "~/server/api/routers/coin";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UserForm from "./user/userForm";
-import { env } from "process";
 import ButtonCustomComponent from "~/components/buttonCustom";
-import { Cupon } from "~/server/api/routers/cupones";
-import { Input } from "~/components/ui/input";
 import SelectEmail from "./email-select/component";
 import SelectToken from "./email-select copy/component";
 import DateExtension from "./extension-date/component";
