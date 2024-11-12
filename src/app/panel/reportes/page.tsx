@@ -21,9 +21,13 @@ import {
 export default function LockerOcupationPage() {
   const router = useRouter();
 
-  // Estados para las fechas
-  const [startDate, setStartDate] = useState("2024-01-01");
-  const [endDate, setEndDate] = useState("2024-12-31");
+  // Estados para las fechas visibles en el input
+  const [tempStartDate, setTempStartDate] = useState("2024-01-01");
+  const [tempEndDate, setTempEndDate] = useState("2024-12-31");
+
+  // Estados para las fechas efectivas de consulta
+  const [startDate, setStartDate] = useState(tempStartDate);
+  const [endDate, setEndDate] = useState(tempEndDate);
 
   // Consulta de datos con fechas seleccionadas
   const { data: ocupationData } = api.reports.getOcupattion.useQuery({
@@ -32,13 +36,10 @@ export default function LockerOcupationPage() {
   });
   const { data: sizes } = api.size.get.useQuery() as { data: Size[] };
 
-  // Función para manejar el cambio de fechas
-  const handleDateChange = (type: "start" | "end", value: string) => {
-    if (type === "start") {
-      setStartDate(value);
-    } else {
-      setEndDate(value);
-    }
+  // Función para aplicar las fechas seleccionadas
+  const applyDateFilter = () => {
+    setStartDate(tempStartDate);
+    setEndDate(tempEndDate);
   };
 
   // Calcular los totales por tamaño
@@ -84,8 +85,8 @@ export default function LockerOcupationPage() {
             Fecha de Inicio:
             <input
               type="date"
-              value={startDate}
-              onChange={(e) => handleDateChange("start", e.target.value)}
+              value={tempStartDate}
+              onChange={(e) => setTempStartDate(e.target.value)}
               className="rounded border p-2"
             />
           </label>
@@ -93,11 +94,12 @@ export default function LockerOcupationPage() {
             Fecha de Fin:
             <input
               type="date"
-              value={endDate}
-              onChange={(e) => handleDateChange("end", e.target.value)}
+              value={tempEndDate}
+              onChange={(e) => setTempEndDate(e.target.value)}
               className="rounded border p-2"
             />
           </label>
+          <Button onClick={applyDateFilter}>Aplicar</Button>
         </div>
 
         {/* Tabla de Ocupación */}
