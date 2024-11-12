@@ -77,7 +77,6 @@ export default function LockerOcupationPage() {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Ocupación de Lockers</Title>
-          <Button onClick={() => router.refresh()}>Refrescar</Button>
         </div>
 
         <div className="my-4 flex gap-4">
