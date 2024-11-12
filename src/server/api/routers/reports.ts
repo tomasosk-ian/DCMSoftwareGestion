@@ -1,71 +1,70 @@
-// import { eq } from "drizzle-orm";
-// import { z } from "zod";
-// import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-// import { db } from "~/server/db";
-// import { lockerValidator } from "./lockers";
-// import { checkBoxAssigned } from "./reserves";
-// import { env } from "process";
+import { and, gte, lte, isNotNull, eq } from "drizzle-orm";
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { db, schema } from "~/server/db";
+import { sizes } from "~/server/db/schema";
+import { Reserves } from "./reserves";
 
-// export const reportRouter = createTRPCRouter({
-//   getUsageReport: publicProcedure
-//     .input(
-//       z.object({
-//         startDate: z.string(),
-//         endDate: z.string(),
-//       })
-//     )
-//     .query(async ({ input }) => {
-//       const { startDate, endDate } = input;
+export type DailyOccupation = {
+  day: string; // Formato "día/mes"
+  sizes: { [sizeName: string]: number }; // Un tamaño por columna con su cantidad
+  total: number; // Total de reservas del día
+};
 
-//       const locerResponse = await fetch(
-//         `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
-//       );
-//       if (!locerResponse.ok) {
-//         const errorResponse = await locerResponse.json();
-//         return { error: errorResponse.message || "Unknown error" };
-//       }
+export const reportsRouter = createTRPCRouter({
+  getOcupattion: publicProcedure
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { startDate, endDate } = input;
 
-//       const reservedBoxData = await locerResponse.json();
-//       // Validate the response data against the lockerValidator schema
-//       const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
-//       if (!validatedData.success) {
-//         // If the data is not an array, wrap it in an array
-//         const singleLocker = lockerValidator.safeParse(reservedBoxData);
+      // Obtener reservas en el rango de fechas con lockers asignados
+      const reserves = await db.query.reservas.findMany({
+        where: (reserva) =>
+          and(
+            gte(reserva.FechaInicio, startDate),
+            lte(reserva.FechaFin, endDate),
+            isNotNull(reserva.nReserve),
+            isNotNull(reserva.IdBox),
+          ),
+      });
 
-//         throw null;
-//       }
-//       await checkBoxAssigned();
-//       const totalLockers= validatedData.data.length;
+      // Obtener los nombres de tamaño para cada IdSize en las reservas
+      const sizeMap: { [id: number]: string | null } = {};
+      const uniqueSizeIds = Array.from(new Set(reserves.map((r) => r.IdSize)));
 
-//       const sizeDistribution = ["a",2];
+      const sizesData = await db.query.sizes.findMany({
+        where: (size) => eq(schema.sizes.id, size.id),
+      });
 
-//       return {
-//         totalLockers,
-//         sizeDistribution,
-//         totalAvgRentPeriod,
-//         totalAvgRentPeriodByLocker,
-//         totalRevenue,
-//         totalRevenueByLocker,
-//         totalRevenueByBox,
-//       };
-//     }),
-// });
+      sizesData.forEach((size) => {
+        sizeMap[size.id] = size.nombre;
+      });
 
-// export const reportsValidator = z.object({
-//     totalLockers: z.number().nullable().optional(),
-//     sizeDistribution: z.tuple([z.string(), z.number()]);
-//     idSize: z.number().nullable().optional(),
-//     idBox: z.number().nullable().optional(),
-//     token1: z.string().nullable().optional(),
-//     fechaCreacion: z.string().nullable().optional(),
-//     fechaInicio: z.string().nullable().optional(),
-//     fechaFin: z.string().nullable().optional(),
-//     contador: z.number().nullable().optional(),
-//     cantidad: z.number().nullable().optional(),
-//     confirmado: z.boolean().nullable().optional(),
-//     modo: z.string().nullable().optional(),
-//     idBoxNavigation: z.any().nullable().optional(),
-//     idLockerNavigation: z.any().nullable().optional(),
-//     idSizeNavigation: z.any().nullable().optional(),
-//   });
-// export type Reports = z.infer<typeof reportsValidator>;
+      // Agrupar reservas por día y tamaño
+      const occupationData: DailyOccupation[] = [];
+
+      reserves.forEach((reserve) => {
+        const date = new Date(reserve.FechaInicio!);
+        const dayKey = `${date.getDate()}/${date.getMonth() + 1}`; // Formato "día/mes"
+        const sizeName = sizeMap[reserve.IdSize!] || "Unknown";
+
+        // Busca o crea una entrada para el día actual
+        let dayEntry = occupationData.find((entry) => entry.day === dayKey);
+        if (!dayEntry) {
+          dayEntry = { day: dayKey, sizes: {}, total: 0 };
+          occupationData.push(dayEntry);
+        }
+
+        // Incrementa la cantidad para el tamaño específico y el total del día
+        dayEntry.sizes[sizeName] = (dayEntry.sizes[sizeName] || 0) + 1;
+        dayEntry.total += 1;
+      });
+      console.log("occupationData", occupationData);
+      return occupationData;
+    }),
+});
