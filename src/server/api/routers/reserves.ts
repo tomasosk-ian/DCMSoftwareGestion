@@ -52,7 +52,7 @@ export const reserveRouter = createTRPCRouter({
       return acc;
     }, {});
     console.log("groupedByNReserve", groupedByNReserve);
-    return groupedByNReserve as Reserve[];
+    return groupedByNReserve;
   }),
 
   // getActive: publicProcedure.query(async ({ ctx }) => {
