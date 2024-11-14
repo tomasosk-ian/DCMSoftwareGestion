@@ -109,6 +109,62 @@ export const reportsRouter = createTRPCRouter({
       ),
     };
   }),
+  getAverageReservationDuration: publicProcedure
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { startDate, endDate } = input;
+
+      // Fetch reservations within the date range with valid start and end dates
+      const reserves = await db.query.reservas.findMany({
+        where: (reserva) =>
+          and(
+            gte(reserva.FechaInicio, startDate),
+            lte(reserva.FechaFin, endDate),
+            isNotNull(reserva.FechaInicio),
+            isNotNull(reserva.FechaFin),
+          ),
+      });
+
+      // Calculate the duration of each reservation in days and accumulate data by duration
+      const durationMap: { [duration: number]: number } = {};
+      let totalReservations = 0;
+      let totalDays = 0;
+
+      reserves.forEach((reserve) => {
+        if (reserve.FechaInicio && reserve.FechaFin) {
+          const start = new Date(reserve.FechaInicio);
+          const end = new Date(reserve.FechaFin);
+          const duration = Math.round(
+            (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+          );
+
+          // Update the duration map and counters
+          durationMap[duration] = (durationMap[duration] || 0) + 1;
+          totalReservations += 1;
+          totalDays += duration;
+        }
+      });
+
+      const averageDuration =
+        totalReservations > 0 ? totalDays / totalReservations : 0;
+
+      // Format result to match the expected output for the chart and table
+      const durationData = Object.entries(durationMap).map(([days, count]) => ({
+        days: parseInt(days),
+        reservations: count,
+        averageDays: averageDuration,
+      }));
+
+      return {
+        data: durationData,
+        averageDuration,
+      };
+    }),
 });
 
 // Helper functions

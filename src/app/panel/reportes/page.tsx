@@ -28,6 +28,11 @@ export default function LockerOcupationPage() {
   const [startDate, setStartDate] = useState(tempStartDate);
   const [endDate, setEndDate] = useState(tempEndDate);
 
+  const { data: averageDurationData } =
+    api.reports.getAverageReservationDuration.useQuery({
+      startDate: "2024-01-01", // Puedes reemplazar esto con las fechas deseadas
+      endDate: "2024-12-31",
+    });
   const { data: ocupationData } = api.reports.getOcupattion.useQuery({
     startDate,
     endDate,
@@ -217,7 +222,6 @@ export default function LockerOcupationPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-
           <div style={{ width: "100%", height: 400 }}>
             <Title>Total de Ocupación</Title>
             <ResponsiveContainer>
@@ -246,7 +250,6 @@ export default function LockerOcupationPage() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-
           <div style={{ width: "100%", height: 400 }}>
             <Title>Reservas por Día</Title>
             <ResponsiveContainer>
@@ -264,7 +267,6 @@ export default function LockerOcupationPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-
           <div style={{ width: "100%", height: 400 }}>
             <Title>Facturación por Día</Title>
             <p>
@@ -282,6 +284,49 @@ export default function LockerOcupationPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          <div style={{ width: "100%", height: 400 }}>
+            <Title>Duración Promedio de Reserva</Title>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart
+                data={averageDurationData?.data}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="days"
+                  label={{
+                    value: "Días",
+                    position: "insideBottom",
+                    offset: -5,
+                  }}
+                />
+                <YAxis
+                  label={{
+                    value: "Reservas",
+                    angle: -90,
+                    position: "insideLeft",
+                  }}
+                />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="reservations" fill="#8884d8" name="Reservas" />
+                <Bar
+                  dataKey="averageDays"
+                  fill="#82ca9d"
+                  name="Promedio (días)"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <p className="mt-4 text-center">
+              <strong>Promedio de duración:</strong>{" "}
+              {averageDurationData?.averageDuration.toFixed(2)} días
+            </p>
+          </div>{" "}
         </div>
       </section>
     </LayoutContainer>
