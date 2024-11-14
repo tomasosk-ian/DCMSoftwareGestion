@@ -12,6 +12,7 @@ import {
   LayoutDashboardIcon,
   PercentCircleIcon,
   AreaChartIcon,
+  BanIcon,
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { About } from "./about-dialog";
@@ -28,7 +29,7 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
           </SidenavItem>
         )}
         {props.isAdmin && (
-          <SidenavItem icon={<CogIcon />} disabled={true}>
+          <SidenavItem icon={<BanIcon />} disabled={true}>
             Roles
           </SidenavItem>
         )}
@@ -45,20 +46,26 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
           >
             Reportes
           </SidenavItem>
+        )}{" "}
+        {props.isAdmin && (
+          <SidenavItem
+            icon={<CogIcon />}
+            disabled={false}
+            href="/panel/parametros"
+          >
+            Parámetros
+          </SidenavItem>
         )}
         <SidenavSeparator>Administración</SidenavSeparator>
-
         <SidenavItem icon={<LayoutDashboardIcon />} href="/panel/monitor">
           Monitor
         </SidenavItem>
         {/* <SidenavItem icon={<CloudIcon />} disabled={true}>
           Ciudades{" "}
         </SidenavItem> */}
-
         <SidenavItem icon={<AlignStartVerticalIcon />} href="/panel/locales">
           Locales
         </SidenavItem>
-
         <SidenavItem icon={<GroupIcon />} href="/panel/tamanos">
           Tamaños
         </SidenavItem>
@@ -74,7 +81,6 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
         <SidenavItem icon={<PercentCircleIcon />} href="/panel/cupones">
           Cupones{" "}
         </SidenavItem>
-
         <div className="absolute bottom-0 right-0 px-5">
           <About />
         </div>
