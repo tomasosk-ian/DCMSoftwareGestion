@@ -86,9 +86,16 @@ export const reportsRouter = createTRPCRouter({
       throw new Error("Invalid locker data");
     }
 
-    const boxCountsBySize = calculateBoxCountsBySize(
-      validatedData.data as Locker[],
-    );
+    // Agrupa todos los lockers por tamaño
+    const boxCountsBySize: { [sizeName: string]: number } = {};
+
+    validatedData.data.forEach((locker) => {
+      locker.boxes.forEach((box) => {
+        const sizeName = box.idSizeNavigation?.nombre || "Unknown";
+        boxCountsBySize[sizeName] = (boxCountsBySize[sizeName] || 0) + 1;
+      });
+    });
+
     return boxCountsBySize;
   }),
 
