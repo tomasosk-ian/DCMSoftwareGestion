@@ -38,7 +38,11 @@ export default function LockerOcupationPage() {
     endDate,
   });
   const { data: sizes } = api.reports.getSizes.useQuery();
-  const { data: transactionsData } = api.transaction.get.useQuery();
+  const { data: transactionsData } =
+    api.transaction.getTransactionsByDate.useQuery({
+      startDate,
+      endDate,
+    });
   const { data: capacityBySize } =
     api.reports.getTotalBoxesAmountPerSize.useQuery();
 
@@ -65,6 +69,15 @@ export default function LockerOcupationPage() {
   const grandTotal = useMemo(() => {
     return Object.values(totalBySize).reduce((acc, count) => acc + count, 0);
   }, [totalBySize]);
+
+  const totalReservationsFromDuration = useMemo(() => {
+    return (
+      averageDurationData?.data?.reduce(
+        (acc, curr) => acc + (curr.reservations || 0),
+        0,
+      ) || 0
+    );
+  }, [averageDurationData]);
 
   const totalCapacity = useMemo(() => {
     if (!capacityBySize) return 0;
@@ -286,6 +299,10 @@ export default function LockerOcupationPage() {
           </div>
           <div style={{ width: "100%", height: 400 }}>
             <Title>Duración Promedio de Reserva</Title>
+            <p className="mt-2 text-center text-gray-700">
+              <strong>Total de reservas:</strong>{" "}
+              {totalReservationsFromDuration}
+            </p>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart
                 data={averageDurationData?.data}
@@ -326,7 +343,7 @@ export default function LockerOcupationPage() {
               <strong>Promedio de duración:</strong>{" "}
               {averageDurationData?.averageDuration.toFixed(2)} días
             </p>
-          </div>{" "}
+          </div>
         </div>
       </section>
     </LayoutContainer>

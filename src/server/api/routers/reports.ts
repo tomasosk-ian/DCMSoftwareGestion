@@ -104,18 +104,6 @@ export const reportsRouter = createTRPCRouter({
     return sizesData;
   }),
 
-  getTransactions: publicProcedure.query(async () => {
-    const transactions = await db.query.transactions.findMany();
-    const formattedTransactions = formatBillingData(transactions);
-
-    return {
-      data: formattedTransactions,
-      total: formattedTransactions.reduce(
-        (acc, entry) => acc + entry.amount,
-        0,
-      ),
-    };
-  }),
   getAverageReservationDuration: publicProcedure
     .input(
       z.object({
