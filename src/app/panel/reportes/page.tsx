@@ -129,8 +129,12 @@ export default function LockerOcupationPage() {
     let totalAmount = 0;
 
     transactionsData?.forEach((transaction) => {
+      // Procesar la fecha correctamente
       const date = new Date(transaction.confirmedAt!);
-      const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
+      const adjustedDate = new Date(date);
+      adjustedDate.setDate(adjustedDate.getDate() + 1); // Ajustar el desfase sumando un día
+      const formattedDate = `${adjustedDate.getDate()}/${adjustedDate.getMonth() + 1}`;
+
       const amount = transaction.amount || 0;
       billingMap[formattedDate] = (billingMap[formattedDate] || 0) + amount;
       totalAmount += amount;
