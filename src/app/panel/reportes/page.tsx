@@ -38,7 +38,11 @@ export default function LockerOcupationPage() {
     endDate,
   });
   const { data: sizes } = api.reports.getSizes.useQuery();
-  const { data: transactionsData } = api.transaction.get.useQuery();
+  const { data: transactionsData } =
+    api.transaction.getTransactionsByDate.useQuery({
+      startDate,
+      endDate,
+    });
   const { data: capacityBySize } =
     api.reports.getTotalBoxesAmountPerSize.useQuery();
 
@@ -50,21 +54,33 @@ export default function LockerOcupationPage() {
   const totalBySize = useMemo(() => {
     if (!ocupationData || !sizes) return {};
 
-    return ocupationData.reduce(
+    // Agrupar ocupación por tamaño único
+    const groupedSizes = ocupationData.reduce(
       (acc, entry) => {
-        sizes.forEach((size) => {
-          const sizeName = size.nombre || "Unknown";
-          acc[sizeName] = (acc[sizeName] || 0) + (entry.sizes[sizeName] || 0);
+        Object.entries(entry.sizes).forEach(([sizeName, count]) => {
+          // Sumar los valores de tamaños duplicados
+          acc[sizeName] = (acc[sizeName] || 0) + count;
         });
         return acc;
       },
       {} as { [sizeName: string]: number },
     );
-  }, [ocupationData, sizes]);
+
+    return groupedSizes;
+  }, [ocupationData]);
 
   const grandTotal = useMemo(() => {
     return Object.values(totalBySize).reduce((acc, count) => acc + count, 0);
   }, [totalBySize]);
+
+  const totalReservationsFromDuration = useMemo(() => {
+    return (
+      averageDurationData?.data?.reduce(
+        (acc, curr) => acc + (curr.reservations || 0),
+        0,
+      ) || 0
+    );
+  }, [averageDurationData]);
 
   const totalCapacity = useMemo(() => {
     if (!capacityBySize) return 0;
@@ -77,18 +93,28 @@ export default function LockerOcupationPage() {
       percentage: ((entry.total / totalCapacity) * 100).toFixed(2),
     })) || [];
 
-  const chartDataTotal =
-    ocupationData?.map((entry) => ({
-      day: entry.day,
-      total: entry.total,
-    })) || [];
+  const pieData = useMemo(() => {
+    if (!sizes) return [];
 
-  const pieData = sizes
-    ? sizes.map((size) => ({
-        name: size.nombre,
-        value: totalBySize[size.nombre!] || 0,
-      }))
-    : [];
+    // Crear datos de torta consolidados
+    return sizes
+      .reduce(
+        (acc, size) => {
+          const sizeName = size.nombre!;
+          const existingSize = acc.find((item) => item.name === sizeName);
+          const value = totalBySize[sizeName] || 0;
+
+          if (existingSize) {
+            existingSize.value += value; // Sumar valores si ya existe
+          } else {
+            acc.push({ name: sizeName, value }); // Crear nuevo grupo
+          }
+          return acc;
+        },
+        [] as { name: string; value: number }[],
+      )
+      .filter((data) => data.value > 0); // Filtrar tamaños con valor 0
+  }, [sizes, totalBySize]);
 
   const dailyReservationsData =
     ocupationData?.map((entry) => ({
@@ -210,15 +236,40 @@ export default function LockerOcupationPage() {
           <div style={{ width: "100%", height: 400 }}>
             <Title>Porcentaje de Ocupación vs Días</Title>
             <ResponsiveContainer>
-              <BarChart data={chartDataOccupation}>
+              <BarChart
+                data={chartDataOccupation}
+                margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis
-                  label={{ value: "Porcentaje de Ocupación", angle: -90 }}
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 12 }}
+                  label={{
+                    value: "Días",
+                    position: "insideBottom",
+                    offset: -10,
+                    fontSize: 14,
+                  }}
                 />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={{ fontSize: 12 }}
+                  label={{
+                    value: "Porcentaje de Ocupación",
+                    angle: -90,
+                    position: "insideLeft",
+                    fontSize: 14,
+                  }}
+                />
+
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="percentage" fill="#8884d8" name="Ocupación (%)" />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar
+                  dataKey="percentage"
+                  fill="#8884d8"
+                  name="Ocupación (%)"
+                  barSize={30}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -286,6 +337,10 @@ export default function LockerOcupationPage() {
           </div>
           <div style={{ width: "100%", height: 400 }}>
             <Title>Duración Promedio de Reserva</Title>
+            <p className="mt-2 text-center text-gray-700">
+              <strong>Total de reservas:</strong>{" "}
+              {totalReservationsFromDuration}
+            </p>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart
                 data={averageDurationData?.data}
@@ -326,7 +381,7 @@ export default function LockerOcupationPage() {
               <strong>Promedio de duración:</strong>{" "}
               {averageDurationData?.averageDuration.toFixed(2)} días
             </p>
-          </div>{" "}
+          </div>
         </div>
       </section>
     </LayoutContainer>
