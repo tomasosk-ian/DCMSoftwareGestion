@@ -112,7 +112,7 @@ export default function HomePage(props: {
     }
     return true;
   };
-  const envVariable = process.env.NEXT_PUBLIC_NODE_ENV;
+  const envVariable = process.env.APP_ENV;
   function AlertFailedResponse() {
     return (
       <AlertDialog defaultOpen={true}>
@@ -136,7 +136,9 @@ export default function HomePage(props: {
   }
   return (
     <>
-      <div>GOLA JAJA {envVariable}</div>
+      <div>
+        <p>Entorno actual: {envVariable}</p>
+      </div>{" "}
       {!isExtension && (
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}
