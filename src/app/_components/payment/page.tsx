@@ -4,6 +4,15 @@ import { es } from "date-fns/locale";
 import Script from "next/script";
 import { env } from "process";
 import { useEffect, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Client } from "~/server/api/routers/clients";
 import { Coin } from "~/server/api/routers/coin";
 import { Cupon } from "~/server/api/routers/cupones";
@@ -48,7 +57,7 @@ export default function Payment(props: {
     const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
     return formattedDate;
   }
-  const envVariable = env.NODE_ENV;
+  const envVariable = process.env.NEXT_PUBLIC_NODE_ENV || "Cargando...";
   async function success() {
     try {
       props.setLoadingPay(true);
@@ -143,70 +152,106 @@ export default function Payment(props: {
       console.log(error);
     }
   }
+
   useEffect(() => {
-    let statusCode = 0;
-    if (props.checkoutNumber) {
-      const options = {
-        id: props.checkoutNumber,
-        type: "checkout",
-        onResult: (data: any) => {
-          // OnResult es llamado cuando se toca el Botón Cerrar
+    if (envVariable !== "testing" && envVariable !== "development") {
+      let statusCode = 0;
+      if (props.checkoutNumber) {
+        const options = {
+          id: props.checkoutNumber,
+          type: "checkout",
+          onResult: (data: any) => {
+            // OnResult es llamado cuando se toca el Botón Cerrar
 
-          window.MobbexEmbed.close();
-        },
-        onPayment: async (data: any) => {
-          statusCode = parseInt(data.data.status.code);
-          if (statusCode == 200) {
-            await success();
-          } else {
-            // location.reload();
-          }
-        },
-        onOpen: () => {
-          console.info("Pago iniciado.");
-        },
-        onError: (error: any) => {
-          console.error("ERROR: ", error);
-        },
-        onClose: (error: any) => {
-          if (statusCode != 200) {
-            location.reload();
-          }
-        },
-      };
+            window.MobbexEmbed.close();
+          },
+          onPayment: async (data: any) => {
+            statusCode = parseInt(data.data.status.code);
+            if (statusCode == 200) {
+              await success();
+            } else {
+              // location.reload();
+            }
+          },
+          onOpen: () => {
+            console.info("Pago iniciado.");
+          },
+          onError: (error: any) => {
+            console.error("ERROR: ", error);
+          },
+          onClose: (error: any) => {
+            if (statusCode != 200) {
+              location.reload();
+            }
+          },
+        };
 
-      function renderMobbexButton() {
-        window.MobbexEmbed.render(options, "#mbbx-button");
+        function renderMobbexButton() {
+          window.MobbexEmbed.render(options, "#mbbx-button");
+        }
+
+        function initMobbexPayment() {
+          const mbbxButton = window.MobbexEmbed.init(options);
+          mbbxButton.open();
+        }
+
+        const script = document.createElement("script");
+        script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
+        script.async = true;
+        script.crossOrigin = "anonymous";
+        script.addEventListener("load", () => {
+          initMobbexPayment(); // Abre inmediatamente el modal de pago
+        });
+        document.body.appendChild(script);
+
+        return () => {
+          document.body.removeChild(script);
+        };
       }
-
-      function initMobbexPayment() {
-        const mbbxButton = window.MobbexEmbed.init(options);
-        mbbxButton.open();
-      }
-
-      const script = document.createElement("script");
-      script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      script.addEventListener("load", () => {
-        initMobbexPayment(); // Abre inmediatamente el modal de pago
-      });
-      document.body.appendChild(script);
-
-      return () => {
-        document.body.removeChild(script);
-      };
     }
   }, [props.checkoutNumber]);
 
+  function AlertSuccess() {
+    return (
+      <AlertDialog defaultOpen={true}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aviso</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se encuentra en un entorno de pruebas, la reserva será aceptada
+              automáticamente sin pasar por un medio de pago.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                success();
+              }}
+            >
+              Aceptar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
   return (
     <>
-      <Script
-        src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
-        integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
-        crossOrigin="anonymous"
-      />
-      <div id="mbbx-container"></div>
+      <div>la variable de entorno es: {envVariable}</div>
+      {envVariable === "testing" ||
+        (envVariable === "development" && <AlertSuccess />)}
+      {envVariable !== "testing" && envVariable !== "development" && (
+        <>
+          {" "}
+          <Script
+            src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
+            integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
+            crossOrigin="anonymous"
+          />
+          <div id="mbbx-container"></div>{" "}
+        </>
+      )}
     </>
   );
 }
