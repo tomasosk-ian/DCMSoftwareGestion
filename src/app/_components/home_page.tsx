@@ -29,6 +29,7 @@ import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
+import { env } from "process";
 
 export const Icons = {
   spinner: Loader2,
@@ -111,7 +112,7 @@ export default function HomePage(props: {
     }
     return true;
   };
-
+  const envVariable = env.NODE_ENV;
   function AlertFailedResponse() {
     return (
       <AlertDialog defaultOpen={true}>
@@ -135,6 +136,7 @@ export default function HomePage(props: {
   }
   return (
     <>
+      <div>GOLA JAJA {envVariable}</div>
       {!isExtension && (
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}

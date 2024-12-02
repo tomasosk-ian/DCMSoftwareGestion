@@ -2,6 +2,7 @@ import { Transaction } from "@libsql/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Script from "next/script";
+import { env } from "process";
 import { useEffect, useState } from "react";
 import { Client } from "~/server/api/routers/clients";
 import { Coin } from "~/server/api/routers/coin";
@@ -47,6 +48,101 @@ export default function Payment(props: {
     const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
     return formattedDate;
   }
+  const envVariable = env.NODE_ENV;
+  async function success() {
+    try {
+      props.setLoadingPay(true);
+      let token: [number, string][] = [];
+      const updatedReserves = await Promise.all(
+        props.reserves.map(async (reserve) => {
+          if (!reserve.IdTransaction) {
+            return reserve;
+          }
+
+          let response;
+          //si no es extension, el idtransaction es con el que se confirma el box. si es extension, el idtransaction es el de mobbex
+          response = await confirmarBox({
+            idToken: reserve.IdTransaction!,
+            nReserve: props.nReserve,
+          });
+
+          if (response) {
+            if (props.isExt) {
+              token.push([
+                reserve.Token1!,
+                props.sizes.find((x) => x.id === reserve.IdSize)?.nombre! ?? "",
+              ]);
+              const updatedReserve = await createReserve({
+                Contador: reserve.Contador,
+                FechaCreacion: reserve.FechaCreacion,
+                FechaInicio: reserve?.FechaInicio!,
+                FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
+                IdBox: reserve.IdBox,
+                IdSize: reserve.IdSize,
+                NroSerie: reserve.NroSerie,
+                Token1: reserve.Token1,
+                Cantidad: reserve.Cantidad,
+                client: reserve.client,
+                Confirmado: reserve.Confirmado,
+                IdLocker: reserve.IdLocker,
+                IdTransaction: reserve.IdTransaction!,
+                Modo: reserve.Modo,
+                nReserve: props.nReserve,
+              });
+
+              if (props.setReserves) {
+                props.setReserves([updatedReserve!]);
+              }
+            } else {
+              token.push([
+                response,
+                props.sizes.find((x) => x.id === reserve.IdSize)?.nombre! ?? "",
+              ]);
+            }
+
+            await createTransaction({
+              ...transaction,
+              client: reserve.client,
+              amount: props.total,
+              nReserve: props.nReserve,
+            });
+
+            if (props.cupon) {
+              useCupon({ identifier: props.cupon.identifier! });
+            }
+          }
+          console.log("HELLO");
+
+          return {
+            ...reserve,
+            Token1: response,
+            idToken: reserve.IdTransaction!,
+            nReserve: props.nReserve,
+          };
+        }),
+      );
+
+      if (props.setReserves) props.setReserves(updatedReserves);
+      console.log("TOKENS", token);
+      await sendEmail({
+        to: props.client.email!,
+        token,
+        client: props.client.name ?? "",
+        price: props.total,
+        coin: props.coin.description,
+        local: props.store!.name!,
+        address: props.store!.address ?? "",
+        nReserve: props.nReserve,
+        from: formatDateToTextDate(props.startDate!),
+        until: formatDateToTextDate(props.endDate!),
+      });
+
+      props.setLoadingPay(false);
+      props.setPagoOk(true);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   useEffect(() => {
     let statusCode = 0;
     if (props.checkoutNumber) {
@@ -60,105 +156,8 @@ export default function Payment(props: {
         },
         onPayment: async (data: any) => {
           statusCode = parseInt(data.data.status.code);
-          const IdTransaction = parseInt(data.data.status.code);
           if (statusCode == 200) {
-            try {
-              props.setLoadingPay(true);
-              let token: [number, string][] = [];
-              const updatedReserves = await Promise.all(
-                props.reserves.map(async (reserve) => {
-                  if (!reserve.IdTransaction) {
-                    return reserve;
-                  }
-
-                  let response;
-                  //si no es extension, el idtransaction es con el que se confirma el box. si es extension, el idtransaction es el de mobbex
-                  response = await confirmarBox({
-                    idToken: reserve.IdTransaction!,
-                    nReserve: props.nReserve,
-                  });
-
-                  if (response) {
-                    if (props.isExt) {
-                      token.push([
-                        reserve.Token1!,
-                        props.sizes.find((x) => x.id === reserve.IdSize)
-                          ?.nombre! ?? "",
-                      ]);
-                      const updatedReserve = await createReserve({
-                        Contador: reserve.Contador,
-                        FechaCreacion: reserve.FechaCreacion,
-                        FechaInicio: reserve?.FechaInicio!,
-                        FechaFin: format(
-                          props.endDate,
-                          "yyyy-MM-dd'T'23:59:59",
-                        ),
-                        IdBox: reserve.IdBox,
-                        IdSize: reserve.IdSize,
-                        NroSerie: reserve.NroSerie,
-                        Token1: reserve.Token1,
-                        Cantidad: reserve.Cantidad,
-                        client: reserve.client,
-                        Confirmado: reserve.Confirmado,
-                        IdLocker: reserve.IdLocker,
-                        IdTransaction: reserve.IdTransaction!,
-                        Modo: reserve.Modo,
-                        nReserve: props.nReserve,
-                      });
-
-                      if (props.setReserves) {
-                        props.setReserves([updatedReserve!]);
-                      }
-                    } else {
-                      token.push([
-                        response,
-                        props.sizes.find((x) => x.id === reserve.IdSize)
-                          ?.nombre! ?? "",
-                      ]);
-                    }
-
-                    await createTransaction({
-                      ...transaction,
-                      client: reserve.client,
-                      amount: props.total,
-                      nReserve: props.nReserve,
-                    });
-
-                    if (props.cupon) {
-                      useCupon({ identifier: props.cupon.identifier! });
-                    }
-                  }
-                  console.log("HELLO");
-
-                  return {
-                    ...reserve,
-                    Token1: response,
-                    idToken: reserve.IdTransaction!,
-                    nReserve: props.nReserve,
-                  };
-                }),
-              );
-
-              if (props.setReserves) props.setReserves(updatedReserves);
-              console.log("TOKENS", token);
-              await sendEmail({
-                to: props.client.email!,
-                token,
-                client: props.client.name ?? "",
-                price: props.total,
-                coin: props.coin.description,
-                local: props.store!.name!,
-                address: props.store!.address ?? "",
-                nReserve: props.nReserve,
-                from: formatDateToTextDate(props.startDate!),
-                until: formatDateToTextDate(props.endDate!),
-              });
-
-              props.setLoadingPay(false);
-              props.setPagoOk(true);
-            } catch (error) {
-              console.log(error);
-            }
+            await success();
           } else {
             // location.reload();
           }
