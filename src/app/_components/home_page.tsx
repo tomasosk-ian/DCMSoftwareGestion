@@ -112,7 +112,7 @@ export default function HomePage(props: {
     }
     return true;
   };
-  const envVariable = process.env.NODE_ENV;
+  const envVariable = process.env.NEXT_PUBLIC_NODE_ENV;
   function AlertFailedResponse() {
     return (
       <AlertDialog defaultOpen={true}>
