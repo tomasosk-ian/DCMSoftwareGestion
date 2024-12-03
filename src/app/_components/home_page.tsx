@@ -29,6 +29,7 @@ import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
+import { env } from "process";
 
 export const Icons = {
   spinner: Loader2,
@@ -111,7 +112,6 @@ export default function HomePage(props: {
     }
     return true;
   };
-
   function AlertFailedResponse() {
     return (
       <AlertDialog defaultOpen={true}>
