@@ -6,6 +6,7 @@ import { CheckCircle, DownloadIcon, XCircle } from "lucide-react";
 import { useRef } from "react";
 import { usePDF } from "react-to-pdf";
 import ButtonCustomComponent from "~/components/buttonCustom";
+import QRCode from "react-qr-code";
 
 import { Coin } from "~/server/api/routers/coin";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
@@ -121,10 +122,21 @@ export default function Success(props: {
                   </p>
                 </div>
                 {props.reserves.map((r, index) => (
-                  <div>
-                    <div className=" flex justify-between text-sm">
+                  <div className="flex break-inside-avoid items-center justify-between py-2 text-sm">
+                    <div>
                       <p>Token ({getSize(r.IdSize!)})</p>
-                      <p className="text-[#848484]">{r.Token1}</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <QRCode
+                        className="w-1/2"
+                        size={128}
+                        style={{ height: "auto", width: "75%" }}
+                        value={r.Token1?.toString() ?? ""}
+                        viewBox={`0 0 128 128`}
+                      />
+                      <p className="mt-2 text-center text-[#848484]">
+                        {r.Token1}
+                      </p>{" "}
                     </div>
                   </div>
                 ))}
