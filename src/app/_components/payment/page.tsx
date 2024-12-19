@@ -1,6 +1,7 @@
 import { Transaction } from "@libsql/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { env } from "process";
 import { useEffect, useState } from "react";
@@ -44,6 +45,7 @@ export default function Payment(props: {
   cupon: Cupon | null | undefined;
   isExt: boolean;
 }) {
+  const router = useRouter();
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();
   const { mutateAsync: createReserve } = api.reserve.create.useMutation();
@@ -58,6 +60,18 @@ export default function Payment(props: {
     return formattedDate;
   }
   const envVariable = process.env.NEXT_PUBLIC_NODE_ENV || "Cargando...";
+  const { mutateAsync: testMP } = api.mp.test.useMutation();
+  const pagoMP = async () => {
+    try {
+      const test = await testMP({
+        nroReserve: props.nReserve,
+      });
+      console.log("testMP", test);
+      router.push(test);
+    } catch (error) {
+      console.error("Error fetching testMP:", error);
+    }
+  };
   async function success() {
     try {
       props.setLoadingPay(true);
@@ -154,61 +168,62 @@ export default function Payment(props: {
   }
 
   useEffect(() => {
-    if (envVariable !== "testing" && envVariable !== "development") {
-      let statusCode = 0;
-      if (props.checkoutNumber) {
-        const options = {
-          id: props.checkoutNumber,
-          type: "checkout",
-          onResult: (data: any) => {
-            // OnResult es llamado cuando se toca el Botón Cerrar
+    pagoMP();
+    // if (envVariable !== "testing" && envVariable !== "development") {
+    //   let statusCode = 0;
+    //   if (props.checkoutNumber) {
+    //     const options = {
+    //       id: props.checkoutNumber,
+    //       type: "checkout",
+    //       onResult: (data: any) => {
+    //         // OnResult es llamado cuando se toca el Botón Cerrar
 
-            window.MobbexEmbed.close();
-          },
-          onPayment: async (data: any) => {
-            statusCode = parseInt(data.data.status.code);
-            if (statusCode == 200) {
-              await success();
-            } else {
-              // location.reload();
-            }
-          },
-          onOpen: () => {
-            console.info("Pago iniciado.");
-          },
-          onError: (error: any) => {
-            console.error("ERROR: ", error);
-          },
-          onClose: (error: any) => {
-            if (statusCode != 200) {
-              location.reload();
-            }
-          },
-        };
+    //         window.MobbexEmbed.close();
+    //       },
+    //       onPayment: async (data: any) => {
+    //         statusCode = parseInt(data.data.status.code);
+    //         if (statusCode == 200) {
+    //           await success();
+    //         } else {
+    //           // location.reload();
+    //         }
+    //       },
+    //       onOpen: () => {
+    //         console.info("Pago iniciado.");
+    //       },
+    //       onError: (error: any) => {
+    //         console.error("ERROR: ", error);
+    //       },
+    //       onClose: (error: any) => {
+    //         if (statusCode != 200) {
+    //           location.reload();
+    //         }
+    //       },
+    //     };
 
-        function renderMobbexButton() {
-          window.MobbexEmbed.render(options, "#mbbx-button");
-        }
+    //     function renderMobbexButton() {
+    //       window.MobbexEmbed.render(options, "#mbbx-button");
+    //     }
 
-        function initMobbexPayment() {
-          const mbbxButton = window.MobbexEmbed.init(options);
-          mbbxButton.open();
-        }
+    //     function initMobbexPayment() {
+    //       const mbbxButton = window.MobbexEmbed.init(options);
+    //       mbbxButton.open();
+    //     }
 
-        const script = document.createElement("script");
-        script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
-        script.async = true;
-        script.crossOrigin = "anonymous";
-        script.addEventListener("load", () => {
-          initMobbexPayment(); // Abre inmediatamente el modal de pago
-        });
-        document.body.appendChild(script);
+    //     const script = document.createElement("script");
+    //     script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
+    //     script.async = true;
+    //     script.crossOrigin = "anonymous";
+    //     script.addEventListener("load", () => {
+    //       initMobbexPayment(); // Abre inmediatamente el modal de pago
+    //     });
+    //     document.body.appendChild(script);
 
-        return () => {
-          document.body.removeChild(script);
-        };
-      }
-    }
+    //     return () => {
+    //       document.body.removeChild(script);
+    //     };
+    //   }
+    // }
   }, [props.checkoutNumber]);
 
   function AlertSuccess() {

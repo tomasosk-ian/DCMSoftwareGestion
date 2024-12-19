@@ -25,16 +25,12 @@ export const transactionRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // TODO: verificar permisos
-
-      const identifier = createId();
-
-      await db.insert(schema.transactions).values({
-        confirm: input.confirm,
-        client: input.client,
-        amount: input.amount,
-        nReserve: input.nReserve,
-      });
-
+      const identifier = await createTransaction(
+        input.confirm ?? false,
+        input.client!,
+        input.nReserve!,
+        input.amount!,
+      );
       return { identifier };
     }),
   getById: publicProcedure
@@ -138,3 +134,20 @@ export const transactionRouter = createTRPCRouter({
 });
 
 export type Transaction = RouterOutputs["transaction"]["get"][number];
+
+export async function createTransaction(
+  confirm: boolean,
+  client: string,
+  amount: number,
+  nReserve: number,
+) {
+  const identifier = createId();
+
+  await db.insert(schema.transactions).values({
+    confirm,
+    client: client,
+    amount: amount,
+    nReserve: nReserve,
+  });
+  return identifier;
+}

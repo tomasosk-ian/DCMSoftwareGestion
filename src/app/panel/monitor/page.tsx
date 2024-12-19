@@ -1,93 +1,59 @@
-import { Title } from "~/components/title";
-import { Locker } from "~/server/api/routers/lockers";
 import { api } from "~/trpc/server";
-import { Card, CardContent, CardTitle } from "~/components/ui/card";
+import { Card, CardTitle } from "~/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "~/components/ui/carousel";
 import BoxContent from "~/components/box-content";
-import { BriefcaseIcon, Power, Zap, ZapOff } from "lucide-react";
+import { Zap, ZapOff } from "lucide-react";
+import { Locker } from "~/server/api/routers/lockers";
 
 export default async function Home() {
-  const lockers = await api.locker.get.query();
-  const store = await api.store.get.query();
-  const reservas = await api.reserve.list.query();
+  const [lockers, stores, reservas] = await Promise.all([
+    api.locker.get.query(),
+    api.store.get.query(),
+    api.reserve.list.query(),
+  ]);
 
   return (
     <section className="w-full">
-      <div className="w-full">
-        <div className="w-full">
-          <Carousel className="w-full">
-            <CarouselContent>
-              {Array.isArray(lockers) &&
-                lockers.map((x, index) => (
-                  <CarouselItem key={index}>
-                    <div className="">
-                      <Card>
-                        <CardTitle>
-                          <div className="flex justify-between p-3">
-                            <div className="flex gap-4">
-                              <div>Locker: {x.nroSerieLocker}</div>
-                              <div>
-                                {x.status == "connected" ? (
-                                  <Zap size={18} color="green" />
-                                ) : (
-                                  <ZapOff size={18} color="red" />
-                                )}
-                              </div>
-                            </div>
-                            {store.find(
-                              (s) => s.serieLocker == x.nroSerieLocker,
-                            ) ? (
-                              <div>
-                                Local:{" "}
-                                {
-                                  store.find(
-                                    (s) => s.serieLocker == x.nroSerieLocker,
-                                  )?.name
-                                }{" "}
-                              </div>
-                            ) : (
-                              <div className="text-xs text-red-400">
-                                No hay local asignado
-                              </div>
-                            )}
-                          </div>
-                        </CardTitle>
+      <Carousel className="w-full">
+        <CarouselContent>
+          {(lockers as Locker[]).map((locker, index) => {
+            const store = stores.find(
+              (store) => store.serieLocker === locker.nroSerieLocker,
+            );
 
-                        <BoxContent locker={x!} reservas={reservas} />
-                      </Card>
+            return (
+              <CarouselItem key={locker.id || index}>
+                <Card>
+                  <CardTitle>
+                    <div className="flex justify-between p-3">
+                      <div className="flex gap-4">
+                        <span>Locker: {locker.nroSerieLocker}</span>
+                        {locker.status === "connected" ? (
+                          <Zap size={18} color="green" />
+                        ) : (
+                          <ZapOff size={18} color="red" />
+                        )}
+                      </div>
+                      {store ? (
+                        <span>Local: {store.name}</span>
+                      ) : (
+                        <span className="text-xs text-red-400">
+                          No hay local asignado
+                        </span>
+                      )}
                     </div>
-                  </CarouselItem>
-                ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
-        {/* <div className="w-full">
-          <Carousel className="max-w-xs">
-            <CarouselContent>
-              {Array.isArray(lockers) &&
-                lockers.map((x, index) => (
-                  <CarouselItem key={index}>
-                    <div className="p-1">
-                      <Card>
-                        <CardContent className="flex aspect-square items-center justify-center p-6">
-                          <span className="text-4xl font-semibold">
-                            {index + 1}
-                          </span>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </CarouselItem>
-                ))}
-            </CarouselContent>
-          </Carousel>
-        </div> */}
-      </div>
+                  </CardTitle>
+                  <BoxContent locker={locker} reservas={reservas} />
+                </Card>
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
+      </Carousel>
     </section>
   );
 }

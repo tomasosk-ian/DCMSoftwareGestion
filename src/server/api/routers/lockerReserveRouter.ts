@@ -110,57 +110,7 @@ export const lockerReserveRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       // if (!input.isExt) {
-      const reservationResponse = await fetch(
-        `${env.SERVER_URL}/api/token/confirmar`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: `${input.idToken}`,
-        },
-      );
-
-      // Handle the response from the external API
-      if (!reservationResponse.ok) {
-        // Extract the error message from the response
-        const errorResponse = await reservationResponse.json();
-        console.log(errorResponse);
-        // Throw an error or return the error message
-        return errorResponse.message || "Unknown error";
-      }
-      const reservedBoxData = await reservationResponse.json();
-      await db
-        .update(schema.reservas)
-        .set({ Token1: reservedBoxData, nReserve: input.nReserve })
-        .where(eq(schema.reservas.IdTransaction, input.idToken));
-      return reservedBoxData;
-      // }
-      // else {
-      //   console.log("ENTRA EN ISEXT");
-
-      //   const reservationResponse = await fetch(
-      //     `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate}`,
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //     },
-      //   );
-
-      //   if (!reservationResponse.ok) {
-      //     const errorResponse = await reservationResponse.json();
-      //     console.log(errorResponse);
-      //     return errorResponse.message || "Unknown error";
-      //   }
-
-      //   const reservedBoxData = await reservationResponse.json();
-
-      //   console.log("extendedBoxData", reservedBoxData);
-      //   return reservedBoxData;
-      // }
+      return confirmBoxHandler(input.idToken, input.nReserve);
     }),
   assignClientToReserve: publicProcedure
     .input(
@@ -215,7 +165,7 @@ export const lockerReserveRouter = createTRPCRouter({
     }),
 });
 
-const reserveValidator = z.object({
+export const reserveValidator = z.object({
   IdLocker: z.number().nullable().optional(),
   NroSerie: z.string().nullable(),
   IdSize: z.number().nullable(),
@@ -235,3 +185,32 @@ const reserveValidator = z.object({
 export type Reserve = z.infer<typeof reserveValidator>;
 
 const responseValidator = z.array(reserveValidator);
+
+export async function confirmBoxHandler(idToken: number, nReserve: number) {
+  const reservationResponse = await fetch(
+    `${env.SERVER_URL}/api/token/confirmar`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: `${idToken}`,
+    },
+  );
+
+  // Handle the response from the external API
+  if (!reservationResponse.ok) {
+    // Extract the error message from the response
+    const errorResponse = await reservationResponse.json();
+    console.log(errorResponse);
+    // Throw an error or return the error message
+    return errorResponse.message || "Unknown error";
+  }
+  const reservedBoxData = await reservationResponse.json();
+  await db
+    .update(schema.reservas)
+    .set({ Token1: reservedBoxData, nReserve: nReserve })
+    .where(eq(schema.reservas.IdTransaction, idToken));
+  return reservedBoxData;
+}

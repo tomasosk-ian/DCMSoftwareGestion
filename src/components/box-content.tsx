@@ -1,17 +1,19 @@
-import { Boxes, Locker } from "~/server/api/routers/lockers";
 import { api } from "~/trpc/server";
+import { MonitorDatatable } from "~/components/monitor-table";
+import { Locker } from "~/server/api/routers/lockers";
 import { Reserves } from "~/server/api/routers/reserves";
-import { MonitorDatatable } from "./monitor-table";
+
 export default async function BoxContent(props: {
   locker: Locker;
-  reservas: Reserves[] | null;
+  reservas: Reserves[];
 }) {
-  const { reservas } = props;
   const sizes = await api.size.get.query();
 
   return (
-    <div>
-      <MonitorDatatable data={props.locker} reservas={reservas} sizes={sizes} />
-    </div>
+    <MonitorDatatable
+      data={props.locker}
+      reservas={props.reservas}
+      sizes={sizes}
+    />
   );
 }

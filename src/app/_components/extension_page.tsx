@@ -264,7 +264,6 @@ export default function Extension(props: { sizes: Size[] }) {
                 nReserve={nReserve!}
                 total={total}
                 coin={coin}
-                checkoutNumber={checkoutNumber!}
                 sizes={props.sizes}
                 endDate={endDate}
               />

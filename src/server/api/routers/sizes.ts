@@ -14,50 +14,10 @@ import { RouterOutputs } from "~/trpc/shared";
 
 export const sizeRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
-
-    // Handle the response from the external API
-    if (!sizeResponse.ok) {
-      // Extract the error message from the response
-      const errorResponse = await sizeResponse.json();
-      // Throw an error or return the error message
-      return errorResponse.message || "Unknown error";
-    }
-
-    const reservedBoxData = await sizeResponse.json();
-
-    const validatedData = responseValidator.parse(reservedBoxData);
-    await Promise.all(
-      validatedData.map(async (v) => {
-        const fee = await db.query.feeData.findFirst({
-          where: eq(schema.feeData.size, v.id),
-        });
-        v.tarifa = fee?.identifier;
-
-        const existingSize = await db.query.sizes.findFirst({
-          where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
-        });
-
-        if (existingSize) {
-          // Si el tamaño ya existe, actualiza los datos
-          await db
-            .update(schema.sizes)
-            .set({
-              ...v,
-            })
-            .where(eq(schema.sizes.id, v.id));
-        } else {
-          // Si el tamaño no existe, insértalo
-          await db.insert(schema.sizes).values({
-            ...v,
-          });
-        }
-      }),
-    );
-
-    // });
-    return validatedData;
+    const sizes = await getSizes();
+    return sizes;
   }),
+
   getAvailability: publicProcedure
     .input(
       z.object({
@@ -174,3 +134,47 @@ const sizeValidator = z.object({
 export type Size = z.infer<typeof sizeValidator>;
 
 const responseValidator = z.array(sizeValidator);
+
+export async function getSizes(): Promise<Size[]> {
+  const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
+
+  // Handle the response from the external API
+  if (!sizeResponse.ok) {
+    // Extract the error message from the response
+    const errorResponse = await sizeResponse.json();
+    // Throw an error or return the error message
+    return errorResponse.message || "Unknown error";
+  }
+
+  const reservedBoxData = await sizeResponse.json();
+
+  const validatedData = responseValidator.parse(reservedBoxData);
+  await Promise.all(
+    validatedData.map(async (v) => {
+      const fee = await db.query.feeData.findFirst({
+        where: eq(schema.feeData.size, v.id),
+      });
+      v.tarifa = fee?.identifier;
+
+      const existingSize = await db.query.sizes.findFirst({
+        where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
+      });
+
+      if (existingSize) {
+        // Si el tamaño ya existe, actualiza los datos
+        await db
+          .update(schema.sizes)
+          .set({
+            ...v,
+          })
+          .where(eq(schema.sizes.id, v.id));
+      } else {
+        // Si el tamaño no existe, insértalo
+        await db.insert(schema.sizes).values({
+          ...v,
+        });
+      }
+    }),
+  );
+  return validatedData;
+}
