@@ -32,10 +32,17 @@ export function About() {
               </div>
               <div className="col-6">
                 <AlertDialogTitle className="pb-4">
+<<<<<<< HEAD
                   Versión 9.6.7
                 </AlertDialogTitle>
                 <AlertDialogTitle>
                   Fecha: 10 de diciembre de 2024
+=======
+                  Versión 9.6.5
+                </AlertDialogTitle>
+                <AlertDialogTitle>
+                  Fecha: 2 de diciembre de 2024
+>>>>>>> parent of d007925 (confirmar reserva sinp pasar por medio de pago con tarifa cero)
                 </AlertDialogTitle>
               </div>
             </div>

@@ -219,31 +219,6 @@ export default function Payment(props: {
             <AlertDialogTitle>Aviso</AlertDialogTitle>
             <AlertDialogDescription>
               Se encuentra en un entorno de pruebas, la reserva será aceptada
-              automáticamente sin pasar por un medio de pago. el total es{" "}
-              {props.total}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                success();
-              }}
-            >
-              Aceptar
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  }
-  function AlertTotalCero() {
-    return (
-      <AlertDialog defaultOpen={true}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Aviso</AlertDialogTitle>
-            <AlertDialogDescription>
-              Su selección no posee precio, la reserva será aceptada
               automáticamente sin pasar por un medio de pago.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -263,25 +238,20 @@ export default function Payment(props: {
 
   return (
     <>
-      {props.total === 0 && <AlertTotalCero />}
-
-      {props.total != 0 &&
-        (envVariable === "testing" || envVariable === "development") && (
-          <AlertSuccess />
-        )}
-      {props.total != 0 &&
-        envVariable !== "testing" &&
-        envVariable !== "development" && (
-          <>
-            {" "}
-            <Script
-              src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
-              integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
-              crossOrigin="anonymous"
-            />
-            <div id="mbbx-container"></div>{" "}
-          </>
-        )}
+      <div>la variable de entorno es: {envVariable}</div>
+      {envVariable === "testing" ||
+        (envVariable === "development" && <AlertSuccess />)}
+      {envVariable !== "testing" && envVariable !== "development" && (
+        <>
+          {" "}
+          <Script
+            src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
+            integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
+            crossOrigin="anonymous"
+          />
+          <div id="mbbx-container"></div>{" "}
+        </>
+      )}
     </>
   );
 }
