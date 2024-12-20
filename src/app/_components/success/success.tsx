@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CheckCircle, DownloadIcon, XCircle } from "lucide-react";
+import { useRef } from "react";
 import { usePDF } from "react-to-pdf";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import QRCode from "react-qr-code";
@@ -12,7 +13,6 @@ import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
 import { api } from "~/trpc/react";
-import { useRouter } from "next/navigation";
 
 export default function Success(props: {
   reserves: Reserve[];
@@ -20,11 +20,12 @@ export default function Success(props: {
   nReserve: number;
   total: number;
   coin?: Coin;
+  checkoutNumber: string;
   sizes: Size[];
   endDate: string | undefined;
 }) {
   const { toPDF, targetRef } = usePDF({
-    filename: `comprobante${props.nReserve ? props.nReserve : ""}.pdf`,
+    filename: `comprobante${props.checkoutNumber ? props.checkoutNumber : ""}.pdf`,
   });
   function getSize(idSize: number) {
     const size = props.sizes!.find((s: Size) => s.id === idSize);
@@ -38,8 +39,6 @@ export default function Success(props: {
     }
     return "";
   }
-  const router = useRouter();
-
   return (
     <main className="flex justify-center pb-5">
       {props.reserves && (
@@ -148,7 +147,7 @@ export default function Success(props: {
             <div className="w-full">
               <ButtonCustomComponent
                 onClick={async () => {
-                  router.push("/");
+                  location.reload();
                 }}
                 text="Cerrar"
                 icon={<XCircle className="h-4 w-4 space-x-4" />}

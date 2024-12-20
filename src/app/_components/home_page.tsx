@@ -27,7 +27,7 @@ import { useState } from "react";
 import UserForm from "./user/userForm";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
 import { Badge } from "~/components/ui/badge";
 
@@ -72,7 +72,6 @@ export default function HomePage(props: {
   });
 
   const { mutateAsync: createClient } = api.client.create.useMutation();
-  const { mutateAsync: testMP } = api.mp.test.useMutation();
 
   const [total, setTotal] = useState<number>(0);
   const [coin, setCoin] = useState<Coin>();
@@ -80,6 +79,7 @@ export default function HomePage(props: {
   const { data: coins } = api.coin.get.useQuery();
   const [terms, setTerms] = useState<boolean>();
   const [isExtension, setIsExtension] = useState<boolean>(false);
+  const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
 
   const [errors, setErrors] = useState({
     name: "",
@@ -135,24 +135,10 @@ export default function HomePage(props: {
       </AlertDialog>
     );
   }
-
   return (
     <>
-      <Button
-        onClick={async () => {
-          const test = await testMP({ nroReserve: 718 });
-          console.log("testMP", test);
-          router.push(test);
-        }}
-      >
-        Test MP
-      </Button>
-      {envVariable === "testing" ||
-        (envVariable === "development" && (
-          <div className="px-8 text-left">
-            <Badge>{envVariable}</Badge>
-          </div>
-        ))}
+  {envVariable === "testing" ||
+        (envVariable === "development" && <div className="text-left px-8"><Badge >{envVariable}</Badge></div> )}
       {!isExtension && (
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}
@@ -287,18 +273,17 @@ export default function HomePage(props: {
                               });
                               if (!failed) {
                                 setReserva(true);
-                                //checkout para mobbex
-                                // const checkoutNumber = await test({
-                                //   amount: total,
-                                //   reference: clientResponse.id.toString(),
-                                //   mail: client.email!,
-                                //   name: client.name!,
-                                //   uid: client.identifier!,
-                                //   cantidad: reserves.length,
-                                //   phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
-                                //   identification: client.dni ?? "0",
-                                // });
-                                // setCheckoutNumber(checkoutNumber);
+                                const checkoutNumber = await test({
+                                  amount: total,
+                                  reference: clientResponse.id.toString(),
+                                  mail: client.email!,
+                                  name: client.name!,
+                                  uid: client.identifier!,
+                                  cantidad: reserves.length,
+                                  phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
+                                  identification: client.dni ?? "0",
+                                });
+                                setCheckoutNumber(checkoutNumber);
                               }
                             }
                           } catch (error) {
@@ -345,6 +330,7 @@ export default function HomePage(props: {
                     nReserve={nReserve!}
                     total={total}
                     coin={coin}
+                    checkoutNumber={checkoutNumber!}
                     sizes={props.sizes}
                     endDate={undefined}
                   />
