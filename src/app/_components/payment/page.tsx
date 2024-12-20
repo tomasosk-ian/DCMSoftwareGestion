@@ -57,7 +57,6 @@ export default function Payment(props: {
     const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
     return formattedDate;
   }
-  const envVariable = process.env.NEXT_PUBLIC_NODE_ENV || "Cargando...";
   async function success() {
     try {
       props.setLoadingPay(true);
@@ -154,60 +153,58 @@ export default function Payment(props: {
   }
 
   useEffect(() => {
-    if (envVariable !== "testing" && envVariable !== "development") {
-      let statusCode = 0;
-      if (props.checkoutNumber) {
-        const options = {
-          id: props.checkoutNumber,
-          type: "checkout",
-          onResult: (data: any) => {
-            // OnResult es llamado cuando se toca el Botón Cerrar
+    let statusCode = 0;
+    if (props.checkoutNumber) {
+      const options = {
+        id: props.checkoutNumber,
+        type: "checkout",
+        onResult: (data: any) => {
+          // OnResult es llamado cuando se toca el Botón Cerrar
 
-            window.MobbexEmbed.close();
-          },
-          onPayment: async (data: any) => {
-            statusCode = parseInt(data.data.status.code);
-            if (statusCode == 200) {
-              await success();
-            } else {
-              // location.reload();
-            }
-          },
-          onOpen: () => {
-            console.info("Pago iniciado.");
-          },
-          onError: (error: any) => {
-            console.error("ERROR: ", error);
-          },
-          onClose: (error: any) => {
-            if (statusCode != 200) {
-              location.reload();
-            }
-          },
-        };
+          window.MobbexEmbed.close();
+        },
+        onPayment: async (data: any) => {
+          statusCode = parseInt(data.data.status.code);
+          if (statusCode == 200) {
+            await success();
+          } else {
+            // location.reload();
+          }
+        },
+        onOpen: () => {
+          console.info("Pago iniciado.");
+        },
+        onError: (error: any) => {
+          console.error("ERROR: ", error);
+        },
+        onClose: (error: any) => {
+          if (statusCode != 200) {
+            location.reload();
+          }
+        },
+      };
 
-        function renderMobbexButton() {
-          window.MobbexEmbed.render(options, "#mbbx-button");
-        }
-
-        function initMobbexPayment() {
-          const mbbxButton = window.MobbexEmbed.init(options);
-          mbbxButton.open();
-        }
-
-        const script = document.createElement("script");
-        script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
-        script.async = true;
-        script.crossOrigin = "anonymous";
-        script.addEventListener("load", () => {
-          initMobbexPayment(); // Abre inmediatamente el modal de pago
-        });
-        document.body.appendChild(script);
-
-        return () => {
-          document.body.removeChild(script);
-        };
+      function renderMobbexButton() {
+        window.MobbexEmbed.render(options, "#mbbx-button");
       }
+
+      function initMobbexPayment() {
+        const mbbxButton = window.MobbexEmbed.init(options);
+        mbbxButton.open();
+      }
+
+      const script = document.createElement("script");
+      script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.addEventListener("load", () => {
+        initMobbexPayment(); // Abre inmediatamente el modal de pago
+      });
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(script);
+      };
     }
   }, [props.checkoutNumber]);
 
@@ -238,20 +235,15 @@ export default function Payment(props: {
 
   return (
     <>
-      <div>la variable de entorno es: {envVariable}</div>
-      {envVariable === "testing" ||
-        (envVariable === "development" && <AlertSuccess />)}
-      {envVariable !== "testing" && envVariable !== "development" && (
-        <>
-          {" "}
-          <Script
-            src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
-            integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
-            crossOrigin="anonymous"
-          />
-          <div id="mbbx-container"></div>{" "}
-        </>
-      )}
+      <>
+        {" "}
+        <Script
+          src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
+          integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
+          crossOrigin="anonymous"
+        />
+        <div id="mbbx-container"></div>{" "}
+      </>
     </>
   );
 }
