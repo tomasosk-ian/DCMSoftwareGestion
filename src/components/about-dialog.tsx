@@ -34,9 +34,7 @@ export function About() {
                 <AlertDialogTitle className="pb-4">
                   Versión 9.6.8
                 </AlertDialogTitle>
-                <AlertDialogTitle>
-                  Fecha: 19 de diciembre de 2024
-                </AlertDialogTitle>
+                <AlertDialogTitle>Fecha: 11 de enero de 2025</AlertDialogTitle>
               </div>
             </div>
             <AlertDialogDescription>

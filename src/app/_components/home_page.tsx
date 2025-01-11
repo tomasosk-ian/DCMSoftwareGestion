@@ -137,8 +137,12 @@ export default function HomePage(props: {
   }
   return (
     <>
-  {envVariable === "testing" ||
-        (envVariable === "development" && <div className="text-left px-8"><Badge >{envVariable}</Badge></div> )}
+      {envVariable === "testing" ||
+        (envVariable === "development" && (
+          <div className="px-8 text-left">
+            <Badge>{envVariable}</Badge>
+          </div>
+        ))}
       {!isExtension && (
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}
