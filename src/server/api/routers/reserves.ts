@@ -37,7 +37,7 @@ export type GroupedReserves = {
 
 export const reserveRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
-    await checkBoxAssigned();
+    checkBoxAssigned();
     const result = await ctx.db.query.reservas.findMany({
       with: { clients: true },
       where: (reservas) =>
@@ -56,7 +56,7 @@ export const reserveRouter = createTRPCRouter({
   }),
 
   // getActive: publicProcedure.query(async ({ ctx }) => {
-  //   await checkBoxAssigned();
+  //   checkBoxAssigned();
 
   //   const result = await db.query.reservas.findMany({
   //     where: (reservas) =>
@@ -94,7 +94,7 @@ export const reserveRouter = createTRPCRouter({
   //   return groupedByNReserve;
   // }),
   getActive: publicProcedure.query(async ({ ctx }) => {
-    await checkBoxAssigned();
+    checkBoxAssigned();
 
     const result = await db.query.reservas.findMany({
       where: (reservas) =>
@@ -132,7 +132,7 @@ export const reserveRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      await checkBoxAssigned();
+      checkBoxAssigned();
 
       const reserve = await db.query.reservas.findMany({
         where: (reservas) =>
@@ -155,7 +155,7 @@ export const reserveRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      await checkBoxAssigned();
+      checkBoxAssigned();
 
       const reserve = await db.query.reservas.findFirst({
         where: (reservas) =>
@@ -177,7 +177,7 @@ export const reserveRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      await checkBoxAssigned();
+      checkBoxAssigned();
       const result = await ctx.db.query.reservas.findMany({
         with: { clients: true },
         where: (reservas) =>
@@ -200,7 +200,7 @@ export const reserveRouter = createTRPCRouter({
       return groupedByNReserve;
     }),
   list: publicProcedure.query(async ({ ctx }) => {
-    await checkBoxAssigned();
+    checkBoxAssigned();
 
     const result = ctx.db.query.reservas.findMany({
       orderBy: (reservas, { desc }) => [desc(reservas.FechaCreacion)],
@@ -299,6 +299,28 @@ export const reserveRouter = createTRPCRouter({
         .delete(schema.reservas)
         .where(eq(schema.reservas.nReserve, input.nReserve));
     }),
+  getLastReserveByBox: publicProcedure.query(async ({ ctx }) => {
+    // Obtener todas las reservas
+    const reservas = await ctx.db.query.reservas.findMany({
+      with: { clients: true }, // Asegúrate de incluir `clients`
+      where: (reservas) => isNotNull(reservas.IdBox),
+      orderBy: (reservas, { desc }) => [desc(reservas.FechaFin)], // Ordenar por FechaFin descendente
+    });
+
+    // Agrupar por `IdBox` y mantener solo la última reserva por caja
+    const lastReservesByBox = reservas.reduce(
+      (acc, reserva) => {
+        if (!acc[reserva.IdBox!]) {
+          acc[reserva.IdBox!] = reserva; // Mantener solo la primera reserva encontrada
+        }
+        return acc;
+      },
+      {} as Record<number, (typeof reservas)[number]>,
+    );
+
+    // Devolver el resultado como un arreglo
+    return Object.values(lastReservesByBox);
+  }),
 });
 
 export type Reserves = RouterOutputs["reserve"]["getBynReserve"][number];
