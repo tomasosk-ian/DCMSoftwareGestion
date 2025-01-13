@@ -91,7 +91,7 @@ export const lockerRouter = createTRPCRouter({
 
       throw null;
     }
-    await checkBoxAssigned();
+    checkBoxAssigned();
     console.log("validatedData.data", validatedData.data);
 
     return validatedData.data;

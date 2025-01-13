@@ -329,13 +329,12 @@ export async function checkBoxAssigned() {
   const locerResponse = await fetch(
     `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
   );
+  const reservedBoxData = await locerResponse.json();
 
   if (!locerResponse.ok) {
-    const errorResponse = await locerResponse.json();
+    const errorResponse = reservedBoxData;
     return { error: errorResponse.message || "Unknown error" };
   }
-
-  const reservedBoxData = await locerResponse.json();
 
   // Validate the response data against the lockerValidator schema
   const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
