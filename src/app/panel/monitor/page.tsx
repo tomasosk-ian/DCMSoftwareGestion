@@ -8,8 +8,6 @@ import {
 import BoxContent from "~/components/box-content";
 import { Zap, ZapOff } from "lucide-react";
 import { Locker } from "~/server/api/routers/lockers";
-import { Store } from "~/server/api/routers/store";
-import { Reserves } from "~/server/api/routers/reserves";
 
 export default async function Home() {
   const { lockers, stores, reservas } = await fetchData();
@@ -44,13 +42,12 @@ async function fetchData() {
   const [lockers, stores, reservas] = await Promise.all([
     api.locker.get.query(),
     api.store.get.query(),
-    [],
-    // api.reserve.getLastReserveByBox.query(),
+    api.reserve.getLastReserveByBox.query(),
   ]);
   return {
-    lockers: [] as Locker[],
-    stores: [] as Store[],
-    reservas: [] as Reserves[],
+    lockers: lockers as Locker[],
+    stores,
+    reservas,
   };
 }
 
