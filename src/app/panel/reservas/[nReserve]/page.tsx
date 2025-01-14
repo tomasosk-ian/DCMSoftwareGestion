@@ -4,9 +4,9 @@ import ReservePage from "./reserve-page";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function Reserve(props: { params: { nReserve: string } }) {
-  const reserve = await api.reserve.getBynReserve.query({
-    nReserve: parseInt(props.params.nReserve),
-  });
+  // const reserve = await api.reserve.getBynReserve.query({
+  //   nReserve: parseInt(props.params.nReserve),
+  // });
   // const isAdmin = auth().protect().sessionClaims.metadata.role == "admin";
   // const sizes = await api.size.get.query();
   // const transaction = await api.transaction.getBynroReserve.query({
