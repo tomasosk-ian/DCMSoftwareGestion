@@ -36,6 +36,7 @@ export const clients = sqliteTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
+    emailIndex: index("idx_email").on(vt.email),
   }),
 );
 
@@ -53,6 +54,7 @@ export const stores = sqliteTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
+    cityIndex: index("idx_cityId").on(vt.cityId),
   }),
 );
 

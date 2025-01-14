@@ -304,11 +304,6 @@ export const reserveRouter = createTRPCRouter({
     }),
   getLastReserveByBox: publicProcedure.query(async ({ ctx }) => {
     // Obtener las reservas ordenadas por FechaFin descendente
-    // const reservas = await ctx.db.query.reservas.findMany({
-    //   with: { clients: true },
-    //   where: (reservas) => isNotNull(reservas.IdBox),
-    //   orderBy: (reservas, { desc }) => [desc(reservas.FechaFin)],
-    // });
     const reservas = await ctx.db.query.reservas.findMany({
       with: { clients: true },
       where: (reservas) => isNotNull(reservas.IdBox),
@@ -325,7 +320,7 @@ export const reserveRouter = createTRPCRouter({
     }, new Map<number, (typeof reservas)[number]>());
 
     // Convertir Map a un arreglo de valores
-    return Array.from(reservas.values());
+    return Array.from(lastReservesByBox.values());
   }),
 });
 
