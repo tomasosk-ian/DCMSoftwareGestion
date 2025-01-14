@@ -41,11 +41,12 @@ export default async function Home() {
 }
 
 async function fetchData() {
-  // const [lockers, stores, reservas] = await Promise.all([
-  //   api.locker.get.query(),
-  //   api.store.get.query(),
-  //   api.reserve.getLastReserveByBox.query(),
-  // ]);
+  const [lockers, stores, reservas] = await Promise.all([
+    api.locker.get.query(),
+    api.store.get.query(),
+    [],
+    // api.reserve.getLastReserveByBox.query(),
+  ]);
   return {
     lockers: [] as Locker[],
     stores: [] as Store[],
