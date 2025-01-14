@@ -10,7 +10,7 @@ import { Zap, ZapOff } from "lucide-react";
 import { Locker } from "~/server/api/routers/lockers";
 
 export default async function Home() {
-  const { lockers, stores, reservas } = await fetchData();
+  const { lockers, stores, reservas, sizes } = await fetchData();
 
   return (
     <section className="w-full">
@@ -27,7 +27,11 @@ export default async function Home() {
                   <CardTitle>
                     <Header locker={locker} store={store} />
                   </CardTitle>
-                  <BoxContent locker={locker} reservas={reservas} />
+                  <BoxContent
+                    locker={locker}
+                    reservas={reservas}
+                    sizes={sizes}
+                  />
                 </Card>
               </CarouselItem>
             );
@@ -39,16 +43,18 @@ export default async function Home() {
 }
 
 async function fetchData() {
-  const [lockers, stores, reservas] = await Promise.all([
+  const [lockers, stores, reservas, sizes] = await Promise.all([
     api.locker.get.query(),
     api.store.get.query(),
     api.reserve.getLastReserveByBox.query(),
+    api.size.get.query(),
   ]);
 
   return {
     lockers: lockers as Locker[],
     stores,
     reservas,
+    sizes,
   };
 }
 
