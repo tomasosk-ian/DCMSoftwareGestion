@@ -1,13 +1,7 @@
 "use client";
 
 import * as React from "react";
-import QRCode from "react-qr-code";
-
-import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -21,19 +15,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -42,33 +32,13 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Boxes, Locker, Token } from "~/server/api/routers/lockers";
-import {
-  AlertCircle,
-  BriefcaseIcon,
-  LockIcon,
-  QrCode,
-  RotateCw,
-  UnlockIcon,
-} from "lucide-react";
-import { Reserve } from "~/server/api/routers/lockerReserveRouter";
+import { Boxes, Locker } from "~/server/api/routers/lockers";
+import { AlertCircle, BriefcaseIcon, LockIcon, UnlockIcon } from "lucide-react";
 import { Reserves } from "~/server/api/routers/reserves";
-import { api } from "~/trpc/react";
 import { Size } from "~/server/api/routers/sizes";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
 import GetQR from "./get-qr";
 
 export function MonitorDatatable(props: {

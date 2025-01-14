@@ -303,26 +303,23 @@ export const reserveRouter = createTRPCRouter({
         .where(eq(schema.reservas.nReserve, input.nReserve));
     }),
   getLastReserveByBox: publicProcedure.query(async ({ ctx }) => {
-    // Obtener todas las reservas
+    // Obtener las reservas ordenadas por FechaFin descendente
     const reservas = await ctx.db.query.reservas.findMany({
-      with: { clients: true }, // Asegúrate de incluir `clients`
+      with: { clients: true },
       where: (reservas) => isNotNull(reservas.IdBox),
-      orderBy: (reservas, { desc }) => [desc(reservas.FechaFin)], // Ordenar por FechaFin descendente
+      orderBy: (reservas, { desc }) => [desc(reservas.FechaFin)],
     });
 
-    // Agrupar por `IdBox` y mantener solo la última reserva por caja
-    const lastReservesByBox = reservas.reduce(
-      (acc, reserva) => {
-        if (!acc[reserva.IdBox!]) {
-          acc[reserva.IdBox!] = reserva; // Mantener solo la primera reserva encontrada
-        }
-        return acc;
-      },
-      {} as Record<number, (typeof reservas)[number]>,
-    );
+    // Agrupar por IdBox y mantener solo la última reserva para cada caja
+    const lastReservesByBox = reservas.reduce((acc, reserva) => {
+      if (!acc.has(reserva.IdBox!)) {
+        acc.set(reserva.IdBox!, reserva); // Mantener la primera reserva encontrada para el box
+      }
+      return acc;
+    }, new Map<number, (typeof reservas)[number]>());
 
-    // Devolver el resultado como un arreglo
-    return Object.values(lastReservesByBox);
+    // Convertir Map a un arreglo de valores
+    return Array.from(lastReservesByBox.values());
   }),
 });
 
