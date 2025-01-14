@@ -11,7 +11,7 @@ export default async function BoxContent(props: {
 
   return (
     <div>
-      <MonitorDatatable data={props.locker} reservas={reservas} sizes={sizes} />
+      {/* <MonitorDatatable data={props.locker} reservas={reservas} sizes={sizes} /> */}
     </div>
   );
 }

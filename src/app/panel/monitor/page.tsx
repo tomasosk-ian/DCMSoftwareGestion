@@ -22,15 +22,14 @@ export default async function Home() {
             );
 
             return (
-              <>asd</>
-              // <CarouselItem key={locker.id}>
-              //   <Card>
-              //     <CardTitle>
-              //       <Header locker={locker} store={store} />
-              //     </CardTitle>
-              //     <BoxContent locker={locker} reservas={reservas} />
-              //   </Card>
-              // </CarouselItem>
+              <CarouselItem key={locker.id}>
+                <Card>
+                  <CardTitle>
+                    <Header locker={locker} store={store} />
+                  </CardTitle>
+                  <BoxContent locker={locker} reservas={reservas} />
+                </Card>
+              </CarouselItem>
             );
           })}
         </CarouselContent>
