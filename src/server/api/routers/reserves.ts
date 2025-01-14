@@ -308,7 +308,7 @@ export const reserveRouter = createTRPCRouter({
       with: { clients: true },
       where: (reservas) => isNotNull(reservas.IdBox),
       orderBy: (reservas, { desc }) => [desc(reservas.FechaFin)],
-      limit: 1, // Si solo necesitas la última reserva por IdBox, usa limit aquí.
+      // limit: 1, // Si solo necesitas la última reserva por IdBox, usa limit aquí.
     });
 
     // Agrupar por IdBox y mantener solo la última reserva para cada caja

@@ -1,5 +1,4 @@
 import { Boxes, Locker } from "~/server/api/routers/lockers";
-import { api } from "~/trpc/server";
 import { Reserves } from "~/server/api/routers/reserves";
 import { MonitorDatatable } from "./monitor-table";
 import { Size } from "~/server/api/routers/sizes";
