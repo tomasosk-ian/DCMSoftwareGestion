@@ -11,29 +11,31 @@ import { Locker } from "~/server/api/routers/lockers";
 
 export default async function Home() {
   const { lockers, stores, reservas } = await fetchData();
-  // return (
-  //   <section className="w-full">
-  //     <Carousel className="w-full">
-  //       <CarouselContent>
-  //         {lockers.map((locker) => {
-  //           const store = stores.find(
-  //             (store) => store.serieLocker === locker.nroSerieLocker,
-  //           );
-  //           return (
-  //             <CarouselItem key={locker.id}>
-  //               <Card>
-  //                 <CardTitle>
-  //                   <Header locker={locker} store={store} />
-  //                 </CardTitle>
-  //                 <BoxContent locker={locker} reservas={reservas} />
-  //               </Card>
-  //             </CarouselItem>
-  //           );
-  //         })}
-  //       </CarouselContent>
-  //     </Carousel>
-  //   </section>
-  // );
+
+  return (
+    <section className="w-full">
+      <Carousel className="w-full">
+        <CarouselContent>
+          {lockers.map((locker) => {
+            const store = stores.find(
+              (store) => store.serieLocker === locker.nroSerieLocker,
+            );
+
+            return (
+              <CarouselItem key={locker.id}>
+                <Card>
+                  <CardTitle>
+                    <Header locker={locker} store={store} />
+                  </CardTitle>
+                  <BoxContent locker={locker} reservas={reservas} />
+                </Card>
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
+      </Carousel>
+    </section>
+  );
 }
 
 async function fetchData() {
@@ -42,7 +44,7 @@ async function fetchData() {
     api.store.get.query(),
     api.reserve.getLastReserveByBox.query(),
   ]);
-  console.log("reservas", reservas.length);
+
   return {
     lockers: lockers as Locker[],
     stores,

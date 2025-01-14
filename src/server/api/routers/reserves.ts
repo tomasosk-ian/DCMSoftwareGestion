@@ -1,4 +1,4 @@
-import { eq, lt, gt, isNotNull, and, sql } from "drizzle-orm";
+import { eq, lt, gt, isNotNull, and } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { format, startOfDay, endOfDay, isAfter, isBefore } from "date-fns";
@@ -51,6 +51,7 @@ export const reserveRouter = createTRPCRouter({
       acc[nReserve].push(reserva);
       return acc;
     }, {});
+    console.log("groupedByNReserve", groupedByNReserve);
     return groupedByNReserve;
   }),
 
@@ -120,6 +121,7 @@ export const reserveRouter = createTRPCRouter({
       acc[nReserve].push(reserva);
       return acc;
     }, {});
+    console.log("groupedByNReserve", groupedByNReserve);
 
     return groupedByNReserve;
   }),
@@ -300,33 +302,24 @@ export const reserveRouter = createTRPCRouter({
         .delete(schema.reservas)
         .where(eq(schema.reservas.nReserve, input.nReserve));
     }),
-
   getLastReserveByBox: publicProcedure.query(async ({ ctx }) => {
-    // Subconsulta para obtener la última FechaFin por IdBox
-    const subQuery = ctx.db
-      .select({
-        IdBox: reservas.IdBox,
-        maxFechaFin: sql`MAX(${reservas.FechaFin})`.as("maxFechaFin"),
-      })
-      .from(reservas)
-      .where(isNotNull(reservas.IdBox))
-      .groupBy(reservas.IdBox)
-      .as("grouped");
+    // Obtener las reservas ordenadas por FechaFin descendente
+    const reservas = await ctx.db.query.reservas.findMany({
+      with: { clients: true },
+      where: (reservas) => isNotNull(reservas.IdBox),
+      orderBy: (reservas, { desc }) => [desc(reservas.FechaFin)],
+    });
 
-    // Consulta principal para obtener las reservas completas basándose en la subconsulta
-    const lastReservesByBox = await ctx.db
-      .select()
-      .from(reservas)
-      .innerJoin(
-        subQuery,
-        and(
-          eq(reservas.IdBox, subQuery.IdBox),
-          eq(reservas.FechaFin, subQuery.maxFechaFin),
-        ),
-      )
-      .execute();
+    // Agrupar por IdBox y mantener solo la última reserva para cada caja
+    // const lastReservesByBox = reservas.reduce((acc, reserva) => {
+    //   if (!acc.has(reserva.IdBox!)) {
+    //     acc.set(reserva.IdBox!, reserva); // Mantener la primera reserva encontrada para el box
+    //   }
+    //   return acc;
+    // }, new Map<number, typeof reservas[number]>());
 
-    return lastReservesByBox;
+    // Convertir Map a un arreglo de valores
+    return Array.from(reservas.values());
   }),
 });
 
