@@ -20,11 +20,11 @@ export default async function Reserve(props: { params: { nReserve: string } }) {
   }
 
   return (
-    <ReservePage
-      reserve={reserve}
-      sizes={sizes}
-      transaction={transaction}
-      isAdmin={isAdmin}
-    />
+    // <ReservePage
+    //   reserve={reserve}
+    //   sizes={sizes}
+    //   transaction={transaction}
+    //   isAdmin={isAdmin}
+    // />
   );
 }
