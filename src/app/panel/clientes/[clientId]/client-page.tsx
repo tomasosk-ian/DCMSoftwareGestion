@@ -31,10 +31,15 @@ import { toast } from "sonner";
 import { UploadButton } from "~/utils/uploadthing";
 import { Client } from "~/server/api/routers/clients";
 import { List, ListTile } from "~/components/list";
-import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Reserves } from "~/server/api/routers/reserves";
 
-export default function ClientPage({ client }: { client: Client }) {
+export default function ClientPage({
+  client,
+  reservasRecord,
+}: {
+  client: Client;
+  reservasRecord: any;
+}) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(client!.name);
   const [surname, setSurname] = useState(client!.surname);
@@ -44,9 +49,7 @@ export default function ClientPage({ client }: { client: Client }) {
   const [dni, setDni] = useState(client!.dni);
   const { mutateAsync: renameclient, isLoading } =
     api.client.change.useMutation();
-  const { data: reservasRecord } = api.reserve.getByClient.useQuery({
-    clientId: client.identifier!,
-  });
+
   const { data: stores } = api.store.get.useQuery();
   const router = useRouter();
 
