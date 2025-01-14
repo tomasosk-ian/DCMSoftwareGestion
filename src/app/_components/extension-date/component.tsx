@@ -50,7 +50,6 @@ export default function DateComponent(props: {
     const today = Date.now();
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
     props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'23:00:00"));
-    console.log("la reserva essss handleClick", reserve);
 
     props.setReserve(reserve!);
 

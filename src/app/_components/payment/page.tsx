@@ -119,7 +119,6 @@ export default function Payment(props: {
               useCupon({ identifier: props.cupon.identifier! });
             }
           }
-          console.log("HELLO");
 
           return {
             ...reserve,
@@ -131,7 +130,6 @@ export default function Payment(props: {
       );
 
       if (props.setReserves) props.setReserves(updatedReserves);
-      console.log("TOKENS", token);
       await sendEmail({
         to: props.client.email!,
         token,

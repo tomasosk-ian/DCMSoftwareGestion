@@ -138,7 +138,6 @@ export const lockerReserveRouter = createTRPCRouter({
       return reservedBoxData;
       // }
       // else {
-      //   console.log("ENTRA EN ISEXT");
 
       //   const reservationResponse = await fetch(
       //     `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate}`,
@@ -152,13 +151,11 @@ export const lockerReserveRouter = createTRPCRouter({
 
       //   if (!reservationResponse.ok) {
       //     const errorResponse = await reservationResponse.json();
-      //     console.log(errorResponse);
       //     return errorResponse.message || "Unknown error";
       //   }
 
       //   const reservedBoxData = await reservationResponse.json();
 
-      //   console.log("extendedBoxData", reservedBoxData);
       //   return reservedBoxData;
       // }
     }),
@@ -185,9 +182,6 @@ export const lockerReserveRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
-        console.log(
-          `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
-        );
         const reservationResponse = await fetch(
           `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
           {

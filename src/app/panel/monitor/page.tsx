@@ -11,7 +11,6 @@ import { Locker } from "~/server/api/routers/lockers";
 
 export default async function Home() {
   const { lockers, stores, reservas } = await fetchData();
-
   // return (
   //   <section className="w-full">
   //     <Carousel className="w-full">
@@ -20,7 +19,6 @@ export default async function Home() {
   //           const store = stores.find(
   //             (store) => store.serieLocker === locker.nroSerieLocker,
   //           );
-
   //           return (
   //             <CarouselItem key={locker.id}>
   //               <Card>
@@ -44,6 +42,7 @@ async function fetchData() {
     api.store.get.query(),
     api.reserve.getLastReserveByBox.query(),
   ]);
+  console.log("reservas", reservas.length);
   return {
     lockers: lockers as Locker[],
     stores,

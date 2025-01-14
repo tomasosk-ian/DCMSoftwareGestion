@@ -57,7 +57,6 @@ export const transactionRouter = createTRPCRouter({
   //     }),
   //   )
   //   .query(async ({ input }) => {
-  //     console.log("HOLA PAAAAAAAAAA");
   //     const channel = await db.query.transactions.findFirst({
   //       where: eq(schema.transactions.nReserve, input.nReserve),
   //       orderBy: (transaction, { desc }) => [desc(transaction.confirmedAt)],
@@ -71,20 +70,12 @@ export const transactionRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      console.log("Ejecutando getBynroReserve con nReserve:", input.nReserve);
-
       const channel = await db.query.transactions.findFirst({
         where: eq(schema.transactions.nReserve, input.nReserve),
         orderBy: (transaction, { desc }) => [desc(transaction.confirmedAt)],
       });
 
-      console.log("Resultado de la consulta:", channel);
-
       if (!channel) {
-        console.log(
-          "No se encontró ninguna transacción con nReserve:",
-          input.nReserve,
-        );
       }
 
       return channel;

@@ -81,7 +81,6 @@ export const mobbexRouter = createTRPCRouter({
           checkoutNumber = result.data.id;
         })
         .catch((error) => console.log(error));
-      console.log("checkoutNumber", checkoutNumber);
       return checkoutNumber;
     }),
 });
