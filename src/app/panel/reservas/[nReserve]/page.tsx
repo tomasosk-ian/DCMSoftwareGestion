@@ -19,12 +19,12 @@ export default async function Reserve(props: { params: { nReserve: string } }) {
     return <Title>No se encontró la reserva</Title>;
   }
 
-  return (
-    // <ReservePage
-    //   reserve={reserve}
-    //   sizes={sizes}
-    //   transaction={transaction}
-    //   isAdmin={isAdmin}
-    // />
-  );
+  // return (
+  //   // <ReservePage
+  //   //   reserve={reserve}
+  //   //   sizes={sizes}
+  //   //   transaction={transaction}
+  //   //   isAdmin={isAdmin}
+  //   // />
+  // );
 }
