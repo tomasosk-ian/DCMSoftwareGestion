@@ -8,11 +8,11 @@ export default async function BoxContent(props: {
   reservas: Reserves[] | null;
   sizes: Size[];
 }) {
-  const { reservas } = props;
+  const { reservas, sizes } = props;
 
   return (
     <div>
-      {/* <MonitorDatatable data={props.locker} reservas={reservas} sizes={sizes} /> */}
+      <MonitorDatatable data={props.locker} reservas={reservas} sizes={sizes} />
     </div>
   );
 }
