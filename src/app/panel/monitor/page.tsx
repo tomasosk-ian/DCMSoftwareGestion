@@ -10,42 +10,22 @@ import { Zap, ZapOff } from "lucide-react";
 import { Locker } from "~/server/api/routers/lockers";
 
 export default async function Home() {
-  const [lockers, stores, reservas] = await Promise.all([
-    api.locker.get.query(),
-    api.store.get.query(),
-    api.reserve.getLastReserveByBox.query(),
-  ]);
+  const { lockers, stores, reservas } = await fetchData();
 
   return (
     <section className="w-full">
       <Carousel className="w-full">
         <CarouselContent>
-          {(lockers as Locker[]).map((locker, index) => {
+          {lockers.map((locker) => {
             const store = stores.find(
               (store) => store.serieLocker === locker.nroSerieLocker,
             );
 
             return (
-              <CarouselItem key={locker.id || index}>
+              <CarouselItem key={locker.id}>
                 <Card>
                   <CardTitle>
-                    <div className="flex justify-between p-3">
-                      <div className="flex gap-4">
-                        <span>Locker: {locker.nroSerieLocker}</span>
-                        {locker.status === "connected" ? (
-                          <Zap size={18} color="green" />
-                        ) : (
-                          <ZapOff size={18} color="red" />
-                        )}
-                      </div>
-                      {store ? (
-                        <span>Local: {store.name}</span>
-                      ) : (
-                        <span className="text-xs text-red-400">
-                          No hay local asignado
-                        </span>
-                      )}
-                    </div>
+                    <Header locker={locker} store={store} />
                   </CardTitle>
                   <BoxContent locker={locker} reservas={reservas} />
                 </Card>
@@ -55,5 +35,39 @@ export default async function Home() {
         </CarouselContent>
       </Carousel>
     </section>
+  );
+}
+
+async function fetchData() {
+  const [lockers, stores, reservas] = await Promise.all([
+    api.locker.get.query(),
+    api.store.get.query(),
+    api.reserve.getLastReserveByBox.query(),
+  ]);
+
+  return {
+    lockers: lockers as Locker[],
+    stores,
+    reservas,
+  };
+}
+
+function Header({ locker, store }: { locker: Locker; store?: any }) {
+  return (
+    <div className="flex justify-between p-3">
+      <div className="flex gap-4">
+        <span>Locker: {locker.nroSerieLocker}</span>
+        {locker.status === "connected" ? (
+          <Zap size={18} color="green" />
+        ) : (
+          <ZapOff size={18} color="red" />
+        )}
+      </div>
+      {store ? (
+        <span>Local: {store.name}</span>
+      ) : (
+        <span className="text-xs text-red-400">No hay local asignado</span>
+      )}
+    </div>
   );
 }
