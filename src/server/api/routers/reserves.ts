@@ -132,21 +132,24 @@ export const reserveRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      checkBoxAssigned();
+      // Evita llamadas innecesarias si `nReserve` es inválido
+      if (!input.nReserve) throw new Error("Invalid nReserve");
 
+      // Consulta optimizada
       const reserve = await db.query.reservas.findMany({
         where: (reservas) =>
           and(
-            isNotNull(reservas.nReserve),
-            isNotNull(reservas.Token1),
             eq(schema.reservas.nReserve, input.nReserve),
+            isNotNull(reservas.Token1),
           ),
-
         with: { clients: true },
       });
 
+      if (!reserve.length) throw new Error("Reserve not found");
+
       return reserve;
     }),
+
   getByToken: publicProcedure
     .input(
       z.object({
