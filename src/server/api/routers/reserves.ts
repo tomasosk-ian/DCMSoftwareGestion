@@ -1,4 +1,4 @@
-import { eq, lt, gt, isNotNull, and } from "drizzle-orm";
+import { eq, lt, gt, isNotNull, and, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { format, startOfDay, endOfDay, isAfter, isBefore } from "date-fns";
@@ -363,7 +363,13 @@ export async function checkBoxAssigned() {
         await db
           .update(schema.reservas)
           .set({ IdFisico: idFisico, IdBox: token.idBox })
-          .where(eq(schema.reservas.Token1!, token1Value));
+          .where(
+            and(
+              eq(schema.reservas.Token1!, token1Value),
+              isNull(schema.reservas.IdBox),
+              isNull(schema.reservas.IdFisico),
+            ),
+          );
       }
     });
   });
