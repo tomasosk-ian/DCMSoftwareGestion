@@ -327,51 +327,45 @@ export const reserveRouter = createTRPCRouter({
 export type Reserves = RouterOutputs["reserve"]["getBynReserve"][number];
 
 export async function checkBoxAssigned() {
-  const locerResponse = await fetch(
-    `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
-  );
-  const reservedBoxData = await locerResponse.json();
-
-  if (!locerResponse.ok) {
-    const errorResponse = reservedBoxData;
-    return { error: errorResponse.message || "Unknown error" };
-  }
-
-  // Validate the response data against the lockerValidator schema
-  const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
-  if (!validatedData.success) {
-    throw null; // Handle the case where the data is invalid
-  }
-
-  // Process lockers and tokens
-  validatedData.data.map(async (locker) => {
-    locker.tokens?.map(async (token) => {
-      if (token.idBox != null) {
-        const idFisico = locker.boxes.find(
-          (box) => box.id == token.idBox,
-        )?.idFisico;
-
-        // Validar el token antes de usarlo en la base de datos
-        const token1Value = parseInt(token.token1 ?? "0");
-
-        if (!Number.isFinite(token1Value)) {
-          console.error(`Valor de token1 no válido: ${token.token1}`);
-          return; // No continuar si el valor no es válido
-        }
-
-        // Solo ejecutar la consulta si el token es válido
-        await db
-          .update(schema.reservas)
-          .set({ IdFisico: idFisico, IdBox: token.idBox })
-          .where(
-            and(
-              eq(schema.reservas.Token1!, token1Value),
-              isNull(schema.reservas.IdBox),
-              isNull(schema.reservas.IdFisico),
-            ),
-          );
-      }
-    });
-  });
-  //fin check
+  // const locerResponse = await fetch(
+  //   `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
+  // );
+  // const reservedBoxData = await locerResponse.json();
+  // if (!locerResponse.ok) {
+  //   const errorResponse = reservedBoxData;
+  //   return { error: errorResponse.message || "Unknown error" };
+  // }
+  // // Validate the response data against the lockerValidator schema
+  // const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
+  // if (!validatedData.success) {
+  //   throw null; // Handle the case where the data is invalid
+  // }
+  // // Process lockers and tokens
+  // validatedData.data.map(async (locker) => {
+  //   locker.tokens?.map(async (token) => {
+  //     if (token.idBox != null) {
+  //       const idFisico = locker.boxes.find(
+  //         (box) => box.id == token.idBox,
+  //       )?.idFisico;
+  //       // Validar el token antes de usarlo en la base de datos
+  //       const token1Value = parseInt(token.token1 ?? "0");
+  //       if (!Number.isFinite(token1Value)) {
+  //         console.error(`Valor de token1 no válido: ${token.token1}`);
+  //         return; // No continuar si el valor no es válido
+  //       }
+  //       // Solo ejecutar la consulta si el token es válido
+  //       await db
+  //         .update(schema.reservas)
+  //         .set({ IdFisico: idFisico, IdBox: token.idBox })
+  //         .where(
+  //           and(
+  //             eq(schema.reservas.Token1!, token1Value),
+  //             isNull(schema.reservas.IdBox),
+  //             isNull(schema.reservas.IdFisico),
+  //           ),
+  //         );
+  //     }
+  //   });
+  // });
+  // //fin check
 }
