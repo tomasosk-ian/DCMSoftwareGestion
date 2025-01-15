@@ -1,4 +1,3 @@
-"use client";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import {
   AlignStartVerticalIcon,

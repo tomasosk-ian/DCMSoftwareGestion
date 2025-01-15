@@ -1,13 +1,12 @@
-"use client";
 import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
-import { api } from "~/trpc/react";
+import { api } from "~/trpc/server";
 import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { PlusCircleIcon } from "lucide-react";
 
-export default function Home() {
-  const { data: cupones } = api.cupones.get.useQuery();
+export default async function Home() {
+  const cupones = await api.cupones.get.query();
   const router = useRouter();
   return (
     <section className="space-y-2">
@@ -19,6 +18,7 @@ export default function Home() {
         </Button>{" "}
       </div>
       <List>
+        {}
         {cupones &&
           cupones.map((cupon) => {
             return (
