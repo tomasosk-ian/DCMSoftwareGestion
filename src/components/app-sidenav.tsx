@@ -7,18 +7,17 @@ import {
   GroupIcon,
   KeyRound,
   ReceiptIcon,
-  Settings2Icon,
   UserIcon,
   LayoutDashboardIcon,
   PercentCircleIcon,
   AreaChartIcon,
   BanIcon,
 } from "lucide-react";
-import { Badge } from "./ui/badge";
 import { About } from "./about-dialog";
-import { Button } from "./ui/button";
+import { useRouter } from "next/router";
 
 export default function AppSidenav(props: { isAdmin: boolean }) {
+  const router = useRouter();
   return (
     <div className="text-xs">
       <Sidenav>
@@ -57,7 +56,10 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
           </SidenavItem>
         )}
         <SidenavSeparator>Administración</SidenavSeparator>
-        <SidenavItem icon={<LayoutDashboardIcon />} href="/panel/monitor">
+        <SidenavItem
+          icon={<LayoutDashboardIcon />}
+          onClick={() => router.push("/panel/monitor")}
+        >
           Monitor
         </SidenavItem>
         {/* <SidenavItem icon={<CloudIcon />} disabled={true}>
