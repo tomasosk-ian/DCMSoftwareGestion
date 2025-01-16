@@ -1,4 +1,4 @@
-import { eq, lt, gt, isNotNull, and, isNull } from "drizzle-orm";
+import { eq, lt, gt, isNotNull, and, isNull, SQL } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { format, startOfDay, endOfDay, isAfter, isBefore } from "date-fns";
@@ -326,45 +326,114 @@ export const reserveRouter = createTRPCRouter({
 
 export type Reserves = RouterOutputs["reserve"]["getBynReserve"][number];
 
+// export async function checkBoxAssigned() {
+//   const locerResponse = await fetch(
+//     `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
+//   );
+//   const reservedBoxData = await locerResponse.json();
+//   if (!locerResponse.ok) {
+//     const errorResponse = reservedBoxData;
+//     return { error: errorResponse.message || "Unknown error" };
+//   }
+//   // Validate the response data against the lockerValidator schema
+//   const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
+//   if (!validatedData.success) {
+//     throw null; // Handle the case where the data is invalid
+//   }
+//   // Process lockers and tokens
+//   validatedData.data.map(async (locker) => {
+//     locker.tokens?.map(async (token) => {
+//       if (token.idBox != null) {
+//         const idFisico = locker.boxes.find(
+//           (box) => box.id == token.idBox,
+//         )?.idFisico;
+//         // Validar el token antes de usarlo en la base de datos
+//         const token1Value = parseInt(token.token1 ?? "0");
+//         if (!Number.isFinite(token1Value)) {
+//           console.error(`Valor de token1 no válido: ${token.token1}`);
+//           return; // No continuar si el valor no es válido
+//         }
+//         // Solo ejecutar la consulta si el token es válido
+//         db.update(schema.reservas)
+//           .set({ IdFisico: idFisico, IdBox: token.idBox })
+//           .where(
+//             and(
+//               eq(schema.reservas.Token1!, token1Value),
+//               isNull(schema.reservas.IdBox),
+//               isNull(schema.reservas.IdFisico),
+//             ),
+//           );
+//       }
+//     });
+//   });
+//   //fin check
+// }
+
+/**
+ * Función para verificar y asignar lockers a partir de un API y procesar las actualizaciones correspondientes en la base de datos.
+ */
 export async function checkBoxAssigned() {
+  // Realiza una solicitud a la API para obtener los datos de lockers asignados por empresa.
   const locerResponse = await fetch(
     `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
   );
   const reservedBoxData = await locerResponse.json();
+
+  // Verifica si la respuesta de la API fue exitosa
   if (!locerResponse.ok) {
     const errorResponse = reservedBoxData;
-    return { error: errorResponse.message || "Unknown error" };
+    return { error: errorResponse.message || "Unknown error" }; // Devuelve un error si la respuesta no fue exitosa
   }
-  // Validate the response data against the lockerValidator schema
+
+  // Valida los datos obtenidos usando un esquema predefinido con Zod
   const validatedData = z.array(lockerValidator).safeParse(reservedBoxData);
   if (!validatedData.success) {
-    throw null; // Handle the case where the data is invalid
+    throw null; // Lanza un error si los datos no cumplen con el esquema definido
   }
-  // Process lockers and tokens
-  validatedData.data.map(async (locker) => {
-    locker.tokens?.map(async (token) => {
+
+  // Inicializa un array para acumular las consultas de actualización en lote
+  const batchUpdates: any = [];
+
+  // Procesa cada locker obtenido en los datos validados
+  validatedData.data.forEach((locker) => {
+    // Itera sobre los tokens asociados al locker
+    locker.tokens?.forEach((token) => {
       if (token.idBox != null) {
+        // Busca el identificador físico (idFisico) asociado al idBox del token
         const idFisico = locker.boxes.find(
           (box) => box.id == token.idBox,
         )?.idFisico;
-        // Validar el token antes de usarlo en la base de datos
+
+        // Valida el token1 asegurándose de que sea un número válido
         const token1Value = parseInt(token.token1 ?? "0");
         if (!Number.isFinite(token1Value)) {
           console.error(`Valor de token1 no válido: ${token.token1}`);
-          return; // No continuar si el valor no es válido
+          return; // Si el token no es válido, se detiene el procesamiento de este token
         }
-        // Solo ejecutar la consulta si el token es válido
-        db.update(schema.reservas)
-          .set({ IdFisico: idFisico, IdBox: token.idBox })
-          .where(
-            and(
-              eq(schema.reservas.Token1!, token1Value),
-              isNull(schema.reservas.IdBox),
-              isNull(schema.reservas.IdFisico),
+
+        // Crea la consulta de actualización para este token y la agrega al array de batchUpdates
+        batchUpdates.push(
+          db
+            .update(schema.reservas) // Define la tabla donde se realizará la actualización
+            .set({ IdFisico: idFisico, IdBox: token.idBox }) // Especifica los valores a actualizar
+            .where(
+              and(
+                eq(schema.reservas.Token1!, token1Value), // Coincide con el token1
+                isNull(schema.reservas.IdBox), // Verifica que IdBox no esté asignado aún
+                isNull(schema.reservas.IdFisico), // Verifica que IdFisico no esté asignado aún
+              ),
             ),
-          );
+        );
       }
     });
   });
-  //fin check
+
+  // Ejecuta todas las actualizaciones en la base de datos como un lote
+  try {
+    await db.batch(batchUpdates); // Realiza la actualización en lote
+    console.log("Actualizaciones en lote completadas con éxito.");
+  } catch (error) {
+    // Maneja errores que puedan ocurrir durante las actualizaciones
+    console.error("Error durante las actualizaciones en lote:", error);
+  }
 }
