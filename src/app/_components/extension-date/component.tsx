@@ -47,19 +47,16 @@ export default function DateComponent(props: {
     }
   }
   function handleClick() {
-    const today = Date.now();
+    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
-    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'23:00:00"));
-
     props.setReserve(reserve!);
 
     getDays();
   }
   function onlyToday() {
-    const today = Date.now();
+    const today = new Date(Date.now());
+    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
-    props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'23:00:00"));
-
     props.setReserve(reserve!);
     getDays();
   }
