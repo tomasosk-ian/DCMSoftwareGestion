@@ -51,8 +51,6 @@ export default function DateComponent(props: {
     nextDay.setDate(nextDay.getDate() + 1);
     props.setStartDate(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
-    console.log(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
-    console.log(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
     props.setReserve(reserve!);
     getDays();
   }
