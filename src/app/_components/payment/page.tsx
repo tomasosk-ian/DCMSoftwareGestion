@@ -80,12 +80,12 @@ export default function Payment(props: {
                 reserve.Token1!,
                 props.sizes.find((x) => x.id === reserve.IdSize)?.nombre! ?? "",
               ]);
-
               const updatedReserve = await createReserve({
                 Contador: reserve.Contador,
                 FechaCreacion: reserve.FechaCreacion,
                 FechaInicio: props.startDate!,
                 FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
+                IdFisico: reserve.IdFisico,
                 IdBox: reserve.IdBox,
                 IdSize: reserve.IdSize,
                 NroSerie: reserve.NroSerie,

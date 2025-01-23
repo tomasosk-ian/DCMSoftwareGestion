@@ -214,6 +214,7 @@ const reserveValidator = z.object({
   NroSerie: z.string().nullable(),
   IdSize: z.number().nullable(),
   IdBox: z.number().nullable(),
+  IdFisico: z.number().nullable(),
   Token1: z.number().nullable(),
   FechaCreacion: z.string().nullable(),
   FechaInicio: z.string().nullable(),
