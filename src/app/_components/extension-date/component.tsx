@@ -51,9 +51,6 @@ export default function DateComponent(props: {
     nextDay.setDate(nextDay.getDate() + 1);
     props.setStartDate(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
-    console.log("IDFISICO", reserve?.IdFisico);
-    console.log("IdBox", reserve?.IdBox);
-
     props.setReserve(reserve!);
     getDays();
   }
@@ -63,8 +60,6 @@ export default function DateComponent(props: {
     nextDay.setDate(nextDay.getDate() + 1);
     props.setStartDate(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
-    console.log("IDFISICO", reserve?.IdFisico);
-    console.log("IdBox", reserve?.IdBox);
     props.setReserve(reserve!);
     getDays();
   }
