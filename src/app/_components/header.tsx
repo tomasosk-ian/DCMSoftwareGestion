@@ -2,7 +2,7 @@ export default async function Home() {
   return (
     <div>
       <div
-        className="masthead inline-header center widgets full-height large-mobile-menu-icon dt-parent-menu-clickable show-sub-menu-on-hover show-device-logo show-mobile-logo top-0"
+        className="masthead inline-header center widgets large-mobile-menu-icon dt-parent-menu-clickable show-sub-menu-on-hover show-device-logo show-mobile-logo top-0"
         role="banner"
       >
         <header className="header-bar">
