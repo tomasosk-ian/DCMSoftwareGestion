@@ -132,6 +132,7 @@ export const reserveRouter = createTRPCRouter({
     .query(async ({ input }) => {
       // Evita llamadas innecesarias si `nReserve` es inválido
       if (!input.nReserve) throw new Error("Invalid nReserve");
+      checkBoxAssigned();
 
       // Consulta optimizada
       const reserve = await db.query.reservas.findMany({
@@ -373,6 +374,7 @@ export type Reserves = RouterOutputs["reserve"]["getBynReserve"][number];
  * Función para verificar y asignar lockers a partir de un API y procesar las actualizaciones correspondientes en la base de datos.
  */
 export async function checkBoxAssigned() {
+  console.log("PORONGAAAAAAAA");
   // Realiza una solicitud a la API para obtener los datos de lockers asignados por empresa.
   const locerResponse = await fetch(
     `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
@@ -419,8 +421,6 @@ export async function checkBoxAssigned() {
             .where(
               and(
                 eq(schema.reservas.Token1!, token1Value), // Coincide con el token1
-                isNull(schema.reservas.IdBox), // Verifica que IdBox no esté asignado aún
-                isNull(schema.reservas.IdFisico), // Verifica que IdFisico no esté asignado aún
               ),
             ),
         );

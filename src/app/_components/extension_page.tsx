@@ -187,13 +187,13 @@ export default function Extension(props: { sizes: Size[] }) {
                             clientId: client.identifier,
                           });
                           setNReserve(nreserve!);
-
                           reserve.client = client.email;
-
                           const response = parseInt(
                             await reserveExtesion({
                               idToken: reserve.IdTransaction!,
                               newEndDate: endDate,
+                              Token1: reserve.Token1!,
+                              nReserve: nreserve!,
                             }),
                           );
 
