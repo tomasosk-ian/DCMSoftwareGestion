@@ -138,16 +138,21 @@ export default function Success(props: {
                   {props.reserves.map((r, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between gap-4 py-2"
+                      className="flex items-center justify-between gap-2"
                     >
                       <div>
                         <p>Token ({getSize(r.IdSize!)})</p>
                       </div>
-                      <QRCode
-                        size={75}
-                        value={r.Token1?.toString() ?? ""}
-                        viewBox={`0 0 128 128`}
-                      />
+                      <div>
+                        <QRCode
+                          size={75}
+                          value={r.Token1?.toString() ?? ""}
+                          viewBox={`0 0 128 128`}
+                        />
+                        <p className="mt-2 text-center text-[#848484]">
+                          {r.Token1}
+                        </p>{" "}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -155,7 +160,7 @@ export default function Success(props: {
             </div>
           </div>
           {/* Botones */}
-          <div className="flex items-center justify-between gap-2 pt-3">
+          <div className="flex items-center justify-between gap-2 pt-2">
             <ButtonCustomComponent
               onClick={async () => {
                 location.reload();
