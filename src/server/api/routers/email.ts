@@ -34,19 +34,20 @@ export const emailRouter = createTRPCRouter({
         }[] = [];
         await Promise.all(
           input.token.map(async (token, index) => {
-            // const img = await QRCode.toDataURL(token[0]!.toString(), {
-            //   type: "png",
-            // });
-            // const qrCode = img.split(";base64,").pop();
-            // if (qrCode) {
-            //   attachments.push({
-            //     filename: `QR_${token[0]}_${token[1]}.png`,
-            //     content: qrCode,
-            //     type: "image/png",
-            //     disposition: "attachment",
-            //     contentId: `qr_code_${index}`,
-            //   });
-            // }
+            const img = await QRCode.toDataURL(token[0]!.toString(), {
+              type: "png",
+            });
+
+            const qrCode = img.split(";base64,").pop();
+            if (qrCode) {
+              attachments.push({
+                filename: `QR_${token[0]}_${token[1]}.png`,
+                content: qrCode,
+                type: "image/png",
+                disposition: "attachment",
+                contentId: `qr_code_${index}`,
+              });
+            }
           }),
         );
         const sgMail = require("@sendgrid/mail");
