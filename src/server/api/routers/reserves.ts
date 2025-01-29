@@ -374,7 +374,6 @@ export type Reserves = RouterOutputs["reserve"]["getBynReserve"][number];
  * Función para verificar y asignar lockers a partir de un API y procesar las actualizaciones correspondientes en la base de datos.
  */
 export async function checkBoxAssigned() {
-  console.log("PORONGAAAAAAAA");
   // Realiza una solicitud a la API para obtener los datos de lockers asignados por empresa.
   const locerResponse = await fetch(
     `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,

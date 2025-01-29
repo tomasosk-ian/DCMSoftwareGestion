@@ -12,7 +12,7 @@ export default function ButtonCustomComponent(props: {
   return (
     <div>
       <Button
-        className="bg-buttonPick hover:bg-buttonHover flex w-full items-center justify-center rounded-full text-sm"
+        className="flex w-full items-center justify-center rounded-full bg-buttonPick text-sm hover:bg-buttonHover"
         onClick={props.onClick}
         disabled={props.disabled}
       >

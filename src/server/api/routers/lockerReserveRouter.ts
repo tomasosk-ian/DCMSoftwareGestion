@@ -196,15 +196,15 @@ export const lockerReserveRouter = createTRPCRouter({
           },
         );
         const newIdToken = parseInt(await reservationResponse.json());
-        await db
-          .update(schema.reservas)
-          .set({ IdTransaction: newIdToken })
-          .where(
-            and(
-              eq(schema.reservas.Token1, input.Token1),
-              eq(schema.reservas.nReserve, input.nReserve),
-            ),
-          );
+        // await db
+        //   .update(schema.reservas)
+        //   .set({ IdTransaction: newIdToken })
+        //   .where(
+        //     and(
+        //       eq(schema.reservas.Token1, input.Token1),
+        //       eq(schema.reservas.nReserve, input.nReserve),
+        //     ),
+        //   );
 
         if (!reservationResponse.ok) {
           const errorResponse = await reservationResponse.json();
