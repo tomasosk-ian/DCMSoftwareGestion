@@ -123,7 +123,7 @@ export default function Payment(props: {
 
           return {
             ...reserve,
-            Token1: response,
+            Token1: props.isExt ? reserve.Token1 : response,
             idToken: reserve.IdTransaction!,
             nReserve: props.nReserve,
           };

@@ -26,7 +26,7 @@ export default function Success(props: {
   const { toPDF, targetRef } = usePDF({
     filename: `comprobante${props.checkoutNumber ? props.checkoutNumber : ""}.pdf`,
   });
-
+  console.log("la reserva es", props.reserves);
   useEffect(() => {
     // Scroll automático de 75px al cargar
     window.scrollTo({
