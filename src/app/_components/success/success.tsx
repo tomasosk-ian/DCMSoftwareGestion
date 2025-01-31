@@ -121,7 +121,11 @@ export default function Success(props: {
                   </div>
                   <div className="flex justify-between">
                     <p>Retiro</p>
-                    <p>{formatDateToTextDate(props.endDate)}</p>
+                    <p>
+                      {formatDateToTextDate(
+                        props.endDate ?? props.reserves[0]?.FechaFin!,
+                      )}
+                    </p>
                   </div>
                 </div>
                 <hr className="my-2 border-[#848484]" />
