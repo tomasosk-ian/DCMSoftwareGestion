@@ -75,7 +75,7 @@ export default function Success(props: {
                 <p>Tu pago se ha completado exitosamente.</p>
               </div>
               <div className="flex justify-center pt-1 text-center text-xs italic text-[#848484]">
-                <p>Te enviaremos un código para que puedas abrir tu locker.</p>
+                <p>Descarga tu token para que puedas abrir el locker.</p>
               </div>
             </div>
             <div className="bg-gray-100 px-4 py-3">
