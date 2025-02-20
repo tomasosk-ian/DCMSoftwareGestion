@@ -21,7 +21,7 @@ import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
 import { api } from "~/trpc/react";
-import { initMercadoPago, Payment as PaymentMp } from '@mercadopago/sdk-react';
+import { initMercadoPago, Payment as PaymentMp, StatusScreen } from '@mercadopago/sdk-react';
 
 let useMercadoPago = false;
 if (
@@ -72,7 +72,7 @@ export default function Payment(props: {
     return formattedDate;
   }
 
-  const [mpPreferenceId, setMpPreferenceId] = useState("");
+  const [mpPaymentId, setMpPaymentId] = useState("");
 
   async function success() {
     try {
@@ -259,7 +259,15 @@ export default function Payment(props: {
           <PaymentMp
             initialization={{
               amount: props.total,
-              preferenceId: mpPreferenceId,
+              payer: {
+                email: props.client.email ?? undefined,
+                firstName: props.client.name ?? undefined,
+                lastName: props.client.surname ?? undefined,
+                identification: props.client.dni ? {
+                  number: props.client.dni,
+                  type: 'id',
+                } : undefined,
+              }
             }}
             customization={{
               paymentMethods: {
@@ -268,6 +276,8 @@ export default function Payment(props: {
                 prepaidCard: "all",
                 debitCard: "all",
                 mercadoPago: "all",
+                bankTransfer: "all",
+                atm: "all",
               },
             }}
             onSubmit={async ({ formData }) => {
@@ -279,13 +289,16 @@ export default function Payment(props: {
                 },
                 issuer_id: Number(formData.issuer_id),
               });
-              if (res === "approved") {
+
+              setMpPaymentId(String(res.paymentId) ?? "");
+              if (res.status === "approved") {
                 await success();
               }
 
               console.log('status', res);
             }}
           />
+          { mpPaymentId && mpPaymentId !== '' && <StatusScreen initialization={{ paymentId: mpPaymentId }} /> }
         </> : <>
           <Script
             src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
