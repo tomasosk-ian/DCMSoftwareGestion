@@ -1,3 +1,4 @@
+"use client"
 import { Transaction } from "@libsql/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -20,6 +21,17 @@ import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
 import { api } from "~/trpc/react";
+import { initMercadoPago, Payment as PaymentMp } from '@mercadopago/sdk-react';
+
+let useMercadoPago = false;
+if (
+  typeof process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY !== 'undefined' &&
+  (process.env.NEXT_PUBLIC_HABILITAR_MERCADOPAGO === "true" ||
+  process.env.NEXT_PUBLIC_HABILITAR_MERCADOPAGO === "si")
+) {
+  useMercadoPago = true;
+  initMercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY);
+}
 
 declare global {
   interface Window {
@@ -52,11 +64,16 @@ export default function Payment(props: {
     api.transaction.create.useMutation();
   const [transaction, setTransaction] = useState<Transaction>();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
+  const { mutateAsync: procesarPagoMp } = api.mp.procesarPago.useMutation();
+
   function formatDateToTextDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
     return formattedDate;
   }
+
+  const [mpPreferenceId, setMpPreferenceId] = useState("");
+
   async function success() {
     try {
       props.setLoadingPay(true);
@@ -152,58 +169,60 @@ export default function Payment(props: {
   }
 
   useEffect(() => {
-    let statusCode = 0;
-    if (props.checkoutNumber) {
-      const options = {
-        id: props.checkoutNumber,
-        type: "checkout",
-        onResult: (data: any) => {
-          // OnResult es llamado cuando se toca el Botón Cerrar
+    if (!useMercadoPago) {
+      let statusCode = 0;
+      if (props.checkoutNumber) {
+        const options = {
+          id: props.checkoutNumber,
+          type: "checkout",
+          onResult: (data: any) => {
+            // OnResult es llamado cuando se toca el Botón Cerrar
 
-          window.MobbexEmbed.close();
-        },
-        onPayment: async (data: any) => {
-          statusCode = parseInt(data.data.status.code);
-          if (statusCode == 200) {
-            await success();
-          } else {
-            // location.reload();
-          }
-        },
-        onOpen: () => {
-          console.info("Pago iniciado.");
-        },
-        onError: (error: any) => {
-          console.error("ERROR: ", error);
-        },
-        onClose: (error: any) => {
-          if (statusCode != 200) {
-            location.reload();
-          }
-        },
-      };
+            window.MobbexEmbed.close();
+          },
+          onPayment: async (data: any) => {
+            statusCode = parseInt(data.data.status.code);
+            if (statusCode == 200) {
+              await success();
+            } else {
+              // location.reload();
+            }
+          },
+          onOpen: () => {
+            console.info("Pago iniciado.");
+          },
+          onError: (error: any) => {
+            console.error("ERROR: ", error);
+          },
+          onClose: (error: any) => {
+            if (statusCode != 200) {
+              location.reload();
+            }
+          },
+        };
 
-      function renderMobbexButton() {
-        window.MobbexEmbed.render(options, "#mbbx-button");
+        function renderMobbexButton() {
+          window.MobbexEmbed.render(options, "#mbbx-button");
+        }
+
+        function initMobbexPayment() {
+          const mbbxButton = window.MobbexEmbed.init(options);
+          mbbxButton.open();
+        }
+
+        const script = document.createElement("script");
+        script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
+        script.async = true;
+        script.crossOrigin = "anonymous";
+        script.addEventListener("load", () => {
+          initMobbexPayment(); // Abre inmediatamente el modal de pago
+        });
+        document.body.appendChild(script);
+
+        return () => {
+          document.body.removeChild(script);
+        };
       }
-
-      function initMobbexPayment() {
-        const mbbxButton = window.MobbexEmbed.init(options);
-        mbbxButton.open();
-      }
-
-      const script = document.createElement("script");
-      script.src = `https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js?t=${Date.now()}`;
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      script.addEventListener("load", () => {
-        initMobbexPayment(); // Abre inmediatamente el modal de pago
-      });
-      document.body.appendChild(script);
-
-      return () => {
-        document.body.removeChild(script);
-      };
     }
   }, [props.checkoutNumber]);
 
@@ -236,12 +255,45 @@ export default function Payment(props: {
     <>
       <>
         {" "}
-        <Script
-          src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
-          integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
-          crossOrigin="anonymous"
-        />
-        <div id="mbbx-container"></div>{" "}
+        {useMercadoPago ? <>
+          <PaymentMp
+            initialization={{
+              amount: props.total,
+              preferenceId: mpPreferenceId,
+            }}
+            customization={{
+              paymentMethods: {
+                ticket: "all",
+                creditCard: "all",
+                prepaidCard: "all",
+                debitCard: "all",
+                mercadoPago: "all",
+              },
+            }}
+            onSubmit={async ({ formData }) => {
+              const res = await procesarPagoMp({
+                ...formData,
+                additional_info: {
+                  ...formData.additional_info,
+                  items: undefined,
+                },
+                issuer_id: Number(formData.issuer_id),
+              });
+              if (res === "approved") {
+                await success();
+              }
+
+              console.log('status', res);
+            }}
+          />
+        </> : <>
+          <Script
+            src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"
+            integrity="sha384-7CIQ1hldcQc/91ZpdRclg9KVlvtXBldQmZJRD1plEIrieHNcYvlQa2s2Bj+dlLzQ"
+            crossOrigin="anonymous"
+          />
+          <div id="mbbx-container"></div>{" "}
+        </>}
       </>
     </>
   );
