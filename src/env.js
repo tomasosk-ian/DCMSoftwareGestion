@@ -31,6 +31,7 @@ export const env = createEnv({
     MOBBEX_ACCESS_TOKEN: z.string(),
     TOKEN_EMPRESA: z.string(),
     CLERK_SECRET_KEY: z.string(),
+    MERCADOPAGO_SERVER_TOKEN: z.string(),
   },
 
   /**
@@ -41,6 +42,8 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
+    NEXT_PUBLIC_HABILITAR_MERCADOPAGO: z.string().transform(v => v.trim().toLowerCase() === "true" || v.trim() === "si" || v.trim() === "1"),
+    NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: z.string(),
   },
 
   /**
@@ -63,6 +66,9 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     APP_ENV: process.env.APP_ENV,
+    NEXT_PUBLIC_HABILITAR_MERCADOPAGO: process.env.NEXT_PUBLIC_HABILITAR_MERCADOPAGO,
+    NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY,
+    MERCADOPAGO_SERVER_TOKEN: process.env.MERCADOPAGO_SERVER_TOKEN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
