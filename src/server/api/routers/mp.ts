@@ -24,7 +24,10 @@ export const mpRouter = createTRPCRouter({
       const res = await payment.create({ body: formData });
       console.log('mp res', res);
 
-      return res.status as "approved" | "authorized" | "in_process" | "pending" | "cancelled" | "charged_back" | "rejected";
+      return {
+        status: res.status as "approved" | "authorized" | "in_process" | "pending" | "cancelled" | "charged_back" | "rejected",
+        paymentId: res.id,
+      };
     }),
 });
 
