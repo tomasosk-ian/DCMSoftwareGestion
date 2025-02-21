@@ -168,7 +168,6 @@ export const publicConfig = sqliteTable(
   {
     key: text("identifier").notNull(),
     value: text("value").notNull(),
-    description: text("description"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.key),
@@ -180,7 +179,6 @@ export const privateConfig = sqliteTable(
   {
     key: text("identifier").notNull(),
     value: text("value").notNull(),
-    description: text("description"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.key),
