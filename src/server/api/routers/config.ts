@@ -13,6 +13,17 @@ export const configRouter = createTRPCRouter({
         where: eq(schema.publicConfig.key, input.key)
       });
     }),
+  getPrivateKey: publicProcedure
+    .input(z.object({ key: z.custom<PrivateConfigKeys>() }))
+    .query(async ({ input, ctx }) => {
+      if (!ctx.session || ctx.session.sessionClaims?.metadata.role !== 'admin') {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: "no es admin" });
+      }
+
+      return await ctx.db.query.privateConfig.findFirst({
+        where: eq(schema.privateConfig.key, input.key)
+      });
+    }),
   setPublicKeyAdmin: protectedProcedure
     .input(z.object({
       key: z.custom<PublicConfigKeys>(),

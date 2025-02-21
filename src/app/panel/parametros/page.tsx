@@ -12,7 +12,7 @@ import { Button } from "~/components/ui/button";
 import { Loader2Icon, PlusCircleIcon, XIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 
-function InsertClavePublica({ invalidate }: { invalidate: () => void }) {
+/* function InsertClavePublica({ invalidate }: { invalidate: () => void }) {
   const [open, setOpen] = useState(false);
   const [clave, setClave] = useState<PublicConfigKeys | "">("");
   const [value, setValue] = useState("");
@@ -46,7 +46,7 @@ function InsertClavePublica({ invalidate }: { invalidate: () => void }) {
   }
 
   return <div className="m-2">
-    <Button onClick={() => setOpen(true)} className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#d0d0d0]">
+    <Button onClick={() => setOpen(true)} className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]">
       {isLoading ? (
         <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
       ) : (
@@ -104,7 +104,7 @@ function InsertClavePublica({ invalidate }: { invalidate: () => void }) {
           <Button
             disabled={isLoading || value === "" || clave === ""}
             onClick={handle}
-            className="flex rounded-full w-fit justify-self-center text-[#3E3E3E] bg-[#d0d0d0]"
+            className="flex rounded-full w-fit justify-self-center text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]"
           >
             {isLoading ? (
               <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
@@ -147,7 +147,7 @@ function InsertClavePrivada({ invalidate }: { invalidate: () => void }) {
   }
 
   return <div className="m-2">
-    <Button onClick={() => setOpen(true)} className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#d0d0d0]">
+    <Button onClick={() => setOpen(true)} className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]">
       {isLoading ? (
         <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
       ) : (
@@ -177,7 +177,7 @@ function InsertClavePrivada({ invalidate }: { invalidate: () => void }) {
           </div>
 
           <div className="font-bold">
-            <Label htmlFor="brandCode">Valor</Label>
+            <Label htmlFor="valor">Valor</Label>
             <Input
               id="valor"
               value={value}
@@ -190,7 +190,7 @@ function InsertClavePrivada({ invalidate }: { invalidate: () => void }) {
           <Button
             disabled={isLoading || value === "" || clave === ""}
             onClick={handle}
-            className="flex rounded-full w-fit justify-self-center text-[#3E3E3E] bg-[#d0d0d0]"
+            className="flex rounded-full w-fit justify-self-center text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]"
           >
             {isLoading ? (
               <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
@@ -198,6 +198,144 @@ function InsertClavePrivada({ invalidate }: { invalidate: () => void }) {
               <PlusCircleIcon className="h-4 mr-1 stroke-1" />
             )}
             Configurar clave
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
+} */
+
+function FormMetodoPago({ invalidate }: { invalidate: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [metodo, setMetodo] = useState<PublicConfigMetodoPagoKeys>("mercadopago");
+  const [clave1, setClave1] = useState("");
+  const [clave2, setClave2] = useState("");
+  const { mutateAsync: setPrivateKey, isLoading: isLoadingPrivate } = api.config.setPrivateKeyAdmin.useMutation();
+  const { mutateAsync: setPublicKey, isLoading: isLoadingPublic } = api.config.setPublicKeyAdmin.useMutation();
+  const { data: claveOriginalMetodo, refetch: refetch1 } = api.config.getKey.useQuery({ key: 'metodo_pago' });
+  const { data: claveOriginalPublicaMp, refetch: refetch2 } = api.config.getKey.useQuery({ key: 'mercadopago_public_key' });
+  const { data: claveOriginalPrivadaMp, refetch: refetch3 } = api.config.getPrivateKey.useQuery({ key: 'mercadopaco_private_key' });
+  const { data: claveMobbexApi, refetch: refetch4 } = api.config.getPrivateKey.useQuery({ key: 'mobbex_api_key' });
+  const { data: claveMobbexToken, refetch: refetch5 } = api.config.getPrivateKey.useQuery({ key: 'mobbex_access_token' });
+
+  const isLoading = isLoadingPrivate || isLoadingPublic;
+
+  useEffect(() => {
+    if (open) {
+      setMetodo((claveOriginalMetodo?.value ?? "mercadopago") as PublicConfigMetodoPagoKeys);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (metodo === 'mercadopago' && claveOriginalPublicaMp) {
+      setClave1(claveOriginalPublicaMp.value);
+    } else if (metodo === 'mercadopago') {
+      setClave1("");
+    }
+
+    if (metodo === 'mercadopago' && claveOriginalPrivadaMp) {
+      setClave2(claveOriginalPrivadaMp.value);
+    } else if (metodo === 'mercadopago') {
+      setClave2("");
+    }
+
+    if (metodo === 'mobbex' && claveMobbexApi) {
+      setClave1(claveMobbexApi.value);
+    } else if (metodo === 'mobbex') {
+      setClave1("");
+    }
+
+    if (metodo === 'mobbex' && claveMobbexToken) {
+      setClave2(claveMobbexToken.value);
+    } else if (metodo === 'mobbex') {
+      setClave2("");
+    }
+  }, [metodo, claveOriginalPublicaMp, claveOriginalPrivadaMp, claveMobbexApi, claveMobbexToken, claveOriginalMetodo]);
+
+  async function handle() {
+    await setPublicKey({ key: 'metodo_pago', value: metodo });
+
+    if (metodo === 'mobbex') {
+      await setPrivateKey({ key: 'mobbex_api_key', value: clave1 });
+      await setPrivateKey({ key: 'mobbex_access_token', value: clave2 });
+    } else if (metodo === 'mercadopago') {
+      await setPublicKey({ key: 'mercadopago_public_key', value: clave1 });
+      await setPrivateKey({ key: 'mercadopaco_private_key', value: clave2 });
+    }
+
+    // no furula api.useUtils()
+    await refetch1();
+    await refetch2();
+    await refetch3();
+    await refetch4();
+    await refetch5();
+
+    invalidate();
+    setOpen(false);
+  }
+
+  return <div className="m-2">
+    <Button onClick={() => setOpen(true)} className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]">
+      {isLoading ? (
+        <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+      ) : (
+        <PlusCircleIcon className="h-5 mr-1 stroke-1" />
+      )}
+      Configurar método de pago
+    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>Configurar método de pago</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex flex-col">
+            <Label htmlFor="valor" className="mb-2">Método de pago</Label>
+            <Select onValueChange={v => setMetodo(v as PublicConfigMetodoPagoKeys)} value={metodo}>
+              <SelectTrigger className="font-bold">
+                <SelectValue placeholder="Método de pago" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(PublicConfigMetodoPago).map(v => 
+                  <SelectItem key={`mp-id-${v}`} value={v}>{PublicConfigMetodoPago[v as PublicConfigMetodoPagoKeys]}</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="font-bold">
+            <Label htmlFor="clave1">{metodo === 'mercadopago' ? "Clave pública de Mercado Pago" : 'Clave API de Mobbex'}</Label>
+            <Input
+              id="clave1"
+              value={clave1}
+              onChange={(e) => setClave1(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="font-bold">
+            <Label htmlFor="clave2">{metodo === 'mercadopago' ? "Clave privada de Mercado Pago" : 'Token de acceso de Mobbex'}</Label>
+            <Input
+              id="clave2"
+              value={clave2}
+              onChange={(e) => setClave2(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+        <DialogFooter className="sm:justify-center">
+          <Button
+            disabled={isLoading}
+            onClick={handle}
+            className="flex rounded-full w-fit justify-self-center text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]"
+          >
+            {isLoading ? (
+              <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+            ) : (
+              <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+            )}
+            Guardar
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -223,13 +361,14 @@ export default function LockerOcupationPage() {
       <div className="w-full flex justify-between">
         <h2 className="text-2xl font-semibold mb-3"></h2>
         <div className="flex flex-row">
-          <InsertClavePublica invalidate={invalidate} />
-          <InsertClavePrivada invalidate={invalidate} />
+          {/* <InsertClavePublica invalidate={invalidate} />
+          <InsertClavePrivada invalidate={invalidate} /> */}
+          <FormMetodoPago invalidate={invalidate} />
         </div>
       </div>
       <section className="space-y-2">
         <div>(Servidor) TimeOut Mobbex: {timeOut}</div>
-        {(privateConfigs ?? []).map(v => <div key={`pc-${v.key}`}>
+        {/* {(privateConfigs ?? []).map(v => <div key={`pc-${v.key}`}>
           <Button onClick={async () => {
             await deletePrivateKey({ key: v.key as PrivateConfigKeys });
             await invalidate();
@@ -240,7 +379,7 @@ export default function LockerOcupationPage() {
             await deletePublicKey({ key: v.key as PublicConfigKeys });
             await invalidate();
           }}><XIcon /></Button> (Configuración pública) {PublicConfigClaves[v.key as PublicConfigKeys]}: {v.value}
-        </div>)}
+        </div>)} */ }
       </section>
     </LayoutContainer>
   );
