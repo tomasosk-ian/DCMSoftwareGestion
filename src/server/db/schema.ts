@@ -163,16 +163,27 @@ export const reservasRelations = relations(reservas, ({ one }) => ({
   }),
 }));
 
-export const config = sqliteTable(
-  "test_config",
+export const publicConfig = sqliteTable(
+  "test_publicConfig",
   {
-    identifier: text("identifier", { length: 255 }).notNull(),
-    name: text("name", { length: 255 }).notNull(),
-    description: text("description", { length: 255 }),
-    token: text("token", { length: 20 }),
+    key: text("identifier").notNull(),
+    value: text("value").notNull(),
+    description: text("description"),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
+    compoundKey: primaryKey(vt.key),
+  }),
+);
+
+export const privateConfig = sqliteTable(
+  "test_privateConfig",
+  {
+    key: text("identifier").notNull(),
+    value: text("value").notNull(),
+    description: text("description"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.key),
   }),
 );
 
@@ -185,19 +196,6 @@ export const lockers = sqliteTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.id),
-  }),
-);
-
-export const globalconfig = sqliteTable(
-  "test_globalconfig",
-  {
-    identifier: text("identifier", { length: 255 }).notNull(),
-    name: text("name", { length: 255 }).notNull(),
-    image: text("image", { length: 255 }),
-    token: text("token", { length: 255 }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier),
   }),
 );
 

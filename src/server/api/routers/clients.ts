@@ -1,9 +1,8 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { createId } from "~/lib/utils";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { RouterOutputs } from "~/trpc/shared";
+import type { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 import { clients } from "~/server/db/schema";
 

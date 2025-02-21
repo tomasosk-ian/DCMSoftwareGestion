@@ -1,5 +1,4 @@
 import { cityRouter } from "~/server/api/routers/city";
-import { globalConfigRouter } from "~/server/api/routers/globalConfig";
 import { storeRouter } from "~/server/api/routers/store";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { sizeRouter } from "./routers/sizes";
@@ -18,6 +17,7 @@ import { tokenRouter } from "./routers/token";
 import { reportsRouter } from "./routers/reports";
 import { paramsRouter } from "./routers/params";
 import { mpRouter } from "./routers/mp";
+import { configRouter } from "./routers/config";
 
 /**
  * This is the primary router for your server.
@@ -29,7 +29,7 @@ export const appRouter = createTRPCRouter({
   store: storeRouter,
   size: sizeRouter,
   locker: lockerRouter,
-  globalConfig: globalConfigRouter,
+  config: configRouter,
   fee: feeRouter,
   coin: coinRouter,
   transaction: transactionRouter,
