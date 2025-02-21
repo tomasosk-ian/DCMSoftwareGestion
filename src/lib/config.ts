@@ -1,5 +1,5 @@
 export const PublicConfigClaves = {
-  "metodo_pago": "Configuración de método de pago. Opciones: mercadopago, mobbex",
+  "metodo_pago": "Configuración de método de pago",
   "mercadopago_public_key": "Clave pública de Mercado Pago",
 }
 
@@ -8,6 +8,7 @@ export enum PublicConfigMetodoPago {
   mobbex = "mobbex"
 }
 
+export type PublicConfigMetodoPagoKeys = keyof typeof PublicConfigMetodoPago;
 export type PublicConfigKeys = keyof typeof PublicConfigClaves;
 
 export const PrivateConfigClaves = {
