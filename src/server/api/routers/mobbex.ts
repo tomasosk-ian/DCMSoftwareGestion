@@ -1,12 +1,15 @@
+import { eq } from "drizzle-orm";
 import { mobbex } from "mobbex";
 import { env } from "process";
 import { z } from "zod";
+import { PrivateConfigKeys } from "~/lib/config";
 
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { schema } from "~/server/db";
 
 export const mobbexRouter = createTRPCRouter({
   test: publicProcedure
@@ -22,7 +25,7 @@ export const mobbexRouter = createTRPCRouter({
         cantidad: z.number(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const timeOutResult = await fetch(
         `${env.SERVER_URL}/api/token/GetTimeDeleter`,
       );
@@ -30,6 +33,23 @@ export const mobbexRouter = createTRPCRouter({
       if (!timeOutResult.ok) {
         const errorResponse = await timeOutResult.json();
         throw new Error(errorResponse.message || "Unknown error");
+      }
+
+      const configMobbexApiKey: PrivateConfigKeys = 'mobbex_api_key';
+      const configMobbexAccessToken: PrivateConfigKeys = 'mobbex_access_token';
+
+      const mobbexApiKey = await ctx.db.query.privateConfig.findFirst({
+        where: eq(schema.privateConfig.key, configMobbexApiKey)
+      });
+
+      const mobbexAccessToken = await ctx.db.query.privateConfig.findFirst({
+        where: eq(schema.privateConfig.key, configMobbexAccessToken)
+      });
+
+      if (!mobbexApiKey) {
+        throw new Error("!mobbexApiKey");
+      } else if (!mobbexAccessToken) {
+        throw new Error("!mobbexAccessToken");
       }
 
       const timeOutJsonData = await timeOutResult.json(); // Obtener el JSON con el valor
@@ -42,9 +62,10 @@ export const mobbexRouter = createTRPCRouter({
       const randomNum = Math.floor(Math.random() * 10000);
       const fourDigitString = randomNum.toString().padStart(4, "0");
       mobbex.configurations.configure({
-        apiKey: "MG6cQtZdWShlZ9MObv98AloWZKUVBv3WwYmpfzOS",
-        accessToken: "a4a78473-14cb-4810-b716-02f003c183bb",
+        apiKey: mobbexApiKey.value,
+        accessToken: mobbexAccessToken.value,
       });
+
       const test = env.APP_ENV == "test" || env.APP_ENV == "development";
       const checkout = {
         total: input.amount!,
