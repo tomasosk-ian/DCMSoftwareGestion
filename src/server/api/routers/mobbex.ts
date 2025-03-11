@@ -23,6 +23,22 @@ export const mobbexRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      const timeOutResult = await fetch(
+        `${env.SERVER_URL}/api/token/GetTimeDeleter`,
+      );
+
+      if (!timeOutResult.ok) {
+        const errorResponse = await timeOutResult.json();
+        throw new Error(errorResponse.message || "Unknown error");
+      }
+
+      const timeOutJsonData = await timeOutResult.json(); // Obtener el JSON con el valor
+      const timeOutValidatedResult = z.number().safeParse(timeOutJsonData);
+
+      if (!timeOutValidatedResult.success) {
+        throw new Error("The result is not a valid number");
+      }
+
       const randomNum = Math.floor(Math.random() * 10000);
       const fourDigitString = randomNum.toString().padStart(4, "0");
       mobbex.configurations.configure({
@@ -55,6 +71,7 @@ export const mobbexRouter = createTRPCRouter({
         options: { domain: "https://lockersurbanos.com.ar/" },
         return_url: "https://mobbex.com/sale/return?session=56789",
         webhook: "https://mobbex.com/sale/webhook?user=1234",
+        timeout: timeOutValidatedResult.data,
       };
 
       let checkoutNumber;
@@ -64,7 +81,6 @@ export const mobbexRouter = createTRPCRouter({
           checkoutNumber = result.data.id;
         })
         .catch((error) => console.log(error));
-      console.log("checkoutNumber", checkoutNumber);
       return checkoutNumber;
     }),
 });

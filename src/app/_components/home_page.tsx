@@ -29,6 +29,7 @@ import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
+import { Badge } from "~/components/ui/badge";
 
 export const Icons = {
   spinner: Loader2,
@@ -111,6 +112,7 @@ export default function HomePage(props: {
     }
     return true;
   };
+  const envVariable = process.env.NEXT_PUBLIC_NODE_ENV || "Cargando...";
 
   function AlertFailedResponse() {
     return (
@@ -135,6 +137,12 @@ export default function HomePage(props: {
   }
   return (
     <>
+      {envVariable === "testing" ||
+        (envVariable === "development" && (
+          <div className="px-8 text-left">
+            <Badge>{envVariable}</Badge>
+          </div>
+        ))}
       {!isExtension && (
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}

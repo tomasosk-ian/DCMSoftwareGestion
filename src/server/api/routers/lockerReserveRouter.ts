@@ -3,7 +3,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "~/env";
 import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const getClientByEmail = async (email: string) => {
   const client = await db.query.clients.findFirst({
@@ -138,7 +138,6 @@ export const lockerReserveRouter = createTRPCRouter({
       return reservedBoxData;
       // }
       // else {
-      //   console.log("ENTRA EN ISEXT");
 
       //   const reservationResponse = await fetch(
       //     `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate}`,
@@ -152,13 +151,11 @@ export const lockerReserveRouter = createTRPCRouter({
 
       //   if (!reservationResponse.ok) {
       //     const errorResponse = await reservationResponse.json();
-      //     console.log(errorResponse);
       //     return errorResponse.message || "Unknown error";
       //   }
 
       //   const reservedBoxData = await reservationResponse.json();
 
-      //   console.log("extendedBoxData", reservedBoxData);
       //   return reservedBoxData;
       // }
     }),
@@ -180,14 +177,14 @@ export const lockerReserveRouter = createTRPCRouter({
     .input(
       z.object({
         idToken: z.number(),
+        Token1: z.number(),
         newEndDate: z.string().optional(),
+        nReserve: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
       try {
-        console.log(
-          `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
-        );
+        console.log("input.idToken", input.idToken);
         const reservationResponse = await fetch(
           `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
           {
@@ -198,6 +195,16 @@ export const lockerReserveRouter = createTRPCRouter({
             body: JSON.stringify({}), // Enviar un cuerpo vacío
           },
         );
+        const newIdToken = parseInt(await reservationResponse.json());
+        // await db
+        //   .update(schema.reservas)
+        //   .set({ IdTransaction: newIdToken })
+        //   .where(
+        //     and(
+        //       eq(schema.reservas.Token1, input.Token1),
+        //       eq(schema.reservas.nReserve, input.nReserve),
+        //     ),
+        //   );
 
         if (!reservationResponse.ok) {
           const errorResponse = await reservationResponse.json();
@@ -205,9 +212,7 @@ export const lockerReserveRouter = createTRPCRouter({
           return errorResponse.message || "Unknown error";
         }
 
-        const reservedBoxData = await reservationResponse.json();
-
-        return reservedBoxData;
+        return newIdToken;
       } catch (error) {
         console.error("Error en la solicitud de extensión:", error);
         return "Error inesperado en la solicitud";
@@ -220,6 +225,7 @@ const reserveValidator = z.object({
   NroSerie: z.string().nullable(),
   IdSize: z.number().nullable(),
   IdBox: z.number().nullable(),
+  IdFisico: z.number().nullable(),
   Token1: z.number().nullable(),
   FechaCreacion: z.string().nullable(),
   FechaInicio: z.string().nullable(),

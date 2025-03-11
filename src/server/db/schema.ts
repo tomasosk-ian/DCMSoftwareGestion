@@ -5,6 +5,8 @@ import {
   primaryKey,
   real,
   sqliteTableCreator,
+  uniqueIndex,
+  index,
 } from "drizzle-orm/sqlite-core";
 export const sqliteTable = sqliteTableCreator((name) => `${name}`);
 
@@ -34,6 +36,7 @@ export const clients = sqliteTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
+    emailIndex: index("idx_email").on(vt.email),
   }),
 );
 
@@ -51,6 +54,7 @@ export const stores = sqliteTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
+    cityIndex: index("idx_cityId").on(vt.cityId),
   }),
 );
 
@@ -141,6 +145,14 @@ export const reservas = sqliteTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
+    clientIndex: index("idx_client").on(vt.client), // Índice no único en client
+    nReserveIndex: index("idx_nReserve").on(vt.nReserve), // Índice no único en nReserve
+    idBoxIndex: index("idx_IdBox").on(vt.IdBox),
+    idBoxFechaFinIndex: index("idx_IdBox_FechaFin").on(vt.IdBox, vt.FechaFin),
+    nReserveTokenIndex: uniqueIndex("idx_nReserve_Token1").on(
+      vt.nReserve,
+      vt.Token1,
+    ), // Índice compuesto
   }),
 );
 

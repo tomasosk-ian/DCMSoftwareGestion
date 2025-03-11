@@ -4,7 +4,6 @@ import LayoutContainer from "~/components/layout-container";
 import { useRouter } from "next/navigation";
 import { Reserves } from "~/server/api/routers/reserves";
 import { Title } from "~/components/title";
-import { api } from "~/trpc/react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Size } from "~/server/api/routers/sizes";
@@ -35,14 +34,17 @@ import { Button, buttonVariants } from "~/components/ui/button";
 import QRCode from "react-qr-code";
 import { DayPicker } from "react-day-picker";
 import { cn } from "~/lib/utils";
+import { api } from "~/trpc/react";
+import { Store } from "~/server/api/routers/store";
 
 export default function ReservePage(props: {
   reserve: Reserves[];
   sizes: Size[];
   transaction: any;
   isAdmin: boolean;
+  store: Store | undefined;
 }) {
-  const { data: stores } = api.store.get.useQuery();
+  const { store } = props;
   const [edit, setEdit] = useState(false);
   const { reserve } = props;
   const [endDate, setEndDate] = useState<Date | undefined>(
@@ -52,9 +54,7 @@ export default function ReservePage(props: {
     new Date(reserve[0]?.FechaInicio!),
   );
   if (reserve.length <= 0) return <Title>No se encontró la reserva</Title>;
-  const { data: store } = api.store.getByNroSerie.useQuery({
-    nroSerie: reserve[0]!.NroSerie!,
-  });
+
   const { mutateAsync: updateReserve } =
     api.reserve.updateReserve.useMutation();
 
@@ -97,11 +97,7 @@ export default function ReservePage(props: {
             <p className="text-lg font-bold text-white">
               Reserva n° {reserve[0]!.nReserve}
             </p>
-            <p className="text-lg font-bold text-white">
-              {stores &&
-                stores?.find((x) => x.serieLocker == reserve[0]!.NroSerie)
-                  ?.name}
-            </p>
+            <p className="text-lg font-bold text-white">{store?.name}</p>
             {props.isAdmin &&
               (!edit ? (
                 <div className="ml-auto">
