@@ -39,7 +39,6 @@ export default async function ReservesComponent(props: {
 
   // Datos formateados de reservas activas y todas las reservas
   const activeReservesData = formatReserves(props.activesReserves);
-  console.log("activeReservesData: ", activeReservesData);
   const allReservesData = formatReserves(props.allReserves);
 
   return (

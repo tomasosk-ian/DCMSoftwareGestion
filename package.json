@@ -51,6 +51,7 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.28.6",
     "embla-carousel-react": "^8.2.0",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.321.0",
     "mobbex": "^2.3.5",
     "nanoid": "^5.0.7",

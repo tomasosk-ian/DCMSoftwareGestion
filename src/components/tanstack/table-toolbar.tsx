@@ -23,8 +23,6 @@ export default function TableToolbar<TData, TValue>({
 }: DataTableToolbarProps<TData, TValue>) {
   const filtersRef = useRef<FiltersRef>(null); // Ref para el componente Filters
 
-  console.log(table.getState().columnFilters);
-
   const handleClearFilters = () => {
     if (filtersRef.current) {
       filtersRef.current.clearFilters(); // Llamamos a la función clearFilters del componente Filters
@@ -33,8 +31,8 @@ export default function TableToolbar<TData, TValue>({
   };
 
   return (
-    <div className="flex flex-row justify-between items-center w-full">
-      <div className="w-full max-w-sm flex items-center place-content-center  relative">
+    <div className="flex w-full flex-row items-center justify-between">
+      <div className="relative flex w-full max-w-sm place-content-center  items-center">
         {searchColumn !== undefined && table.getColumn(searchColumn ?? "") && (
           <>
             <Input
@@ -49,9 +47,9 @@ export default function TableToolbar<TData, TValue>({
                   .getColumn(searchColumn ?? "")
                   ?.setFilterValue(event.target.value)
               }
-              className="w-full h-7 p-5 rounded-full border-2 border-black focus-visible:ring-[#BEF0BB]"
+              className="h-7 w-full rounded-full border-2 border-black p-5 focus-visible:ring-[#BEF0BB]"
             />
-            <div className="rounded-full h-6 w-6 place-content-center absolute right-5">
+            <div className="absolute right-5 h-6 w-6 place-content-center rounded-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -70,9 +68,7 @@ export default function TableToolbar<TData, TValue>({
           </>
         )}
       </div>
-      <div className="flex gap-1 items-center">       
-      
-      </div>
+      <div className="flex items-center gap-1"></div>
     </div>
   );
 }

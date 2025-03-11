@@ -44,6 +44,8 @@ export default function Extension(props: { sizes: Size[] }) {
   const [pagoOk, setPagoOk] = useState<boolean>(false);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failed, setFailed] = useState<boolean>(false);
+  const [reserves, setReserves] = useState<Reserve[]>([]);
+
   const [errors, setErrors] = useState({
     name: "",
     surname: "",
@@ -187,13 +189,13 @@ export default function Extension(props: { sizes: Size[] }) {
                             clientId: client.identifier,
                           });
                           setNReserve(nreserve!);
-
                           reserve.client = client.email;
-
                           const response = parseInt(
                             await reserveExtesion({
                               idToken: reserve.IdTransaction!,
                               newEndDate: endDate,
+                              Token1: reserve.Token1!,
+                              nReserve: nreserve!,
                             }),
                           );
 
@@ -241,7 +243,7 @@ export default function Extension(props: { sizes: Size[] }) {
                     nReserve={nReserve}
                     reserves={[reserve]}
                     setPagoOk={setPagoOk}
-                    setReserves={null}
+                    setReserves={setReserves}
                     sizes={props.sizes}
                     store={
                       stores.find((s) => s.serieLocker == reserve.NroSerie)!
@@ -259,7 +261,7 @@ export default function Extension(props: { sizes: Size[] }) {
           <div>
             <div>
               <Success
-                reserves={[reserve!]}
+                reserves={reserves}
                 store={stores?.find((s) => s.serieLocker == reserve!.NroSerie)!}
                 nReserve={nReserve!}
                 total={total}

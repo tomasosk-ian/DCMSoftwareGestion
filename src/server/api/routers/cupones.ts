@@ -156,7 +156,6 @@ export const cuponesRouter = createTRPCRouter({
       const response = await db.query.cuponesData.findFirst({
         where: eq(schema.cuponesData.identifier, input.identifier),
       });
-      console.log("response?.usos", response?.usos);
       return response;
     }),
   delete: publicProcedure

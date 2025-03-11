@@ -1,5 +1,6 @@
 import { api } from "~/trpc/server";
 import HomePage from "./_components/home_page";
+import Header from "./_components/header";
 import { Inter } from "next/font/google";
 const inter = Inter({
   subsets: ["latin"],
@@ -402,6 +403,7 @@ export default async function Home() {
       <body className={`font-sans ${inter.variable} bg-lockersUrbanos`}>
         <main>
           <div>
+            <Header />
             <HomePage cities={cities} sizes={sizes} stores={stores} />
           </div>
         </main>
