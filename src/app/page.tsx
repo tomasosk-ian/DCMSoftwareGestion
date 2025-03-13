@@ -207,13 +207,13 @@ export default async function Home() {
           rel="alternate"
           type="application/rss+xml"
           title="Iguazú Lockers » Feed"
-          href="https://iguazulockers.com/feed/"
+          href="https://iguazulockers.com/"
         />
         <link
           rel="alternate"
           type="application/rss+xml"
           title="Iguazú Lockers » Feed de los comentarios"
-          href="https://iguazulockers.com/comments/feed/"
+          href="https://iguazulockers.com/"
         />
         <link rel="canonical" href="https://iguazulockers.com/" />
 

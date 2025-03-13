@@ -42,7 +42,7 @@ export default async function Home() {
             </li>
             <li className="menu-item menu-item-type-post_type menu-item-object-page menu-item-29 depth-0">
               <a
-                href="https://iguazulockers.com/preguntas-frecuentes/"
+                href="https://iguazulockers.com/"
                 data-level="1"
               >
                 <span className="menu-item-text">
@@ -51,7 +51,7 @@ export default async function Home() {
               </a>
             </li>
             <li className="menu-item menu-item-type-post_type menu-item-object-page menu-item-28 last depth-0">
-              <a href="https://iguazulockers.com/contacto/" data-level="1">
+              <a href="https://iguazulockers.com/" data-level="1">
                 <span className="menu-item-text">
                   <span className="text-[#00E1A5]">Contacto</span>
                 </span>
