@@ -68,7 +68,7 @@ export const mobbexRouter = createTRPCRouter({
             total: input.amount,
           },
         ],
-        options: { domain: "https://lockersurbanos.com.ar/" },
+        options: { domain: "https://iguazulockers.com/" },
         return_url: "https://mobbex.com/sale/return?session=56789",
         webhook: "https://mobbex.com/sale/webhook?user=1234",
         timeout: timeOutValidatedResult.data,
