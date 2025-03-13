@@ -231,7 +231,7 @@ export default function UserForm(props: {
             className="hover:underline"
             onClick={() => {
               open(
-                "https://lockersurbanos.com.ar/wp-content/uploads/2024/05/Terminos-y-condiciones-Lockers-Urbanos.pdf",
+                "https://iguazulockers.com/",
               );
             }}
           >

@@ -200,30 +200,29 @@ export default async function Home() {
         />
         <meta name="theme-color" content="#5b9a8b" />
         <title>
-          Lockers Urbanos | Guarda equipajes en Bariloche – Una solución
-          inteligente para el guardado de equipaje
+          Iguazú Lockers
         </title>
         <meta name="robots" content="max-image-preview:large" />
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="Lockers Urbanos | Guarda equipajes en Bariloche » Feed"
-          href="https://lockersurbanos.com.ar/feed/"
+          title="Iguazú Lockers » Feed"
+          href="https://iguazulockers.com/"
         />
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="Lockers Urbanos | Guarda equipajes en Bariloche » Feed de los comentarios"
-          href="https://lockersurbanos.com.ar/comments/feed/"
+          title="Iguazú Lockers » Feed de los comentarios"
+          href="https://iguazulockers.com/"
         />
-        <link rel="canonical" href="https://lockersurbanos.com.ar/" />
+        <link rel="canonical" href="https://iguazulockers.com/" />
 
         <meta
           property="og:site_name"
-          content="Lockers Urbanos | Guarda equipajes en Bariloche"
+          content="Iguazú Lockers"
         />
         <meta property="og:title" content="Home" />
-        <meta property="og:url" content="https://lockersurbanos.com.ar/" />
+        <meta property="og:url" content="https://iguazulockers.com/" />
         <meta property="og:type" content="website" />
         <link rel="profile" href="https://gmpg.org/xfn/11" />
         <link

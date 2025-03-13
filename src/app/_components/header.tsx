@@ -8,7 +8,7 @@ export default async function Home() {
         <header className="flex flex-row header-bar bg-[#0F0C24] w-full">
           <div className="branding">
             <div id="site-title" className="assistive-text">
-              Lockers Urbanos | Guarda equipajes en Bariloche
+              Iguazú Lockers
             </div>
             <div id="site-description" className="assistive-text">
               Una solución inteligente para el guardado de equipaje
@@ -16,25 +16,25 @@ export default async function Home() {
           </div>
           <ul id="primary-menu" className="flex flex-row main-nav outside-item-remove-margin">
             <li>
-              <a className="" href="https://lockersurbanos.com.ar/">
+              <a className="" href="https://iguazulockers.com/">
                 <img
                   src="./Lockers Urbanos _ Guarda equipajes en Bariloche – Una solución inteligente para el guardado de equipaje_files/logo-iguazu.png"
                   width="207"
                   height="74"
                   sizes="207px"
-                  alt="Lockers Urbanos | Guarda equipajes en Bariloche"
+                  alt="Iguazú Lockers"
                 />
               </a>
             </li>
             <li className="menu-item menu-item-type-post_type menu-item-object-page menu-item-home current-menu-item page_item page-item-11 current_page_item menu-item-27 first depth-0">
-              <a href="https://lockersurbanos.com.ar/" data-level="1">
+              <a href="https://iguazulockers.com/" data-level="1">
                 <span className="menu-item-text">
                   <span className="text-[#00E1A5]">Home</span>
                 </span>
               </a>
             </li>
             <li className="menu-item menu-item-type-custom menu-item-object-custom menu-item-30 depth-0">
-              <a href="https://lockersurbanos.com.ar/#!/lockers" data-level="1">
+              <a href="https://iguazulockers.com/#!/lockers" data-level="1">
                 <span className="menu-item-text">
                   <span className="text-[#00E1A5]">Lockers</span>
                 </span>
@@ -42,7 +42,7 @@ export default async function Home() {
             </li>
             <li className="menu-item menu-item-type-post_type menu-item-object-page menu-item-29 depth-0">
               <a
-                href="https://lockersurbanos.com.ar/preguntas-frecuentes/"
+                href="https://iguazulockers.com/"
                 data-level="1"
               >
                 <span className="menu-item-text">
@@ -51,7 +51,7 @@ export default async function Home() {
               </a>
             </li>
             <li className="menu-item menu-item-type-post_type menu-item-object-page menu-item-28 last depth-0">
-              <a href="https://lockersurbanos.com.ar/contacto/" data-level="1">
+              <a href="https://iguazulockers.com/" data-level="1">
                 <span className="menu-item-text">
                   <span className="text-[#00E1A5]">Contacto</span>
                 </span>
@@ -62,7 +62,7 @@ export default async function Home() {
             <div className="soc-ico show-on-desktop in-top-bar-right in-menu-second-switch disabled-bg custom-border border-on hover-disabled-bg hover-custom-border hover-border-on first last">
               <a
                 title="Instagram page opens in new window"
-                href="https://lockersurbanos.com.ar/#"
+                href="https://iguazulockers.com/#"
                 target="_blank"
                 className="instagram"
               >
@@ -73,7 +73,7 @@ export default async function Home() {
               </a>
               <a
                 title="Facebook page opens in new window"
-                href="https://lockersurbanos.com.ar/#"
+                href="https://iguazulockers.com/#"
                 target="_blank"
                 className="facebook"
               >
@@ -88,7 +88,7 @@ export default async function Home() {
         <div className="mobile-header-bar bg-[#0F0C24]">
           <div className="mobile-navigation">
             <a
-              href="https://lockersurbanos.com.ar/#"
+              href="https://iguazulockers.com/#"
               className="dt-mobile-menu-icon"
               aria-label="Mobile menu icon"
             >
@@ -101,14 +101,14 @@ export default async function Home() {
           </div>
           <div className="mobile-mini-widgets"></div>
           <div className="mobile-branding">
-            <a className="" href="https://lockersurbanos.com.ar/">
+            <a className="" href="https://iguazulockers.com/">
               <img
                 className="preload-me"
                 src="./Lockers Urbanos _ Guarda equipajes en Bariloche – Una solución inteligente para el guardado de equipaje_files/logo-lockers.png"
                 width="207"
                 height="74"
                 sizes="207px"
-                alt="Lockers Urbanos | Guarda equipajes en Bariloche"
+                alt="Iguazú Lockers"
               />
               <img
                 className="mobile-logo preload-me"
@@ -116,7 +116,7 @@ export default async function Home() {
                 width="183"
                 height="64"
                 sizes="183px"
-                alt="Lockers Urbanos | Guarda equipajes en Bariloche"
+                alt="Iguazú Lockers"
               />
             </a>
           </div>
