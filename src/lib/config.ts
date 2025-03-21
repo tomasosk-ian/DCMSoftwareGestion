@@ -12,7 +12,7 @@ export type PublicConfigMetodoPagoKeys = keyof typeof PublicConfigMetodoPago;
 export type PublicConfigKeys = keyof typeof PublicConfigClaves;
 
 export const PrivateConfigClaves = {
-  "mercadopaco_private_key": "Clave privada de Mercado Pago",
+  "mercadopago_private_key": "Clave privada de Mercado Pago",
   "mobbex_api_key": "Clave API de Mobbex",
   "mobbex_access_token": "Token de acceso de Mobbex",
 }
