@@ -60,17 +60,31 @@ export default function Payment(props: {
     api.transaction.create.useMutation();
   const [transaction, setTransaction] = useState<Transaction>();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
+  const { mutateAsync: mpPreferenceGet } = api.mp.getPreference.useMutation();
   const { mutateAsync: procesarPagoMp } = api.mp.procesarPago.useMutation();
   const { data: medioPagoRes } = api.config.getKey.useQuery({ key: 'metodo_pago' });
   const { data: mpPublicKey } = api.config.getKey.useQuery({ key: 'mercadopago_public_key' });
   const [medioConfigurado, setMedioConfigurado] = useState<PublicConfigMetodoPago | null>(null);
   const [mpClavePrimeraCarga, setMpClavePrimeraCarga] = useState<string | null>(null);
+  const [mpPreference, setMpPreference] = useState("");
 
   // solo define mpClavePrimeraCarga si
   // mpPublicKey existe y no se había definido antes
   useEffect(() => {
     if (mpPublicKey && !mpClavePrimeraCarga) {
-      setMpClavePrimeraCarga(mpPublicKey.value);
+      const v = mpPublicKey.value;
+      (async () => {
+        const res = await mpPreferenceGet({
+          price: props.total,
+          productName: "Reserva de locker",
+          quantity: 1,
+        });
+  
+        setMpPreference(res.preferenceId);
+        setMpClavePrimeraCarga(v);
+      })()
+        .then(console.log)
+        .catch(console.error);
     }
   }, [mpPublicKey, mpClavePrimeraCarga]);
 
@@ -291,7 +305,8 @@ export default function Payment(props: {
                   number: props.client.dni,
                   type: 'id',
                 } : undefined,
-              }
+              },
+              preferenceId: mpPreference,
             }}
             customization={{
               paymentMethods: {
@@ -302,6 +317,7 @@ export default function Payment(props: {
                 mercadoPago: "all",
                 bankTransfer: "all",
                 atm: "all",
+                maxInstallments: 1,
               },
             }}
             onSubmit={async ({ formData }) => {
