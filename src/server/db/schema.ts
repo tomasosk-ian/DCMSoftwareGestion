@@ -142,7 +142,7 @@ export const reservas = sqliteTable(
     IdTransaction: integer("IdTransaction"),
     client: text("client", { length: 255 }),
     nReserve: integer("nReserve"),
-    mpPagadoOk: integer("mpPagadoOk"),
+    mpPagadoOk: integer("mpPagadoOk", { mode: "boolean" }).default(false),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),

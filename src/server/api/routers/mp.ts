@@ -29,6 +29,19 @@ export const mpRouter = createTRPCRouter({
       quantity: z.number().int().min(1),
       price: z.number().min(1),
       IdTransactions: z.array(z.number()),
+      meta: z.custom<{
+        store_name: string,
+        store_address: string,
+        nReserve: number,
+        coin_description: null | string,
+        client_email: string,
+        client_name: string,
+        total: number,
+        isExt: boolean,
+        startDate: string,
+        endDate: string,
+        cupon_id?: string,
+      }>(),
     }))
     .mutation(async ({ input, ctx }) => {
       const r = [...(new Set(input.IdTransactions))];
@@ -63,6 +76,24 @@ export const mpRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
 
+      const meta: {
+        IdTransactions?: number[],
+        store_name: string,
+        store_address: string,
+        nReserve: number,
+        coin_description: null | string,
+        client_email: string,
+        client_name: string,
+        total: number,
+        isExt: boolean,
+        startDate: string,
+        endDate: string,
+        cupon_id?: string,
+      } = {
+        ...input.meta,
+        IdTransactions: r,
+      };
+
       const preference = new Preference(mpClient);
       try {
         const res = await preference.create({
@@ -77,9 +108,7 @@ export const mpRouter = createTRPCRouter({
                 unit_price: input.price,
               }
             ],
-            metadata: {
-              IdTransactions: r,
-            }
+            metadata: meta
           },
         });
 
@@ -114,9 +143,9 @@ export const mpRouter = createTRPCRouter({
         throw new TRPCError({ code: 'BAD_REQUEST', message: "Reservas inválidas" });
       }
 
-      let listo = true;
+      let listo = reservas.length > 0;
       for (const reserva of reservas) {
-        if (typeof reserva.mpPagadoOk !== 'number' || reserva.mpPagadoOk !== 1) {
+        if (typeof reserva.mpPagadoOk !== 'boolean' || !reserva.mpPagadoOk) {
           listo = false;
           break;
         }

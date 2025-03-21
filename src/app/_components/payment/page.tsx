@@ -103,7 +103,8 @@ export default function Payment(props: {
         await loadMercadoPago();
 
         const mp = new window.MercadoPago(mpClavePrimeraCarga, {
-          locale: mercadopagocore.Locale.ES_AR,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          locale: "es-AR" as unknown as never,
         });
   
         const bricks = mp.bricks();
@@ -115,6 +116,19 @@ export default function Payment(props: {
                 productName: "Reserva de locker",
                 quantity: 1,
                 IdTransactions: idTransactions,
+                meta: {
+                  client_email: props.client.email!,
+                  client_name: props.client.name ?? "",
+                  coin_description: props.coin.description,
+                  cupon_id: props.cupon?.identifier,
+                  endDate: props.endDate,
+                  startDate: props.startDate,
+                  isExt: props.isExt,
+                  nReserve: props.nReserve,
+                  store_address: props.store.address ?? "",
+                  store_name: props.store.name,
+                  total: props.total
+                }
               });
 
               return res.preferenceId;
@@ -139,7 +153,7 @@ export default function Payment(props: {
           }).catch(e => {
             console.error("isPagadoMp error", e);
           })
-        })
+        }, 1000)
       })()
         .then(console.log)
         .catch(console.error);
@@ -155,6 +169,12 @@ export default function Payment(props: {
   // const [mpPaymentId, setMpPaymentId] = useState("");
 
   async function success() {
+    if (medioConfigurado !== PublicConfigMetodoPago.mobbex) {
+      props.setLoadingPay(false);
+      props.setPagoOk(true);
+      return;
+    }
+
     try {
       props.setLoadingPay(true);
       const token: [number, string][] = [];
@@ -176,6 +196,7 @@ export default function Payment(props: {
                 reserve.Token1!,
                 props.sizes.find((x) => x.id === reserve.IdSize)?.nombre! ?? "",
               ]);
+              
               const updatedReserve = await createReserve({
                 Contador: reserve.Contador,
                 FechaCreacion: reserve.FechaCreacion,
