@@ -55,6 +55,7 @@ export default function Payment(props: {
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();
   const { mutateAsync: createReserve } = api.reserve.create.useMutation();
+  const { mutateAsync: getReserves } = api.reserve.getByidTransactionsMut.useMutation();
   const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
@@ -170,6 +171,18 @@ export default function Payment(props: {
 
   async function success() {
     if (medioConfigurado !== PublicConfigMetodoPago.mobbex) {
+      const reserves = await getReserves({
+        idTransactions: idTransactions
+      });
+
+      if (props.setReserves) {
+        props.setReserves(reserves.map(r => ({
+          ...r,
+          Cantidad: typeof r.Cantidad !== 'number' ? undefined : r.Cantidad,
+          IdTransaction: typeof r.IdTransaction !== 'number' ? undefined : r.IdTransaction,
+        })));
+      }
+
       props.setLoadingPay(false);
       props.setPagoOk(true);
       return;
