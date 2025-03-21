@@ -6,7 +6,7 @@ import {
 } from "~/server/api/trpc";
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { schema } from "~/server/db";
 import { type PrivateConfigKeys } from "~/lib/config";
 
@@ -28,8 +28,22 @@ export const mpRouter = createTRPCRouter({
       productDescription: z.string().min(2).max(256).optional(),
       quantity: z.number().int().min(1),
       price: z.number().min(1),
+      IdTransactions: z.array(z.number()),
     }))
     .mutation(async ({ input, ctx }) => {
+      const r = [...(new Set(input.IdTransactions))];
+      if (r.length <= 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "Reservas inválidas" });
+      }
+
+      const reservas = await ctx.db.query.reservas.findMany({
+        where: inArray(schema.reservas.IdTransaction, r)
+      });
+
+      if (reservas.length <= 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "Reservas inválidas" });
+      }
+
       const claveConfigMp: PrivateConfigKeys = 'mercadopaco_private_key';
       const claveMp = await ctx.db.query.privateConfig.findFirst({
         where: eq(schema.privateConfig.key, claveConfigMp)
@@ -44,11 +58,16 @@ export const mpRouter = createTRPCRouter({
         mpClient = new MercadoPagoConfig({ accessToken: claveMp.value });
       }
 
+      if (!process.env.VERCEL_URL) {
+        console.error('No está seteado VERCEL_URL');
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
+
       const preference = new Preference(mpClient);
       try {
         const res = await preference.create({
           body: {
-            notification_url: `${URL}/api/mp-pago?source_news=webhooks`,
+            notification_url: `https://${process.env.VERCEL_URL}/api/mp-pago?source_news=webhooks`,
             items: [
               {
                 id: "id",
@@ -58,7 +77,10 @@ export const mpRouter = createTRPCRouter({
                 unit_price: input.price,
               }
             ],
-          }
+            metadata: {
+              IdTransactions: r,
+            }
+          },
         });
 
         if (!res.id) {
@@ -73,6 +95,34 @@ export const mpRouter = createTRPCRouter({
         console.error("Error mp preference:", e);
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
+    }),
+  areReservesPaid: publicProcedure
+    .input(z.object({
+      IdTransactions: z.array(z.number()),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const r = [...(new Set(input.IdTransactions))];
+      if (r.length <= 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "Reservas inválidas" });
+      }
+
+      const reservas = await ctx.db.query.reservas.findMany({
+        where: inArray(schema.reservas.IdTransaction, r)
+      });
+
+      if (reservas.length <= 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "Reservas inválidas" });
+      }
+
+      let listo = true;
+      for (const reserva of reservas) {
+        if (typeof reserva.mpPagadoOk !== 'number' || reserva.mpPagadoOk !== 1) {
+          listo = false;
+          break;
+        }
+      }
+
+      return listo;
     }),
 });
 

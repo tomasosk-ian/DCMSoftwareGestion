@@ -3,7 +3,7 @@ import { type Transaction } from "@libsql/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 /* import {
   AlertDialog,
   AlertDialogCancel,
@@ -63,9 +63,21 @@ export default function Payment(props: {
   const { mutateAsync: mpPreferenceGet } = api.mp.getPreference.useMutation();
   const { data: medioPagoRes } = api.config.getKey.useQuery({ key: 'metodo_pago' });
   const { data: mpPublicKey } = api.config.getKey.useQuery({ key: 'mercadopago_public_key' });
+  const { mutateAsync: isPagadoMp } = api.mp.areReservesPaid.useMutation();
   const [medioConfigurado, setMedioConfigurado] = useState<PublicConfigMetodoPago | null>(null);
   const [mpClavePrimeraCarga, setMpClavePrimeraCarga] = useState<string | null>(null);
   // const [mpPreference, setMpPreference] = useState("");
+
+  const idTransactions = useMemo(() => props.reserves
+    .map(v => v.IdTransaction)
+    .filter(v => {
+      if (typeof v !== 'number') {
+        console.error("reserva sin IdTransaction");
+        return false;
+      } else {
+        return true;
+      }
+    }) as number[], [props.reserves]);
 
   // solo define mpClavePrimeraCarga si
   // mpPublicKey existe y no se había definido antes
@@ -102,6 +114,7 @@ export default function Payment(props: {
                 price: props.total,
                 productName: "Reserva de locker",
                 quantity: 1,
+                IdTransactions: idTransactions,
               });
 
               return res.preferenceId;
@@ -111,6 +124,22 @@ export default function Payment(props: {
             redirectMode: 'blank',
           }
         });
+
+        const interval = setInterval(() => {
+          isPagadoMp({
+            IdTransactions: idTransactions
+          }).then(e => {
+            console.log('isPagadoMp', e);
+            if (e) {
+              success()
+                .then(console.log)
+                .catch(console.error);
+              clearInterval(interval);
+            }
+          }).catch(e => {
+            console.error("isPagadoMp error", e);
+          })
+        })
       })()
         .then(console.log)
         .catch(console.error);
@@ -126,10 +155,6 @@ export default function Payment(props: {
   // const [mpPaymentId, setMpPaymentId] = useState("");
 
   async function success() {
-    if (medioConfigurado !== PublicConfigMetodoPago.mobbex) {
-      return;
-    }
-
     try {
       props.setLoadingPay(true);
       const token: [number, string][] = [];

@@ -1,6 +1,5 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { Payment } from "mercadopago";
-import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import type { PrivateConfigKeys } from "~/lib/config";
@@ -91,9 +90,22 @@ export async function POST(request: Request) {
 
   const mp = getMpClient(claveMp.value);
   const payment = await new Payment(mp).get({id: body.data.id});
+  const meta: {
+    IdTransactions?: number[],
+  } = payment.metadata as object;
+  const trans = (meta.IdTransactions ?? []).filter(v => typeof v === 'number');
 
-  if (payment.status === "approved") {
-    revalidatePath("/");
+  if (meta.IdTransactions && Array.isArray(meta.IdTransactions) && payment.status === "approved") {
+    console.log("recibido WH pago procesado", payment);
+    if (trans.length > 0) {
+      await db.update(schema.reservas)
+        .set({ mpPagadoOk: 1 })
+        .where(inArray(schema.reservas.IdTransaction, trans));
+    } else {
+      console.error("recibido WH pago sin reservas");
+    }
+  } else {
+    console.log("recibido WH pago no procesado", payment);
   }
 
   return new Response(null, {status: 200});
