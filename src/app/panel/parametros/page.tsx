@@ -214,7 +214,7 @@ function FormMetodoPago({ invalidate }: { invalidate: () => void }) {
   const { mutateAsync: setPublicKey, isLoading: isLoadingPublic } = api.config.setPublicKeyAdmin.useMutation();
   const { data: claveOriginalMetodo, refetch: refetch1 } = api.config.getKey.useQuery({ key: 'metodo_pago' });
   const { data: claveOriginalPublicaMp, refetch: refetch2 } = api.config.getKey.useQuery({ key: 'mercadopago_public_key' });
-  const { data: claveOriginalPrivadaMp, refetch: refetch3 } = api.config.getPrivateKey.useQuery({ key: 'mercadopaco_private_key' });
+  const { data: claveOriginalPrivadaMp, refetch: refetch3 } = api.config.getPrivateKey.useQuery({ key: 'mercadopago_private_key' });
   const { data: claveMobbexApi, refetch: refetch4 } = api.config.getPrivateKey.useQuery({ key: 'mobbex_api_key' });
   const { data: claveMobbexToken, refetch: refetch5 } = api.config.getPrivateKey.useQuery({ key: 'mobbex_access_token' });
 
@@ -260,7 +260,7 @@ function FormMetodoPago({ invalidate }: { invalidate: () => void }) {
       await setPrivateKey({ key: 'mobbex_access_token', value: clave2 });
     } else if (metodo === 'mercadopago') {
       await setPublicKey({ key: 'mercadopago_public_key', value: clave1 });
-      await setPrivateKey({ key: 'mercadopaco_private_key', value: clave2 });
+      await setPrivateKey({ key: 'mercadopago_private_key', value: clave2 });
     }
 
     // no furula api.useUtils()

@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   const xSignature = request.headers.get("x-signature");
   const xRequestId = request.headers.get("x-request-id");
 
-  const claveConfigMp: PrivateConfigKeys = 'mercadopaco_private_key';
+  const claveConfigMp: PrivateConfigKeys = 'mercadopago_private_key';
   const claveMp = await db.query.privateConfig.findFirst({
     where: eq(schema.privateConfig.key, claveConfigMp)
   });

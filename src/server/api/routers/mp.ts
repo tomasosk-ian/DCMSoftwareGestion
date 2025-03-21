@@ -57,7 +57,7 @@ export const mpRouter = createTRPCRouter({
         throw new TRPCError({ code: 'BAD_REQUEST', message: "Reservas inválidas" });
       }
 
-      const claveConfigMp: PrivateConfigKeys = 'mercadopaco_private_key';
+      const claveConfigMp: PrivateConfigKeys = 'mercadopago_private_key';
       const claveMp = await ctx.db.query.privateConfig.findFirst({
         where: eq(schema.privateConfig.key, claveConfigMp)
       });
