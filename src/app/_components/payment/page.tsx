@@ -218,7 +218,7 @@ export default function Payment(props: {
                 IdFisico: reserve.IdFisico,
                 IdBox: reserve.IdBox,
                 IdSize: reserve.IdSize,
-                NroSerie: reserve.NroSerie,
+                NroSerie: reserve.NroSerie!,
                 Token1: reserve.Token1,
                 Cantidad: reserve.Cantidad,
                 client: reserve.client,

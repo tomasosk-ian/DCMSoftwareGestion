@@ -3,14 +3,18 @@
 import { Button } from "~/components/ui/button";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import type { Reserve } from "~/server/api/routers/reserves";
 import dayjs from "dayjs";
 
 export function ReserveExcel({ allReservesData }: { allReservesData: {
-  nReserve?: string,
-  storeName?: string,
-  client?: string,
-  dataReserve?: Reserve,
+  nReserve?: string | number | null,
+  storeName?: string | null,
+  client?: string | null,
+  dataReserve?: {
+    NroSerie?: string | null,
+    FechaCreacion?: dayjs.ConfigType | null,
+    FechaInicio?: dayjs.ConfigType | null,
+    FechaFin?: dayjs.ConfigType | null,
+  } | null,
 }[] }) {
   async function downloadExcel() {
     const excelRows: (string | number)[][] = [[
@@ -25,7 +29,7 @@ export function ReserveExcel({ allReservesData }: { allReservesData: {
 
     for (const data of allReservesData) {
       excelRows.push([
-        data.nReserve ?? "",
+        String(data.nReserve ?? ""),
         data.storeName ?? "",
         data.client ?? "",
         data.dataReserve?.NroSerie ?? "",

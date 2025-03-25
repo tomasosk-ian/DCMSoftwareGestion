@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { ChevronRightIcon, Loader2 } from "lucide-react";
+import { ChevronLeftCircle, ChevronRightIcon, Loader2 } from "lucide-react";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
 import Payment from "./payment/page";
@@ -31,6 +31,7 @@ import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
 import { Badge } from "~/components/ui/badge";
 import CitySelector from "./city/selector";
+import ButtonIconCustomComponent from "~/components/button-icon-custom";
 
 export const Icons = {
   spinner: Loader2,
@@ -166,7 +167,7 @@ export default function HomePage(props: {
                     setStore={setStore}
                     goBack={() => {
                       setStore(null);
-                      setCity(undefined);
+                      setCity(null);
                       setStores(undefined);
                     }}
                   />{" "}
@@ -194,11 +195,11 @@ export default function HomePage(props: {
                 />
               </div>
             )}
-            {endDate && (
+            {endDate && store && (
               <SizeSelector
-                nroSerieLocker={store?.serieLocker!}
+                store={store}
                 inicio={startDate}
-                fin={endDate!}
+                fin={endDate}
                 size={size}
                 setSize={setSize}
                 sizeSelected={sizeSelected}
@@ -206,7 +207,7 @@ export default function HomePage(props: {
                 reserves={reserves}
                 setReserves={setReserves}
                 startDate={startDate!}
-                endDate={endDate!}
+                endDate={endDate}
                 coins={coins!}
                 setFailedResponse={setFailedResponse}
                 failedResponse={failedResponse}
@@ -221,6 +222,10 @@ export default function HomePage(props: {
             {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
             {sizeSelected && !reserva && !loadingPay && (
               <div>
+                <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+                  setsizeSelected(false);
+                  setFailedResponse(false);
+                }} />
                 <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
                   <div className="w-full lg:w-auto">
                     <UserForm
@@ -239,7 +244,7 @@ export default function HomePage(props: {
                       store={store!}
                       startDate={startDate!}
                       endDate={endDate!}
-                      reserves={reserves!}
+                      reserves={reserves}
                       total={total}
                       setTotal={setTotal}
                       coin={coin!}
