@@ -1,7 +1,6 @@
-import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
-import { DataTable } from "./data-table";
-import { ClientTableRecord, columns } from "./columns";
+import { type ClientTableRecord } from "./columns";
+import { PageCliente } from "./page-client";
 
 export default async function Home() {
   const clientes = await api.client.getGroupedByEmail.query();
@@ -10,12 +9,5 @@ export default async function Home() {
     .map((clientList) => clientList[0])
     .filter((client): client is ClientTableRecord => client !== undefined);
 
-  return (
-    <section className="">
-      <div className="flex justify-between">
-        <Title>Clientes</Title>
-      </div>
-      <DataTable columns={columns} data={uniqueClientes} />
-    </section>
-  );
+  return <PageCliente uniqueClientes={uniqueClientes} />;
 }
