@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "~/components/ui/card";
 import { Size } from "~/server/api/routers/sizes";
 import { Button } from "~/components/ui/button";
@@ -11,12 +11,14 @@ import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
 import SizeCard from "./size-card";
 import ButtonCustomComponent from "~/components/buttonCustom";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronLeftCircle, ChevronRightIcon } from "lucide-react";
+import ButtonIconCustomComponent from "~/components/button-icon-custom";
+import type { Store } from "~/server/api/routers/store";
 
 export default function SizeSelector(props: {
   size: Size | null;
   setSize: (size: Size) => void;
-  nroSerieLocker: string | null;
+  store: Store,
   inicio: string | undefined;
   fin: string | undefined;
   setSizeSelected: (sizeSelected: boolean) => void;
@@ -30,8 +32,12 @@ export default function SizeSelector(props: {
   failedResponse: boolean;
   setTotal: (total: number) => void;
   total: number;
+  goBack: () => void;
 }) {
-  const [values, setValues] = useState<Record<string, number>>({});
+  const [values, setValues] = useState<Record<string, {
+    cantidad: number,
+    lockerSerial: string
+  }>>({});
   const { data: fees } = api.fee.get.useQuery();
   const [coin, setCoin] = useState<Coin>();
   // const { mutateAsync: reservarBox } =
@@ -40,29 +46,44 @@ export default function SizeSelector(props: {
   const [updatedReserveWithToken, setUpdatedReserveWithToken] = useState<
     Reserve[]
   >([]);
-  const { data: sizes, isLoading } = api.size.getAvailability.useQuery({
-    nroSerieLocker: props.nroSerieLocker!,
+
+  const { data: sizesRaw, isLoading } = api.size.getAvailability.useQuery({
     inicio: props.inicio!,
     fin: props.fin!,
+    store: props.store.identifier,
   });
+
+  const sizes: (Size & { lockerSerial: string })[] = useMemo(() => {
+    if (sizesRaw) {
+      return Object.entries(sizesRaw)
+        .filter(v => v[1].lockers.length > 0)
+        .map(v => ({
+          ...v[1].size,
+          lockerSerial: v[1].lockers[Math.floor(Math.random() * v[1].lockers.length)]!
+        }));
+    } else {
+      return [];
+    }
+  }, [sizesRaw]);
+
   useEffect(() => {
     try {
       if (values) {
         const newReserves: Reserve[] = Object.entries(values).map(
-          ([id, cantidad]) => ({
+          ([id, v]) => ({
             IdLocker: null,
-            NroSerie: props.nroSerieLocker,
+            NroSerie: v.lockerSerial,
             IdSize: parseInt(id),
             IdBox: null,
             IdFisico: null,
             Token1: null,
             FechaCreacion: format(Date.now(), "yyyy-MM-dd'T'00:00:00"),
-            FechaInicio: props.startDate!,
-            FechaFin: props.endDate!,
+            FechaInicio: props.startDate,
+            FechaFin: props.endDate,
             Contador: -1,
             Confirmado: false,
             Modo: "Por fecha",
-            Cantidad: cantidad,
+            Cantidad: v.cantidad,
             client: null,
           }),
         );
@@ -105,14 +126,15 @@ export default function SizeSelector(props: {
       // Manejar errores aquí
     }
   }, [fees, values]);
+
   function applyReserve() {
     try {
       if (values) {
         const newReserves: Reserve[] = Object.entries(values).flatMap(
-          ([id, cantidad]) => {
-            return Array.from({ length: cantidad }, () => ({
+          ([id, v]) => {
+            return Array.from({ length: v.cantidad }, () => ({
               IdLocker: null,
-              NroSerie: props.nroSerieLocker,
+              NroSerie: v.lockerSerial,
               IdSize: parseInt(id),
               IdBox: null,
               IdFisico: null,
@@ -132,6 +154,8 @@ export default function SizeSelector(props: {
         const updatedReserves = props.reserves
           ? [...props.reserves, ...newReserves]
           : [...newReserves];
+        console.log('values', values);
+        console.log('updatedReserves', updatedReserves);
         props.setReserves(updatedReserves);
         props.setSizeSelected(true);
         window.scrollTo({ top: 0 });
@@ -140,6 +164,7 @@ export default function SizeSelector(props: {
       // Manejar errores aquí
     }
   }
+
   useEffect(() => {
     props.reserves?.map(async (reserve: Reserve) => {
       for (var i = 0; i < reserve.Cantidad!; i++) {
@@ -156,9 +181,13 @@ export default function SizeSelector(props: {
   }, [props.reserves]);
 
   useEffect(() => {
-    const filteredValues: Record<string, number> = {};
+    const filteredValues: Record<string, {
+      cantidad: number,
+      lockerSerial: string
+    }> = {};
+  
     Object.entries(values).forEach(([key, value]) => {
-      if (value !== 0) {
+      if (value.cantidad !== 0) {
         filteredValues[key] = value;
       }
     });
@@ -172,9 +201,12 @@ export default function SizeSelector(props: {
     <main className="flex justify-center">
       {!props.sizeSelected && coin && (
         <div className="flex w-full flex-col items-center justify-center px-4 sm:px-0 lg:px-8">
-          <h2 className="mb-4 text-center text-2xl font-semibold">
-            Selecciona tamaño de tu Locker.
-          </h2>
+          <div className="flex flex-row">
+            <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.goBack} />
+            <h2 className="mb-4 text-center text-2xl font-semibold">
+              Selecciona tamaño de tu Locker.
+            </h2>
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {isLoading && (
               <div className="col-span-full text-center">Cargando...</div>
@@ -183,26 +215,32 @@ export default function SizeSelector(props: {
               <div className="col-span-full text-center">No hay tamaños.</div>
             )}
             {!isLoading &&
-              sizes.map((size: Size) => (
+              sizes.map((size) => (
                 <div key={size.id} className="h-full px-5 pb-5">
                   <SizeCard
-                    coin={coin!}
+                    coin={coin}
                     size={size}
-                    disabledMinus={(values[size.id] || 0) === 0}
+                    disabledMinus={(values[size.id]?.cantidad ?? 0) === 0}
                     onClickMinus={() =>
                       setValues({
                         ...values,
-                        [size.id]: (values[size.id] || 0) - 1,
+                        [size.id]: {
+                          lockerSerial: size.lockerSerial,
+                          cantidad: (values[size.id]?.cantidad ?? 0) - 1,
+                        },
                       })
                     }
-                    disabledPlus={(values[size.id] || 0) === size.cantidad!}
+                    disabledPlus={(values[size.id]?.cantidad ?? 0) === size.cantidad!}
                     onClickPlus={() =>
                       setValues({
                         ...values,
-                        [size.id]: (values[size.id] || 0) + 1,
+                        [size.id]: {
+                          lockerSerial: size.lockerSerial,
+                          cantidad: (values[size.id]?.cantidad ?? 0) + 1,
+                        },
                       })
                     }
-                    value={`${values[size.id || 0] ? values[size.id]! : 0}`}
+                    value={`${values[size.id || 0] ? values[size.id]!.cantidad : 0}`}
                   />
                 </div>
               ))}

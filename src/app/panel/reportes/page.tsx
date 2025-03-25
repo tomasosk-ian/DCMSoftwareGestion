@@ -18,24 +18,44 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { MultiSelect } from "~/components/multi-select";
 
 export default function LockerOcupationPage() {
   const router = useRouter();
 
+  const [tempLockersSerie, setTempLockersSerie] = useState<null | string[]>(null);
   const [tempStartDate, setTempStartDate] = useState("2024-01-01");
   const [tempEndDate, setTempEndDate] = useState("2024-12-31");
 
+  const [lockersSerie, setLockersSerie] = useState<null | string[]>(null);
   const [startDate, setStartDate] = useState(tempStartDate);
   const [endDate, setEndDate] = useState(tempEndDate);
 
+  const { data: lockers } = api.locker.get.useQuery();
+
+  const dataLockers = useMemo(() => {
+    if (!lockers) {
+      return [];
+    }
+
+    if ("error" in lockers) {
+      console.log(`Error: ${lockers.error}`);
+      return [];
+    };
+
+    return lockers;
+  }, [lockers]);
+
   const { data: averageDurationData } =
     api.reports.getAverageReservationDuration.useQuery({
-      startDate: "2024-01-01", // Puedes reemplazar esto con las fechas deseadas
-      endDate: "2024-12-31",
+      startDate,
+      endDate,
+      filterSerie: lockersSerie,
     });
   const { data: ocupationData } = api.reports.getOcupattion.useQuery({
     startDate,
     endDate,
+    filterSerie: lockersSerie,
   });
   const { data: sizes } = api.reports.getSizes.useQuery();
   const { data: transactionsData } =
@@ -49,6 +69,7 @@ export default function LockerOcupationPage() {
   const applyDateFilter = () => {
     setStartDate(tempStartDate);
     setEndDate(tempEndDate);
+    setLockersSerie(tempLockersSerie);
   };
 
   const totalBySize = useMemo(() => {
@@ -159,11 +180,11 @@ export default function LockerOcupationPage() {
   return (
     <LayoutContainer>
       <section className="space-y-2">
-        <div className="flex justify-between">
+        <div className="flex justify-between align-center">
           <Title>Ocupación de Lockers</Title>
         </div>
 
-        <div className="my-4 flex gap-4">
+        <div className="my-4 flex gap-4 justify-center items-center">
           <label>
             Fecha de Inicio:
             <input
@@ -182,6 +203,15 @@ export default function LockerOcupationPage() {
               className="rounded border p-2"
             />
           </label>
+          <MultiSelect 
+            onValueChange={setTempLockersSerie}
+            value={tempLockersSerie ?? []}
+            options={dataLockers.map(v => ({
+              label: v.nroSerieLocker,
+              value: v.nroSerieLocker
+            }))}
+            placeholder="Filtrar por lockers"
+          />
           <Button onClick={applyDateFilter}>Aplicar</Button>
         </div>
 

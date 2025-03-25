@@ -1,16 +1,12 @@
 "use client";
-import { useState } from "react";
-import { RouterOutputs } from "~/trpc/shared";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { City } from "~/server/api/routers/city";
-import { Store } from "~/server/api/routers/store";
+import type { City } from "~/server/api/routers/city";
+import type { Store } from "~/server/api/routers/store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
@@ -41,10 +37,11 @@ export default function CitySelector(props: {
     <main className="flex justify-center ">
       {!props.city && (
         <div className="container flex flex-col items-center justify-center gap-6 ">
-          <h2 className="text-3xl font-semibold">
+          <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl">
             ¿Dónde quieres reservar tu consigna?
           </h2>
           <div className="grid grid-cols-4 gap-4 ">
+            {props.cities.length === 0 && <div className="col-span-full text-center">No hay ciudades disponibles.</div>}
             {props.cities.map((city) => {
               return (
                 <Card
