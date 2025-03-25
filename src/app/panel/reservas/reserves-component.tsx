@@ -1,17 +1,19 @@
 import * as React from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Reserves } from "~/server/api/routers/reserves";
-import { api } from "~/trpc/server";
+import type { Reserves } from "~/server/api/routers/reserves";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
+import { Title } from "~/components/title";
+import type { Store } from "~/server/api/routers/store";
+import { ReserveExcel } from "./excel-component";
 
-export default async function ReservesComponent(props: {
+export default async function ReservesComponent({ stores, ...props }: {
   activesReserves: Record<number, Reserves[]>;
   allReserves: Record<number, Reserves[]>;
+  stores: Store[],
 }) {
   // Obtener las tiendas (stores) del servidor
-  const stores = await api.store.get.query();
 
   // Función para formatear las reservas, agregando el nombre del local correspondiente
   const formatReserves = (reserves: Record<number, Reserves[]>) => {
@@ -29,11 +31,12 @@ export default async function ReservesComponent(props: {
         return true;
       })
       .map((reserve) => ({
+        dataReserve: reserve,
         nReserve: reserve.nReserve,
         storeName:
-          stores.find((store) => store.serieLocker === reserve.NroSerie)
-            ?.name || "-",
-        client: reserve.client || "-",
+          stores?.find((x) => x.lockers.some(l => l.serieLocker === reserve.NroSerie))
+            ?.name ?? "-",
+        client: reserve.client ?? "-",
       }));
   };
 
@@ -41,7 +44,11 @@ export default async function ReservesComponent(props: {
   const activeReservesData = formatReserves(props.activesReserves);
   const allReservesData = formatReserves(props.allReserves);
 
-  return (
+  return <section className="space-y-2">
+    <div className="flex justify-between">
+      <Title>Reservas</Title>
+      <ReserveExcel allReservesData={allReservesData} />
+    </div>
     <section className="space-y-2">
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
@@ -58,5 +65,5 @@ export default async function ReservesComponent(props: {
         </TabsContent>
       </Tabs>
     </section>
-  );
+  </section>;
 }
