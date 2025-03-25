@@ -134,10 +134,10 @@ export async function POST(request: Request) {
         profundidad: number | null;
         nombre: string | null;
         cantidadSeleccionada: number | null;
-        image?: string | null | undefined;
-        cantidad?: number | undefined;
-        tarifa?: string | undefined;
-      }[] | string = await api.size.get.query();
+        image?: string | null;
+        cantidad?: number | null;
+        tarifa?: string | null;
+      }[] | string = await api.size.get.query({});
 
       const nReserve = meta.nReserve;
       const isExt = meta.isExt;

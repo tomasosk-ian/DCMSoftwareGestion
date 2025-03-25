@@ -21,23 +21,22 @@ import { AddFeeDialog } from "../add-fee-dialog";
 import { AddCoinDialog } from "../add-coin-dialog";
 
 export default async function Home() {
-  // const sizes = await api.size.get.query();
   const fee = await api.fee.get.query();
   const coin = await api.coin.get.query();
-  const sizes = await api.size.get.query();
+  // const sizes = await api.size.get.query({});
   return (
     <div>
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Tarifas</Title>
-          <AddFeeDialog coins={coin} sizes={sizes} />
+          {/* <AddFeeDialog coins={coin} sizes={sizes} /> */}
         </div>
         <List>
           {fee.map((fee) => {
             return (
               <ListTile
                 href={`/panel/tarifas/${fee.identifier}`}
-                title={fee.description}
+                title={fee.description + (fee.store ? ` (Local "${fee.store?.name}")` : "")}
               />
             );
           })}

@@ -259,7 +259,7 @@ export const reserveRouter = createTRPCRouter({
     .input(
       z.object({
         IdLocker: z.number().nullable().optional(),
-        NroSerie: z.string().nullable(),
+        NroSerie: z.string(),
         IdSize: z.number().nullable(),
         IdBox: z.number().nullable(),
         IdFisico: z.number().nullable(),

@@ -7,17 +7,34 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { cities, feeData, sizes } from "~/server/db/schema";
-import { RouterOutputs } from "~/trpc/shared";
+import { feeData, sizes } from "~/server/db/schema";
+import type { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 
 export const feeRouter = createTRPCRouter({
   get: publicProcedure.query(({ ctx }) => {
     const result = ctx.db.query.feeData.findMany({
+      with: {
+        store: true,
+      },
       orderBy: (feeData, { desc }) => [desc(feeData.identifier)],
     });
     return result;
   }),
+  getByStore: publicProcedure
+    .input(z.object({
+      id: z.string()
+    }))
+    .query(async ({ ctx, input }) => {
+      const result = ctx.db.query.feeData.findMany({
+        where: eq(schema.feeData.localId, input.id),
+        with: {
+          store: true,
+        },
+        orderBy: (feeData, { desc }) => [desc(feeData.identifier)],
+      });
+      return result;
+    }),
   getById: publicProcedure
     .input(
       z.object({
@@ -27,6 +44,9 @@ export const feeRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const channel = await db.query.feeData.findFirst({
         where: eq(schema.feeData.identifier, input.id),
+        with: {
+          store: true,
+        },
       });
 
       return channel;
@@ -40,6 +60,9 @@ export const feeRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const channel = await db.query.feeData.findFirst({
         where: eq(schema.feeData.size, input.idSize),
+        with: {
+          store: true,
+        },
       });
 
       return channel;
@@ -52,6 +75,7 @@ export const feeRouter = createTRPCRouter({
         coin: z.string().nullable().optional(),
         size: z.number().nullable().optional(),
         discount: z.number().nullable().optional(),
+        localId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -66,6 +90,7 @@ export const feeRouter = createTRPCRouter({
         value: input.value,
         size: input.size,
         discount: input.discount,
+        localId: input.localId,
       });
 
       return { identifier };

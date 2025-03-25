@@ -52,13 +52,14 @@ export const reportsRouter = createTRPCRouter({
       z.object({
         startDate: z.string(),
         endDate: z.string(),
+        filterSerie: z.array(z.string()).nullable()
       }),
     )
     .query(async ({ input }) => {
       const { startDate, endDate } = input;
 
       // Get reservations within the date range with assigned lockers
-      const reserves = await db.query.reservas.findMany({
+      let reserves = await db.query.reservas.findMany({
         where: (reserva) =>
           and(
             gte(reserva.FechaInicio, startDate),
@@ -67,6 +68,11 @@ export const reportsRouter = createTRPCRouter({
             isNotNull(reserva.IdBox),
           ),
       });
+
+      if (Array.isArray(input.filterSerie)) {
+        const validSeries = new Set(input.filterSerie);
+        reserves = reserves.filter(v => validSeries.has(v.NroSerie ?? ""));
+      }
 
       const sizeMap = await getSizesMap();
       const occupationData = groupOccupationDataByDay(reserves, sizeMap);
@@ -109,13 +115,14 @@ export const reportsRouter = createTRPCRouter({
       z.object({
         startDate: z.string(),
         endDate: z.string(),
+        filterSerie: z.array(z.string()).nullable()
       }),
     )
     .query(async ({ input }) => {
       const { startDate, endDate } = input;
 
       // Fetch reservations within the date range with valid start and end dates
-      const reserves = await db.query.reservas.findMany({
+      let reserves = await db.query.reservas.findMany({
         where: (reserva) =>
           and(
             gte(reserva.FechaInicio, startDate),
@@ -124,6 +131,11 @@ export const reportsRouter = createTRPCRouter({
             isNotNull(reserva.FechaFin),
           ),
       });
+
+      if (Array.isArray(input.filterSerie)) {
+        const validSeries = new Set(input.filterSerie);
+        reserves = reserves.filter(v => validSeries.has(v.NroSerie ?? ""));
+      }
 
       // Calculate the duration of each reservation in days and accumulate data by duration
       const durationMap: { [duration: number]: number } = {};

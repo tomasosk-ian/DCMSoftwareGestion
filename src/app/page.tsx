@@ -8,7 +8,7 @@ const inter = Inter({
 });
 export default async function Home() {
   const cities = await api.city.get.query();
-  const sizes = await api.size.get.query();
+  const sizes = await api.size.get.query({});
   const stores = await api.store.get.query();
 
   return (

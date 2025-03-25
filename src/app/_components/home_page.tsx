@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { ChevronRightIcon, Loader2 } from "lucide-react";
+import { ChevronLeftCircle, ChevronRightIcon, Loader2 } from "lucide-react";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
 import Payment from "./payment/page";
@@ -30,6 +30,8 @@ import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
 import { Badge } from "~/components/ui/badge";
+import CitySelector from "./city/selector";
+import ButtonIconCustomComponent from "~/components/button-icon-custom";
 
 export const Icons = {
   spinner: Loader2,
@@ -40,6 +42,8 @@ export default function HomePage(props: {
   sizes: Size[];
   stores: Store[];
 }) {
+  const [city, setCity] = useState<City | null>(null);
+  const [stores, setStores] = useState<Store[]>();
   const [store, setStore] = useState<Store | null>(null);
   const [size, setSize] = useState<Size | null>(null);
   const [sizeSelected, setsizeSelected] = useState(false);
@@ -147,13 +151,25 @@ export default function HomePage(props: {
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}
           <div className="flex flex-col items-center justify-center ">
-            {!store && (
+            {(!city || !Array.isArray(stores)) && 
+              <CitySelector
+                cities={props.cities}
+                city={city}
+                setCity={setCity}
+                setStores={setStores}
+              />}
+            {(!store && city && Array.isArray(stores)) && (
               <div className="flex flex-col items-center justify-center ">
                 <div className="flex flex-col items-center justify-center ">
                   <StoreSelector
-                    stores={props.stores}
+                    stores={stores}
                     store={store}
                     setStore={setStore}
+                    goBack={() => {
+                      setStore(null);
+                      setCity(null);
+                      setStores(undefined);
+                    }}
                   />{" "}
                 </div>
                 <div className="flex flex-col items-center justify-center ">
@@ -175,14 +191,15 @@ export default function HomePage(props: {
                   setEndDate={setEndDate}
                   days={days}
                   setDays={setDays}
+                  goBack={() => setStore(null)}
                 />
               </div>
             )}
-            {endDate && (
+            {endDate && store && (
               <SizeSelector
-                nroSerieLocker={store?.serieLocker!}
+                store={store}
                 inicio={startDate}
-                fin={endDate!}
+                fin={endDate}
                 size={size}
                 setSize={setSize}
                 sizeSelected={sizeSelected}
@@ -190,17 +207,25 @@ export default function HomePage(props: {
                 reserves={reserves}
                 setReserves={setReserves}
                 startDate={startDate!}
-                endDate={endDate!}
+                endDate={endDate}
                 coins={coins!}
                 setFailedResponse={setFailedResponse}
                 failedResponse={failedResponse}
                 total={total}
                 setTotal={setTotal}
+                goBack={() => {
+                  setEndDate(undefined);
+                  setStartDate(undefined);
+                }}
               />
             )}
             {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
             {sizeSelected && !reserva && !loadingPay && (
               <div>
+                <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+                  setsizeSelected(false);
+                  setFailedResponse(false);
+                }} />
                 <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
                   <div className="w-full lg:w-auto">
                     <UserForm
@@ -219,7 +244,7 @@ export default function HomePage(props: {
                       store={store!}
                       startDate={startDate!}
                       endDate={endDate!}
-                      reserves={reserves!}
+                      reserves={reserves}
                       total={total}
                       setTotal={setTotal}
                       coin={coin!}
@@ -331,7 +356,7 @@ export default function HomePage(props: {
                   <Success
                     reserves={reserves}
                     store={store!}
-                    nReserve={nReserve!}
+                    nReserve={nReserve}
                     total={total}
                     coin={coin}
                     checkoutNumber={checkoutNumber!}

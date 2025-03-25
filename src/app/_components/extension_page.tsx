@@ -164,7 +164,7 @@ export default function Extension(props: { sizes: Size[] }) {
               </div>
               <div className="w-full lg:w-auto">
                 <Booking
-                  store={stores.find((s) => s.serieLocker == reserve.NroSerie)!}
+                  store={stores.find((s) => s.lockers.some(l => l.serieLocker == reserve.NroSerie))!}
                   startDate={startDate!}
                   endDate={endDate!}
                   reserves={[reserve]}
@@ -246,7 +246,7 @@ export default function Extension(props: { sizes: Size[] }) {
                     setReserves={setReserves}
                     sizes={props.sizes}
                     store={
-                      stores.find((s) => s.serieLocker == reserve.NroSerie)!
+                      stores.find((s) => s.lockers.some(l => l.serieLocker == reserve.NroSerie))!
                     }
                     total={total}
                     cupon={null}
@@ -262,7 +262,7 @@ export default function Extension(props: { sizes: Size[] }) {
             <div>
               <Success
                 reserves={reserves}
-                store={stores?.find((s) => s.serieLocker == reserve!.NroSerie)!}
+                store={stores?.find((s) => s.lockers.some(l => l.serieLocker == reserve!.NroSerie))!}
                 nReserve={nReserve!}
                 total={total}
                 coin={coin}
