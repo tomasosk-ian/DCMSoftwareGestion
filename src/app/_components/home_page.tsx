@@ -30,6 +30,7 @@ import { Cupon } from "~/server/api/routers/cupones";
 import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
 import { Badge } from "~/components/ui/badge";
+import CitySelector from "./city/selector";
 
 export const Icons = {
   spinner: Loader2,
@@ -40,6 +41,8 @@ export default function HomePage(props: {
   sizes: Size[];
   stores: Store[];
 }) {
+  const [city, setCity] = useState<City | null>(null);
+  const [stores, setStores] = useState<Store[]>();
   const [store, setStore] = useState<Store | null>(null);
   const [size, setSize] = useState<Size | null>(null);
   const [sizeSelected, setsizeSelected] = useState(false);
@@ -147,13 +150,25 @@ export default function HomePage(props: {
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}
           <div className="flex flex-col items-center justify-center ">
-            {!store && (
+            {(!city || !Array.isArray(stores)) && 
+              <CitySelector
+                cities={props.cities}
+                city={city}
+                setCity={setCity}
+                setStores={setStores}
+              />}
+            {(!store && city && Array.isArray(stores)) && (
               <div className="flex flex-col items-center justify-center ">
                 <div className="flex flex-col items-center justify-center ">
                   <StoreSelector
-                    stores={props.stores}
+                    stores={stores}
                     store={store}
                     setStore={setStore}
+                    goBack={() => {
+                      setStore(null);
+                      setCity(undefined);
+                      setStores(undefined);
+                    }}
                   />{" "}
                 </div>
                 <div className="flex flex-col items-center justify-center ">

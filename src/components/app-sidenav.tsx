@@ -60,9 +60,9 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
         <SidenavItem icon={<LayoutDashboardIcon />} href="/panel/monitor">
           Monitor
         </SidenavItem>
-        {/* <SidenavItem icon={<CloudIcon />} disabled={true}>
+        <SidenavItem icon={<CloudIcon />} href="/panel/ciudades">
           Ciudades{" "}
-        </SidenavItem> */}
+        </SidenavItem>
         <SidenavItem icon={<AlignStartVerticalIcon />} href="/panel/locales">
           Locales
         </SidenavItem>
