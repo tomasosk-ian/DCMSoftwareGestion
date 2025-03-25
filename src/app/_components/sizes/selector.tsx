@@ -11,7 +11,8 @@ import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
 import SizeCard from "./size-card";
 import ButtonCustomComponent from "~/components/buttonCustom";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronLeftCircle, ChevronRightIcon } from "lucide-react";
+import ButtonIconCustomComponent from "~/components/button-icon-custom";
 
 export default function SizeSelector(props: {
   size: Size | null;
@@ -30,6 +31,7 @@ export default function SizeSelector(props: {
   failedResponse: boolean;
   setTotal: (total: number) => void;
   total: number;
+  goBack: () => void;
 }) {
   const [values, setValues] = useState<Record<string, number>>({});
   const { data: fees } = api.fee.get.useQuery();
@@ -172,9 +174,12 @@ export default function SizeSelector(props: {
     <main className="flex justify-center">
       {!props.sizeSelected && coin && (
         <div className="flex w-full flex-col items-center justify-center px-4 sm:px-0 lg:px-8">
-          <h2 className="mb-4 text-center text-2xl font-semibold">
-            Selecciona tamaño de tu Locker.
-          </h2>
+          <div className="flex flex-row">
+            <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.goBack} />
+            <h2 className="mb-4 text-center text-2xl font-semibold">
+              Selecciona tamaño de tu Locker.
+            </h2>
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {isLoading && (
               <div className="col-span-full text-center">Cargando...</div>

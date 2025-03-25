@@ -175,6 +175,7 @@ export default function HomePage(props: {
                   setEndDate={setEndDate}
                   days={days}
                   setDays={setDays}
+                  goBack={() => setStore(null)}
                 />
               </div>
             )}
@@ -196,6 +197,10 @@ export default function HomePage(props: {
                 failedResponse={failedResponse}
                 total={total}
                 setTotal={setTotal}
+                goBack={() => {
+                  setEndDate(undefined);
+                  setStartDate(undefined);
+                }}
               />
             )}
             {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}

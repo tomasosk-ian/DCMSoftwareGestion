@@ -4,6 +4,9 @@ import { DateRange } from "react-day-picker";
 import { useEffect, useState } from "react";
 import ButtonCustomComponent from "../../../components/buttonCustom";
 import { es } from "date-fns/locale";
+import { Button } from "~/components/ui/button";
+import { ChevronLeftCircle } from "lucide-react";
+import ButtonIconCustomComponent from "~/components/button-icon-custom";
 
 export default function DateComponent(props: {
   startDate: string;
@@ -12,6 +15,7 @@ export default function DateComponent(props: {
   setEndDate: (endDate: string) => void;
   days: number;
   setDays: (days: number) => void;
+  goBack: () => void;
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
@@ -50,9 +54,12 @@ export default function DateComponent(props: {
     <div>
       {!props.endDate && (
         <div className="container flex flex-col items-center justify-center  ">
-          <h2 className="text-3xl font-semibold">
-            ¿Cuántos días necesitas tu locker?
-          </h2>
+          <div className="flex flex-row">
+            <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.goBack} />
+            <h2 className="text-3xl font-semibold">
+              ¿Cuántos días necesitas tu locker?
+            </h2>
+          </div>
           <p>Reservas desde las 00:00 hs hasta las 23:59</p>
           <div className="justify-center">
             <div className="w-full">
