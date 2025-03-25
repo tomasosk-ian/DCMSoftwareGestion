@@ -14,7 +14,7 @@ export default async function Channel(props: { params: { storeId: string } }) {
   }
 
   if (!store) {
-    return <Title>No se encontró el canal</Title>;
+    return <Title>No se encontró el local</Title>;
   }
 
   return <StorePage store={store} cities={cities} lockers={lockersResponse} />;

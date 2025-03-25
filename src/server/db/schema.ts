@@ -47,7 +47,6 @@ export const stores = sqliteTable(
     name: text("name", { length: 255 }).notNull(),
     image: text("image", { length: 255 }),
     cityId: text("cityId", { length: 255 }).notNull(),
-    serieLocker: text("serieLocker", { length: 255 }),
     address: text("address", { length: 255 }),
     organizationName: text("organizationName", { length: 255 }),
     description: text("description", { length: 255 }),
@@ -58,12 +57,32 @@ export const stores = sqliteTable(
   }),
 );
 
-export const storesRelations = relations(stores, ({ one }) => ({
+export const storesRelations = relations(stores, ({ one, many }) => ({
   city: one(cities, {
     fields: [stores.cityId],
     references: [cities.identifier],
   }),
+  lockers: many(storesLockers),
 }));
+
+export const storesLockers = sqliteTable(
+  "test_stores_lockers",
+  {
+    storeId: text("storeId", { length: 255 }).notNull(),
+    serieLocker: text("serieLocker", { length: 255 }).notNull(),
+  },
+  (t) => ({
+    key: primaryKey(t.storeId, t.serieLocker),
+    storeIndex: index("store_idx").on(t.storeId),
+  })
+);
+
+export const storesLockersRelations = relations(storesLockers, ({ one }) => ({
+  store: one(stores, {
+    fields: [storesLockers.storeId],
+    references: [stores.identifier]
+  }),
+}))
 
 export const transactions = sqliteTable(
   "test_transactions",
