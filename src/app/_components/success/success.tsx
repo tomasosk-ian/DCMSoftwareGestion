@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CheckCircle, DownloadIcon, Share2Icon, XCircle } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import QRCode from "react-qr-code";
@@ -25,6 +25,7 @@ export default function Success(props: {
 }) {
   const targetRef = useRef<HTMLDivElement>(null);
 
+  const [shareDisabled, setShareDisabled] = useState(false);
   useEffect(() => {
     window.scrollTo({
       top: 110,
@@ -33,7 +34,7 @@ export default function Success(props: {
   }, []);
 
   function getSize(idSize: number) {
-    const size = props.sizes!.find((s: Size) => s.id === idSize);
+    const size = props.sizes.find((s: Size) => s.id === idSize);
     return size?.nombre ?? "";
   }
 
@@ -66,11 +67,15 @@ export default function Success(props: {
     canvas.toBlob((v) => {
       if (!v) {
         console.error("canvas toBlob !v");
+        setShareDisabled(true);
       } else {
         navigator.share({
           files: [new File([v], `comprobante_${props.checkoutNumber}.jpg`)]
         }).then(v => console.log('compartido', v))
-          .catch(e => console.error('navigator share error', e));
+          .catch(e => {
+            setShareDisabled(true);
+            console.error('navigator share error', e)
+          });
       }
     });
   }
@@ -191,8 +196,9 @@ export default function Success(props: {
               text="Descargar"
               icon={<DownloadIcon className="h-4 w-4" />}
             />
-            {'share' in navigator && <ButtonCustomComponent
+            {('share' in navigator && navigator.canShare()) && <ButtonCustomComponent
               onClick={share}
+              disabled={shareDisabled}
               text="Compartir"
               icon={<Share2Icon className="h-4 w-4" />}
             />}

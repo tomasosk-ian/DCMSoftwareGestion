@@ -81,7 +81,7 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
         <SidenavItem icon={<PercentCircleIcon />} href="/panel/cupones">
           Cupones{" "}
         </SidenavItem>
-        <div className="absolute bottom-0 right-0 px-5">
+        <div className="bottom-0 right-0 px-5">
           <About />
         </div>
       </Sidenav>
