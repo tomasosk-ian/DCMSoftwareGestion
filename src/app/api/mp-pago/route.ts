@@ -137,7 +137,7 @@ export async function POST(request: Request) {
         image?: string | null;
         cantidad?: number | null;
         tarifa?: string | null;
-      }[] | string = await api.size.get.query();
+      }[] | string = await api.size.get.query({});
 
       const nReserve = meta.nReserve;
       const isExt = meta.isExt;

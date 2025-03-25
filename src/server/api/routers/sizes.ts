@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { env } from "~/env";
 import { createId } from "~/lib/utils";
@@ -9,10 +9,8 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { db, schema } from "~/server/db";
-import { api } from "~/trpc/server";
-import { RouterOutputs } from "~/trpc/shared";
 
-async function sizesList(): Promise<z.infer<typeof responseValidator>> {
+async function sizesList(localId?: string): Promise<z.infer<typeof responseValidator>> {
   const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
   // Handle the response from the external API
@@ -28,9 +26,20 @@ async function sizesList(): Promise<z.infer<typeof responseValidator>> {
   const validatedData = responseValidator.parse(reservedBoxData);
   await Promise.all(
     validatedData.map(async (v) => {
-      const fee = await db.query.feeData.findFirst({
-        where: eq(schema.feeData.size, v.id),
-      });
+      let fee;
+      if (typeof localId === 'string') {
+        fee = await db.query.feeData.findFirst({
+          where: and(
+            eq(schema.feeData.size, v.id),
+            eq(schema.feeData.localId, localId),
+          ),
+        });
+      } else {
+        fee = await db.query.feeData.findFirst({
+          where: eq(schema.feeData.size, v.id),
+        });
+      }
+
       v.tarifa = fee?.identifier;
 
       const existingSize = await db.query.sizes.findFirst({
@@ -76,10 +85,14 @@ async function disponibilidad(nroSerieLocker: string, inicio: string | null, fin
 }
 
 type LockerSize = z.infer<typeof responseValidator>[number];
-async function sizeExpand(v: LockerSize): Promise<LockerSize> {
+async function sizeExpand(v: LockerSize, localId: string): Promise<LockerSize> {
   const fee = await db.query.feeData.findFirst({
-    where: eq(schema.feeData.size, v.id),
+    where: and(
+      eq(schema.feeData.size, v.id),
+      eq(schema.feeData.localId, localId),
+    ),
   });
+  
   v.tarifa = fee?.identifier;
 
   const existingSize = await db.query.sizes.findFirst({
@@ -106,9 +119,15 @@ async function sizeExpand(v: LockerSize): Promise<LockerSize> {
 }
 
 export const sizeRouter = createTRPCRouter({
-  get: publicProcedure.query(async ({ ctx }) => {
-    return sizesList();
-  }),
+  get: publicProcedure
+    .input(
+      z.object({
+        store: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      return sizesList(input.store);
+    }),
   getAvailability: publicProcedure
     .input(
       z.object({
@@ -142,13 +161,13 @@ export const sizeRouter = createTRPCRouter({
           } else {
             sizesLockersMap[lockerSize.id] = {
               lockers: [locker.serieLocker],
-              size: await sizeExpand(lockerSize),
+              size: await sizeExpand(lockerSize, store.identifier),
             };
           }
         }
       }
 
-      return sizesLockersMap;
+      return Object.fromEntries(Object.entries(sizesLockersMap).filter(v => typeof v[1].size.tarifa === 'string'));
     }),
 
   getById: publicProcedure

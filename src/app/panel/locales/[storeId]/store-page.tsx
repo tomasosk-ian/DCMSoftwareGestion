@@ -43,11 +43,19 @@ import {
 import type { Locker } from "~/server/api/routers/lockers";
 import type { TRPCError } from "@trpc/server";
 import { MultiSelect } from "~/components/multi-select";
+import type { Coin } from "~/server/api/routers/coin";
+import type { Size } from "~/server/api/routers/sizes";
+import { AddFeeDialog } from "../../add-fee-dialog";
+import { List, ListTile } from "~/components/list";
+import type { Fee } from "~/server/api/routers/fee";
 
 export default function StorePage(props: {
   store: Store;
   cities: City[];
   lockers: Locker[];
+  coins: Coin[];
+  sizes: Size[];
+  fees: Fee[];
 }) {
   const [name, setName] = useState(props.store.name);
   const [cityId, setCity] = useState(props.store.cityId);
@@ -206,8 +214,18 @@ export default function StorePage(props: {
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  
+                <div>
+                  <AddFeeDialog coins={props.coins} sizes={props.sizes} localId={props.store.identifier} />
+                  <List className="mt-3">
+                    {props.fees.map((fee) => {
+                      return (
+                        <ListTile
+                          href={`/panel/tarifas/${fee.identifier}`}
+                          title={fee.description}
+                        />
+                      );
+                    })}
+                  </List>
                 </div>
               </Card>
             </AccordionContent>

@@ -7,6 +7,7 @@ import {
   sqliteTableCreator,
   uniqueIndex,
   index,
+  unique,
 } from "drizzle-orm/sqlite-core";
 export const sqliteTable = sqliteTableCreator((name) => `${name}`);
 
@@ -238,13 +239,27 @@ export const feeData = sqliteTable(
     description: text("description", { length: 255 }),
     coin: text("coin", { length: 255 }),
     size: integer("size"),
+    localId: text("localId"),
     value: real("value"),
     discount: real("discount"),
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier),
+    localIdIdx: index("local_id_idx").on(vt.localId),
+    uniqueLocal: unique("unique_local_size").on(vt.size, vt.localId),
   }),
 );
+
+export const feeDataRelations = relations(feeData, ({ one }) => ({
+  store: one(stores, {
+    fields: [feeData.localId],
+    references: [stores.identifier]
+  }),
+  coin: one(coinData, {
+    fields: [feeData.coin],
+    references: [coinData.identifier],
+  }),
+}));
 
 export const coinData = sqliteTable(
   "test_coindate",
@@ -257,12 +272,6 @@ export const coinData = sqliteTable(
     compoundKey: primaryKey(vt.identifier),
   }),
 );
-export const feeRelations = relations(feeData, ({ one }) => ({
-  coin: one(coinData, {
-    fields: [feeData.coin],
-    references: [coinData.identifier],
-  }),
-}));
 
 export const cuponesData = sqliteTable(
   "test_cupones",

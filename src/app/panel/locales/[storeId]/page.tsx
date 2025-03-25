@@ -8,6 +8,11 @@ export default async function Channel(props: { params: { storeId: string } }) {
   });
   const cities = await api.city.get.query();
   const lockersResponse = await api.locker.get.query();
+  const coin = await api.coin.get.query();
+  const sizes = await api.size.get.query({});
+  const fees = await api.fee.getByStore.query({
+    id: props.params.storeId
+  });
 
   if ("error" in lockersResponse) {
     return <Title>Error: {lockersResponse.error}</Title>;
@@ -17,5 +22,5 @@ export default async function Channel(props: { params: { storeId: string } }) {
     return <Title>No se encontró el local</Title>;
   }
 
-  return <StorePage store={store} cities={cities} lockers={lockersResponse} />;
+  return <StorePage store={store} cities={cities} lockers={lockersResponse} coins={coin} sizes={sizes} fees={fees} />;
 }

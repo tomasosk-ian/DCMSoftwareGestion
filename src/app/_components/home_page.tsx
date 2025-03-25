@@ -356,7 +356,7 @@ export default function HomePage(props: {
                   <Success
                     reserves={reserves}
                     store={store!}
-                    nReserve={nReserve!}
+                    nReserve={nReserve}
                     total={total}
                     coin={coin}
                     checkoutNumber={checkoutNumber!}
