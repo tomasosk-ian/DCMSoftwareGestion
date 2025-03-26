@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
   const dataID = request.nextUrl.searchParams.get('data.id') ?? body.data.id;
   if (!validateHmac(dataID, xSignature ?? "", xRequestId ?? "", claveMpWh.value)) {
-    console.error("mp-pago: api mp firma invalida");
+    console.error("mp-pago: api mp firma invalida", dataID, xSignature, xRequestId);
     return NextResponse.json(null, { status: 400 });
   }
 
