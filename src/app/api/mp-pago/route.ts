@@ -1,6 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
 import { Payment } from "mercadopago";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import type { PrivateConfigKeys } from "~/lib/config";
 import { getMpClient } from "~/server/api/routers/mp";
@@ -17,11 +17,7 @@ function formatDateToTextDate(dateString: string): string {
   return formattedDate;
 }
 
-function validateHmac(xSignature: string, xRequestId: string, secretKey: string): boolean {
-  // Obtain Query params related to the request URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const dataID = urlParams.get('data.id');
-
+function validateHmac(dataID: string, xSignature: string, xRequestId: string, secretKey: string): boolean {
   // Separating the x-signature into parts
   const parts = xSignature.split(',');
 
@@ -59,7 +55,7 @@ function validateHmac(xSignature: string, xRequestId: string, secretKey: string)
   return sha === hash;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const xSignature = request.headers.get("x-signature");
   const xRequestId = request.headers.get("x-request-id");
 
@@ -69,18 +65,13 @@ export async function POST(request: Request) {
   });
 
   if (!claveMp) {
-    console.error('No está configurada la clave privada de mercado pago');
+    console.error('mp-pago: No está configurada la clave privada de mercado pago');
     return NextResponse.json(null, { status: 502 });
-  }
-
-  if (!validateHmac(xSignature ?? "", xRequestId ?? "", claveMp.value)) {
-    console.error("api mp firma invalida");
-    return NextResponse.json(null, { status: 400 });
   }
 
   const res = await request.json() as object;
   if (typeof res !== 'object') {
-    console.error("api mp res no es object");
+    console.error("mp-pago: api mp res no es object");
     return NextResponse.json(null, { status: 400 });
   }
 
@@ -92,10 +83,16 @@ export async function POST(request: Request) {
   } = res;
 
   if (!body.data?.id) {
-    console.error("api mp !body.data.id", body);
+    console.error("mp-pago: api mp !body.data.id", body);
     return NextResponse.json(null, { status: 400 });
   } else if (body.type !== 'payment') {
-    console.error("api mp type is not payment", body);
+    console.error("mp-pago: api mp type is not payment", body);
+    return NextResponse.json(null, { status: 400 });
+  }
+
+  const dataID = request.nextUrl.searchParams.get('data.id') ?? body.data.id;
+  if (!validateHmac(dataID, xSignature ?? "", xRequestId ?? "", claveMp.value)) {
+    console.error("mp-pago: api mp firma invalida");
     return NextResponse.json(null, { status: 400 });
   }
 
@@ -119,7 +116,7 @@ export async function POST(request: Request) {
   const trans = (meta.IdTransactions ?? []).filter(v => typeof v === 'number');
 
   if (meta.IdTransactions && Array.isArray(meta.IdTransactions) && payment.status === "approved") {
-    console.log("recibido WH pago procesado", payment);
+    console.log("mp-pago: recibido WH pago procesado", payment);
     if (trans.length > 0) {
       const reserves = await db.query.reservas.findMany({
         where: inArray(schema.reservas.IdTransaction, trans)
@@ -152,7 +149,7 @@ export async function POST(request: Request) {
       const store_address = meta.store_address;
 
       if (!Array.isArray(sizes)) {
-        console.error("NO HAY SIZES mp-pago");
+        console.error("mp-pago: NO HAY SIZES mp-pago");
         sizes = [];
       }
 
@@ -160,7 +157,7 @@ export async function POST(request: Request) {
       const updatedReserves = await Promise.all(
         reserves.map(async (reserve) => {
           if (typeof reserve.IdTransaction !== 'number') {
-            console.error('mp-pago reserve.IdTransaction no es number', reserve);
+            console.error('mp-pago: mp-pago reserve.IdTransaction no es number', reserve);
             return reserve;
           }
 
@@ -247,10 +244,10 @@ export async function POST(request: Request) {
         .set({ mpPagadoOk: true })
         .where(inArray(schema.reservas.IdTransaction, trans));
     } else {
-      console.error("recibido WH pago sin reservas");
+      console.error("mp-pago: recibido WH pago sin reservas");
     }
   } else {
-    console.log("recibido WH pago no procesado", payment);
+    console.log("mp-pago: recibido WH pago no procesado", payment);
   }
 
   return new Response(null, {status: 200});
