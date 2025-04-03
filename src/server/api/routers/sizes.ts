@@ -149,19 +149,34 @@ export const sizeRouter = createTRPCRouter({
       }
 
       const sizesLockersMap: Record<number, {
-        lockers: string[],
-        size: LockerSize,
+        lockers: {
+          serie: string,
+          cantidad: number,
+          size: LockerSize,
+        }[],
+        size: LockerSize, // solo sirve para referenciar por id y nombre
+        cantidadSumada: number,
       }> = {};
 
       for (const locker of store.lockers) {
         const disp = await disponibilidad(locker.serieLocker, input.inicio, input.fin);
         for (const lockerSize of disp) {
           if (sizesLockersMap[lockerSize.id]) {
-            sizesLockersMap[lockerSize.id]!.lockers.push(locker.serieLocker);
+            sizesLockersMap[lockerSize.id]!.lockers.push({
+              serie: locker.serieLocker,
+              cantidad: lockerSize.cantidad ?? 0,
+              size: await sizeExpand(lockerSize, store.identifier),
+            });
+            sizesLockersMap[lockerSize.id]!.cantidadSumada += (lockerSize.cantidad ?? 0);
           } else {
             sizesLockersMap[lockerSize.id] = {
-              lockers: [locker.serieLocker],
+              lockers: [{
+                serie: locker.serieLocker,
+                cantidad: lockerSize.cantidad ?? 0,
+                size: await sizeExpand(lockerSize, store.identifier),
+              }],
               size: await sizeExpand(lockerSize, store.identifier),
+              cantidadSumada: lockerSize.cantidad ?? 0,
             };
           }
         }
