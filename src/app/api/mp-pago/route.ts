@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { createId } from "~/lib/utils";
 import { getClientByEmail } from "~/server/api/routers/lockerReserveRouter";
+import { MpMeta } from "~/lib/types";
 
 function formatDateToTextDate(dateString: string): string {
   const date = new Date(dateString);
@@ -109,23 +110,10 @@ export async function POST(request: NextRequest) {
   const mp = getMpClient(claveMp.value);
   const payment = await new Payment(mp).get({id: body.data.id});
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const meta: {
-    IdTransactions?: number[],
-    store_name: string,
-    store_address: string,
-    nReserve: number,
-    coin_description: null | string,
-    client_email: string,
-    client_name: string,
-    total: number,
-    isExt: boolean,
-    startDate: string,
-    endDate: string,
-    cupon_id?: string,
-  } = payment.metadata;
-  const trans = (meta.IdTransactions ?? []).filter(v => typeof v === 'number');
+  const meta: MpMeta = payment.metadata;
+  const trans = (meta.id_transactions ?? []).filter(v => typeof v === 'number');
 
-  if (meta.IdTransactions && Array.isArray(meta.IdTransactions) && payment.status === "approved") {
+  if (meta.id_transactions && Array.isArray(meta.id_transactions) && payment.status === "approved") {
     console.log("mp-pago: recibido WH pago procesado", payment);
     if (trans.length > 0) {
       const reserves = await db.query.reservas.findMany({
@@ -146,10 +134,10 @@ export async function POST(request: NextRequest) {
         tarifa?: string | null;
       }[] | string = await api.size.get.query({});
 
-      const nReserve = meta.nReserve;
-      const isExt = meta.isExt;
-      const startDate = meta.startDate;
-      const endDate = meta.endDate;
+      const nReserve = meta.n_reserve;
+      const isExt = meta.is_ext;
+      const startDate = meta.start_date;
+      const endDate = meta.end_date;
       const total = meta.total;
       const cupon_id = meta.cupon_id;
       const client_name = meta.client_name;
