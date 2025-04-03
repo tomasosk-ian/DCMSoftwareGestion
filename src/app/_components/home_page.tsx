@@ -160,10 +160,6 @@ export default function HomePage(props: {
               />}
             {(!store && city && Array.isArray(stores)) && (
               <div>
-                <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
-                  setCity(null);
-                  setStores(undefined);
-                }} />
                 <div className="flex flex-col items-center justify-center ">
                   <div className="flex flex-col items-center justify-center ">
                     <StoreSelector
@@ -190,10 +186,6 @@ export default function HomePage(props: {
             )}
             {store && (
               <div>
-                <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
-                  setStore(null);
-                  setTotal(0);
-                }} />
                 <DateComponent
                   startDate={startDate!}
                   setStartDate={setStartDate}
@@ -201,7 +193,10 @@ export default function HomePage(props: {
                   setEndDate={setEndDate}
                   days={days}
                   setDays={setDays}
-                  goBack={() => setStore(null)}
+                  goBack={() => {
+                    setStore(null);
+                    setTotal(0);
+                  }}
                 />
               </div>
             )}
@@ -382,7 +377,9 @@ export default function HomePage(props: {
       )}
       {isExtension && (
         <div className="container absolute">
-          <Extension sizes={props.sizes} />
+          <Extension sizes={props.sizes} onBack={() => {
+            setIsExtension(false);
+          }} />
         </div>
       )}
     </>
