@@ -25,7 +25,7 @@ export default function Success(props: {
 }) {
   const targetRef = useRef<HTMLDivElement>(null);
 
-  const [shareDisabled, setShareDisabled] = useState(false);
+  const [shareDisabled, setShareDisabled] = useState(!(('share' in navigator && navigator.canShare())));
   useEffect(() => {
     window.scrollTo({
       top: 110,
@@ -196,12 +196,12 @@ export default function Success(props: {
               text="Descargar"
               icon={<DownloadIcon className="h-4 w-4" />}
             />
-            {('share' in navigator && navigator.canShare()) && <ButtonCustomComponent
+            <ButtonCustomComponent
               onClick={share}
               disabled={shareDisabled}
               text="Compartir"
               icon={<Share2Icon className="h-4 w-4" />}
-            />}
+            />
           </div>
         </div>
       )}
