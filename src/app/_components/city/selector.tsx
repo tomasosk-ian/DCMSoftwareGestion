@@ -40,26 +40,28 @@ export default function CitySelector(props: {
           <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl">
             ¿Dónde quieres reservar tu consigna?
           </h2>
-          <div className="grid grid-cols-4 gap-4 ">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {props.cities.length === 0 && <div className="col-span-full text-center">No hay ciudades disponibles.</div>}
             {props.cities.map((city) => {
               return (
-                <Card
-                  className="grid w-[35vh] overflow-hidden shadow-xl"
-                  onClick={() => handleChange(city)}
-                  key={city.identifier}
-                >
-                  <CardHeader>
-                    <CardTitle> {city.name}</CardTitle>
-                    <CardDescription>
-                      Seleccione la ciudad donde desea alquilar.
-                    </CardDescription>
-                  </CardHeader>
-                  <img
-                    className="aspect-video object-cover"
-                    src={city.image ? city.image : "/placeholder.svg"}
-                  ></img>
-                </Card>
+                <div key={"div-" + city.identifier} className="px-5 pb-5">
+                  <Card
+                    className="grid w-[35vh] overflow-hidden shadow-xl"
+                    onClick={() => handleChange(city)}
+                    key={city.identifier}
+                  >
+                    <CardHeader>
+                      <CardTitle> {city.name}</CardTitle>
+                      <CardDescription>
+                        Seleccione la ciudad donde desea alquilar.
+                      </CardDescription>
+                    </CardHeader>
+                    <img
+                      className="aspect-video object-cover"
+                      src={city.image ? city.image : "/placeholder.svg"}
+                    ></img>
+                  </Card> 
+                </div>
               );
             })}
           </div>
