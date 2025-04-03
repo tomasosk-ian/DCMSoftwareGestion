@@ -221,6 +221,7 @@ export default function HomePage(props: {
                 goBack={() => {
                   setEndDate(undefined);
                   setStartDate(undefined);
+                  setDays(0);
                 }}
               />
             )}
