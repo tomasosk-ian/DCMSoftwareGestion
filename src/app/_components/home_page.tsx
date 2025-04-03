@@ -159,31 +159,41 @@ export default function HomePage(props: {
                 setStores={setStores}
               />}
             {(!store && city && Array.isArray(stores)) && (
-              <div className="flex flex-col items-center justify-center ">
+              <div>
+                <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+                  setCity(null);
+                  setStores(undefined);
+                }} />
                 <div className="flex flex-col items-center justify-center ">
-                  <StoreSelector
-                    stores={stores}
-                    store={store}
-                    setStore={setStore}
-                    goBack={() => {
-                      setStore(null);
-                      setCity(null);
-                      setStores(undefined);
-                    }}
-                  />{" "}
+                  <div className="flex flex-col items-center justify-center ">
+                    <StoreSelector
+                      stores={stores}
+                      store={store}
+                      setStore={setStore}
+                      goBack={() => {
+                        setStore(null);
+                        setCity(null);
+                        setStores(undefined);
+                      }}
+                    />{" "}
+                  </div>
+                  <div className="flex flex-col items-center justify-center ">
+                    <Button
+                      className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
+                      onClick={() => setIsExtension(true)}
+                    >
+                      Extender reserva
+                    </Button>
+                  </div>{" "}
                 </div>
-                <div className="flex flex-col items-center justify-center ">
-                  <Button
-                    className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
-                    onClick={() => setIsExtension(true)}
-                  >
-                    Extender reserva
-                  </Button>
-                </div>{" "}
               </div>
             )}
             {store && (
               <div>
+                <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+                  setStore(null);
+                  setTotal(0);
+                }} />
                 <DateComponent
                   startDate={startDate!}
                   setStartDate={setStartDate}
@@ -225,6 +235,7 @@ export default function HomePage(props: {
                 <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
                   setsizeSelected(false);
                   setFailedResponse(false);
+                  setReserves([]);
                 }} />
                 <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
                   <div className="w-full lg:w-auto">
