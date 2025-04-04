@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { ChevronRightIcon, Loader2 } from "lucide-react";
+import { ChevronLeftCircle, ChevronRightIcon, Loader2 } from "lucide-react";
 import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
 import Payment from "./payment/page";
@@ -23,12 +23,13 @@ import SelectEmail from "./email-select/component";
 import SelectToken from "./email-select copy/component";
 import DateExtension from "./extension-date/component";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
+import ButtonIconCustomComponent from "~/components/button-icon-custom";
 
 export const Icons = {
   spinner: Loader2,
 };
 
-export default function Extension(props: { sizes: Size[] }) {
+export default function Extension(props: { sizes: Size[], onBack: () => void; }) {
   const [email, setEmail] = useState("");
   const [token, setToken] = useState<number>();
   const [inputToken, setInputToken] = useState(false);
@@ -120,6 +121,8 @@ export default function Extension(props: { sizes: Size[] }) {
       {failed && <AlertFailedResponse />}
 
       <div className="flex flex-col items-center justify-center ">
+        <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.onBack} />
+
         {!email && <SelectEmail email={email} setEmail={setEmail} />}
         {email && !token && (
           <SelectToken

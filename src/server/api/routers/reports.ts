@@ -65,7 +65,7 @@ export const reportsRouter = createTRPCRouter({
             gte(reserva.FechaInicio, startDate),
             lte(reserva.FechaFin, endDate),
             isNotNull(reserva.nReserve),
-            isNotNull(reserva.IdBox),
+            // isNotNull(reserva.IdBox),
           ),
       });
 

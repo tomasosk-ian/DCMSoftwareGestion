@@ -159,27 +159,29 @@ export default function HomePage(props: {
                 setStores={setStores}
               />}
             {(!store && city && Array.isArray(stores)) && (
-              <div className="flex flex-col items-center justify-center ">
+              <div>
                 <div className="flex flex-col items-center justify-center ">
-                  <StoreSelector
-                    stores={stores}
-                    store={store}
-                    setStore={setStore}
-                    goBack={() => {
-                      setStore(null);
-                      setCity(null);
-                      setStores(undefined);
-                    }}
-                  />{" "}
+                  <div className="flex flex-col items-center justify-center ">
+                    <StoreSelector
+                      stores={stores}
+                      store={store}
+                      setStore={setStore}
+                      goBack={() => {
+                        setStore(null);
+                        setCity(null);
+                        setStores(undefined);
+                      }}
+                    />{" "}
+                  </div>
+                  <div className="flex flex-col items-center justify-center ">
+                    <Button
+                      className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
+                      onClick={() => setIsExtension(true)}
+                    >
+                      Extender reserva
+                    </Button>
+                  </div>{" "}
                 </div>
-                <div className="flex flex-col items-center justify-center ">
-                  <Button
-                    className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
-                    onClick={() => setIsExtension(true)}
-                  >
-                    Extender reserva
-                  </Button>
-                </div>{" "}
               </div>
             )}
             {store && (
@@ -191,7 +193,10 @@ export default function HomePage(props: {
                   setEndDate={setEndDate}
                   days={days}
                   setDays={setDays}
-                  goBack={() => setStore(null)}
+                  goBack={() => {
+                    setStore(null);
+                    setTotal(0);
+                  }}
                 />
               </div>
             )}
@@ -216,6 +221,7 @@ export default function HomePage(props: {
                 goBack={() => {
                   setEndDate(undefined);
                   setStartDate(undefined);
+                  setDays(0);
                 }}
               />
             )}
@@ -225,6 +231,7 @@ export default function HomePage(props: {
                 <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
                   setsizeSelected(false);
                   setFailedResponse(false);
+                  setReserves([]);
                 }} />
                 <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
                   <div className="w-full lg:w-auto">
@@ -371,7 +378,9 @@ export default function HomePage(props: {
       )}
       {isExtension && (
         <div className="container absolute">
-          <Extension sizes={props.sizes} />
+          <Extension sizes={props.sizes} onBack={() => {
+            setIsExtension(false);
+          }} />
         </div>
       )}
     </>

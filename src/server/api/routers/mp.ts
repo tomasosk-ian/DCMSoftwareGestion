@@ -9,6 +9,7 @@ import { TRPCError } from "@trpc/server";
 import { eq, inArray } from "drizzle-orm";
 import { schema } from "~/server/db";
 import { type PrivateConfigKeys } from "~/lib/config";
+import { MpMeta } from "~/lib/types";
 
 // eslint-disable-next-line no-var
 export var mpClient: MercadoPagoConfig | null = null;
@@ -29,19 +30,7 @@ export const mpRouter = createTRPCRouter({
       quantity: z.number().int().min(1),
       price: z.number().min(1),
       IdTransactions: z.array(z.number()),
-      meta: z.custom<{
-        store_name: string,
-        store_address: string,
-        nReserve: number,
-        coin_description: null | string,
-        client_email: string,
-        client_name: string,
-        total: number,
-        isExt: boolean,
-        startDate: string,
-        endDate: string,
-        cupon_id?: string,
-      }>(),
+      meta: z.custom<MpMeta>(),
     }))
     .mutation(async ({ input, ctx }) => {
       const claveConfigMpWhUrl: PrivateConfigKeys = 'mercadopago_webhook_url';
@@ -95,22 +84,9 @@ export const mpRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
 
-      const meta: {
-        IdTransactions?: number[],
-        store_name: string,
-        store_address: string,
-        nReserve: number,
-        coin_description: null | string,
-        client_email: string,
-        client_name: string,
-        total: number,
-        isExt: boolean,
-        startDate: string,
-        endDate: string,
-        cupon_id?: string,
-      } = {
+      const meta: MpMeta = {
         ...input.meta,
-        IdTransactions: r,
+        id_transactions: r,
       };
 
       const preference = new Preference(mpClient);

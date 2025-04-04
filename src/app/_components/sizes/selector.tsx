@@ -36,7 +36,6 @@ export default function SizeSelector(props: {
 }) {
   const [values, setValues] = useState<Record<string, {
     cantidad: number,
-    lockerSerial: string
   }>>({});
   const { data: fees } = api.fee.get.useQuery();
   const [coin, setCoin] = useState<Coin>();
@@ -53,40 +52,65 @@ export default function SizeSelector(props: {
     store: props.store.identifier,
   });
 
-  const sizes: (Size & { lockerSerial: string })[] = useMemo(() => {
+  const sizes = useMemo(() => {
     if (sizesRaw) {
       return Object.entries(sizesRaw)
         .filter(v => v[1].lockers.length > 0)
         .map(v => ({
           ...v[1].size,
-          lockerSerial: v[1].lockers[Math.floor(Math.random() * v[1].lockers.length)]!
+          cantidad: v[1].cantidadSumada,
+          lockers: v[1].lockers,
         }));
     } else {
       return [];
     }
   }, [sizesRaw]);
 
+  function getReservesFinal() {
+    const dispLockersPorSize: Record<number, [string, number][]> = {};
+    for (const size of sizes) {
+      for (const locker of size.lockers) {
+        if (dispLockersPorSize[size.id]) {
+          dispLockersPorSize[size.id]!.push([locker.serie, locker.cantidad]);
+        } else {
+          dispLockersPorSize[size.id] = [[locker.serie, locker.cantidad]];
+        }
+      }
+    }
+
+    const newReserves: Reserve[] = [];
+    Object.entries(values).forEach(([idSize, c]) => {
+      let restante = c.cantidad;
+      while (restante > 0) {
+        const alguno = dispLockersPorSize[parseInt(idSize)]!.pop()!;
+        const cantidad = Math.min(restante, alguno[1]);
+        restante -= cantidad;
+        newReserves.push({
+          IdLocker: null,
+          NroSerie: alguno[0],
+          IdSize: parseInt(idSize),
+          IdBox: null,
+          IdFisico: null,
+          Token1: null,
+          FechaCreacion: format(Date.now(), "yyyy-MM-dd'T'00:00:00"),
+          FechaInicio: props.startDate,
+          FechaFin: props.endDate,
+          Contador: -1,
+          Confirmado: false,
+          Modo: "Por fecha",
+          Cantidad: cantidad,
+          client: null,
+        })
+      }
+    });
+
+    return newReserves;
+  }
+
   useEffect(() => {
     try {
       if (values) {
-        const newReserves: Reserve[] = Object.entries(values).map(
-          ([id, v]) => ({
-            IdLocker: null,
-            NroSerie: v.lockerSerial,
-            IdSize: parseInt(id),
-            IdBox: null,
-            IdFisico: null,
-            Token1: null,
-            FechaCreacion: format(Date.now(), "yyyy-MM-dd'T'00:00:00"),
-            FechaInicio: props.startDate,
-            FechaFin: props.endDate,
-            Contador: -1,
-            Confirmado: false,
-            Modo: "Por fecha",
-            Cantidad: v.cantidad,
-            client: null,
-          }),
-        );
+        const newReserves: Reserve[] = getReservesFinal();
 
         if (fees) {
           let totalPrice = 0;
@@ -130,26 +154,7 @@ export default function SizeSelector(props: {
   function applyReserve() {
     try {
       if (values) {
-        const newReserves: Reserve[] = Object.entries(values).flatMap(
-          ([id, v]) => {
-            return Array.from({ length: v.cantidad }, () => ({
-              IdLocker: null,
-              NroSerie: v.lockerSerial,
-              IdSize: parseInt(id),
-              IdBox: null,
-              IdFisico: null,
-              Token1: null,
-              FechaCreacion: format(new Date(), "yyyy-MM-dd'T'00:00:00"),
-              FechaInicio: props.startDate!,
-              FechaFin: props.endDate!,
-              Contador: -1,
-              Confirmado: false,
-              Modo: "Por fecha",
-              Cantidad: 1,
-              client: null,
-            }));
-          },
-        );
+        const newReserves: Reserve[] = getReservesFinal();
 
         const updatedReserves = props.reserves
           ? [...props.reserves, ...newReserves]
@@ -181,10 +186,7 @@ export default function SizeSelector(props: {
   }, [props.reserves]);
 
   useEffect(() => {
-    const filteredValues: Record<string, {
-      cantidad: number,
-      lockerSerial: string
-    }> = {};
+    const filteredValues: typeof values = {};
   
     Object.entries(values).forEach(([key, value]) => {
       if (value.cantidad !== 0) {
@@ -225,17 +227,15 @@ export default function SizeSelector(props: {
                       setValues({
                         ...values,
                         [size.id]: {
-                          lockerSerial: size.lockerSerial,
                           cantidad: (values[size.id]?.cantidad ?? 0) - 1,
                         },
                       })
                     }
-                    disabledPlus={(values[size.id]?.cantidad ?? 0) === size.cantidad!}
+                    disabledPlus={(values[size.id]?.cantidad ?? 0) === size.cantidad}
                     onClickPlus={() =>
                       setValues({
                         ...values,
                         [size.id]: {
-                          lockerSerial: size.lockerSerial,
                           cantidad: (values[size.id]?.cantidad ?? 0) + 1,
                         },
                       })

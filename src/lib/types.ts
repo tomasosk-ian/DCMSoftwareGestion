@@ -1,1 +1,14 @@
-import { z } from "zod";
+export type MpMeta = {
+  id_transactions?: number[],
+  store_name: string,
+  store_address: string,
+  n_reserve: number,
+  coin_description: null | string,
+  client_email: string,
+  client_name: string,
+  total: number,
+  is_ext: boolean,
+  start_date: string,
+  end_date: string,
+  cupon_id?: string,
+};

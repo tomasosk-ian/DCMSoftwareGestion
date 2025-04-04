@@ -50,7 +50,7 @@ export function ReserveExcel({ allReservesData }: { allReservesData: {
     });
 
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, `Clientes_${new Date().toISOString().split("T")[0]}.xlsx`);
+    saveAs(blob, `Reservas_${new Date().toISOString().split("T")[0]}.xlsx`);
   }
 
   return <Button onClick={downloadExcel}>Descargar Excel</Button>
