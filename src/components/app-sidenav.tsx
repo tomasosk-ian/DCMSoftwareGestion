@@ -69,8 +69,8 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
         <SidenavItem icon={<GroupIcon />} href="/panel/tamanos">
           Tamaños
         </SidenavItem>
-        <SidenavItem icon={<DollarSignIcon />} href="/panel/tarifas">
-          Tarifas
+        <SidenavItem icon={<DollarSignIcon />} href="/panel/monedas">
+          Monedas
         </SidenavItem>
         <SidenavItem icon={<CloudIcon />} href="/panel/clientes">
           Clientes{" "}
