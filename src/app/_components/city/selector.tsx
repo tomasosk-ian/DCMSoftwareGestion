@@ -38,7 +38,7 @@ export default function CitySelector(props: {
       {!props.city && (
         <div className="container flex flex-col items-center justify-center gap-6 ">
           <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl">
-            ¿Dónde quieres reservar tu consigna?
+            ¿Dónde quieres reservar tu locker?
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {props.cities.length === 0 && <div className="col-span-full text-center">No hay ciudades disponibles.</div>}

@@ -23,7 +23,7 @@ import Success from "./success/success";
 import { Client } from "~/server/api/routers/clients";
 import Payment from "./payment/page";
 import { Coin } from "~/server/api/routers/coin";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import UserForm from "./user/userForm";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
@@ -116,6 +116,15 @@ export default function HomePage(props: {
     }
     return true;
   };
+
+  const storesFinal = useMemo(() => {
+    if (props.cities.length === 0) {
+      return props.stores;
+    } else {
+      return stores;
+    }
+  }, [stores, props]);
+
   const envVariable = process.env.NEXT_PUBLIC_NODE_ENV || "Cargando...";
 
   function AlertFailedResponse() {
@@ -151,19 +160,19 @@ export default function HomePage(props: {
         <div className="container absolute">
           {failedResponse && <AlertFailedResponse />}
           <div className="flex flex-col items-center justify-center ">
-            {(!city || !Array.isArray(stores)) && 
+            {((!city && props.cities.length > 0) || !Array.isArray(storesFinal)) && 
               <CitySelector
                 cities={props.cities}
                 city={city}
                 setCity={setCity}
                 setStores={setStores}
               />}
-            {(!store && city && Array.isArray(stores)) && (
+            {(!store && (city !== null || props.cities.length === 0) && Array.isArray(storesFinal)) && (
               <div>
                 <div className="flex flex-col items-center justify-center ">
                   <div className="flex flex-col items-center justify-center ">
                     <StoreSelector
-                      stores={stores}
+                      stores={storesFinal}
                       store={store}
                       setStore={setStore}
                       goBack={() => {
@@ -174,12 +183,10 @@ export default function HomePage(props: {
                     />{" "}
                   </div>
                   <div className="flex flex-col items-center justify-center ">
-                    <Button
-                      className="border-0 bg-transparent text-black shadow-transparent hover:bg-transparent"
+                    <ButtonCustomComponent
                       onClick={() => setIsExtension(true)}
-                    >
-                      Extender reserva
-                    </Button>
+                      text="Extender reserva"
+                    />
                   </div>{" "}
                 </div>
               </div>
