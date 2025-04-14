@@ -32,7 +32,7 @@ export default function Booking(props: {
   cupon: Cupon | undefined;
   isExt: boolean;
 }) {
-  const { data: fees } = api.fee.get.useQuery();
+  const { data: fees } = api.fee.getByStore.useQuery({ id: props.store.identifier });
 
   const [subTotal, setSubTotal] = useState<number>(0);
   const [groupedItems, setGroupedItems] = useState<GroupedItem[]>();

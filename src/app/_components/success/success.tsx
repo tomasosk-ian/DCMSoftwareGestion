@@ -21,6 +21,7 @@ export default function Success(props: {
   coin?: Coin;
   checkoutNumber: string;
   sizes: Size[];
+  startDate: string | undefined;
   endDate: string | undefined;
 }) {
   const targetRef = useRef<HTMLDivElement>(null);
@@ -146,7 +147,11 @@ export default function Success(props: {
                 </div>
                 <div className="flex justify-between">
                   <p>Entrega</p>
-                  <p>{formatDateToTextDate(props.reserves[0]?.FechaFin!)}</p>
+                  <p>
+                    {formatDateToTextDate(
+                      props.startDate ?? props.reserves[0]?.FechaInicio!,
+                    )}
+                  </p>
                 </div>
                 <div className="flex justify-between">
                   <p>Retiro</p>

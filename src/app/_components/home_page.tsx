@@ -375,7 +375,8 @@ export default function HomePage(props: {
                     coin={coin}
                     checkoutNumber={checkoutNumber!}
                     sizes={props.sizes}
-                    endDate={undefined}
+                    startDate={startDate}
+                    endDate={endDate}
                   />
                 </div>
               </div>

@@ -37,7 +37,8 @@ export default function SizeSelector(props: {
   const [values, setValues] = useState<Record<string, {
     cantidad: number,
   }>>({});
-  const { data: fees } = api.fee.get.useQuery();
+  const { data: fees } = api.fee.getByStore.useQuery({ id: props.store.identifier });
+
   const [coin, setCoin] = useState<Coin>();
   // const { mutateAsync: reservarBox } =
   //   api.lockerReserve.reserveBox.useMutation();
@@ -104,6 +105,7 @@ export default function SizeSelector(props: {
       }
     });
 
+    console.log('newReserves', newReserves);
     return newReserves;
   }
 
@@ -217,7 +219,7 @@ export default function SizeSelector(props: {
               <div className="col-span-full text-center">No hay tamaños.</div>
             )}
             {!isLoading &&
-              sizes.map((size) => (
+              sizes.sort((a, b) => a.alto * (a.ancho ?? 1) * (a.profundidad ?? 1) - b.alto * (b.ancho ?? 1) * (b.profundidad ?? 1)).map((size) => (
                 <div key={size.id} className="h-full px-5 pb-5">
                   <SizeCard
                     coin={coin}
