@@ -39,7 +39,7 @@ export default function Booking(props: {
 
   useEffect(() => {
     const grouped = props.reserves.reduce((acc, item) => {
-      if (item.Cantidad === 1) {
+      if (item.Cantidad >= 1) {
         const existing = acc.find((group) => group.IdSize === item.IdSize);
         const days = daysBetweenDates(props.startDate!, props.endDate!);
         const fee = fees?.find((f: Fee) => f.size == item.IdSize)!;
@@ -61,6 +61,7 @@ export default function Booking(props: {
           });
         }
       }
+
       return acc;
     }, [] as GroupedItem[]);
 
