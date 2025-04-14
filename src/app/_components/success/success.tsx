@@ -12,8 +12,9 @@ import { Coin } from "~/server/api/routers/coin";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
+import type { Translations } from "~/translations";
 
-export default function Success(props: {
+export default function Success({ t, ...props }: {
   reserves: Reserve[];
   store: Store;
   nReserve: number;
@@ -23,6 +24,7 @@ export default function Success(props: {
   sizes: Size[];
   startDate: string | undefined;
   endDate: string | undefined;
+  t: Translations;
 }) {
   const targetRef = useRef<HTMLDivElement>(null);
 
@@ -94,35 +96,35 @@ export default function Success(props: {
                 <CheckCircle color="#FF813A" className="w-10" />
               </div>
               <div className="flex justify-center pt-1 text-center text-sm font-bold text-[#848484]">
-                <p>Tu pago se ha completado exitosamente.</p>
+                <p>{t("paymentSuccess")}</p>
               </div>
               <div className="flex justify-center pt-1 text-center text-xs italic text-[#848484]">
-                <p>Descarga tu token para que puedas abrir el locker.</p>
+                <p>{t("downloadToken")}</p>
               </div>
             </div>
             <div className="bg-gray-100 px-4 py-3">
               <div className="text-xs">
                 <div className="flex justify-between">
                   <p>
-                    <b>Número de reserva</b>
+                    <b>{t("nReserve")}</b>
                   </p>
                   <p>{props.nReserve}</p>
                 </div>
                 <div className="flex justify-between">
                   <p>
-                    <b>Organización</b>
+                    <b>{t("org")}</b>
                   </p>
                   <p>{props.store.organizationName}</p>
                 </div>
                 <div className="flex justify-between">
                   <p>
-                    <b>Local</b>
+                    <b>{t("local")}</b>
                   </p>
                   <p>{props.store.name}</p>
                 </div>
                 <div className="flex justify-between">
                   <p>
-                    <b>Dirección</b>
+                    <b>{t("address")}</b>
                   </p>
                   <p>{props.store.address}</p>
                 </div>
@@ -131,7 +133,7 @@ export default function Success(props: {
               <div className="text-xs">
                 <div className="flex justify-between">
                   <p>
-                    <b>Importe</b>
+                    <b>{t("importe")}</b>
                   </p>
                   <p>
                     {props.coin?.description} {props.total}
@@ -142,11 +144,11 @@ export default function Success(props: {
               <div className="text-xs">
                 <div className="flex justify-between">
                   <p>
-                    <b>Período</b>
+                    <b>{t("period")}</b>
                   </p>
                 </div>
                 <div className="flex justify-between">
-                  <p>Entrega</p>
+                  <p>{t("deliveryDate")}</p>
                   <p>
                     {formatDateToTextDate(
                       props.startDate ?? props.reserves[0]?.FechaInicio!,
@@ -154,7 +156,7 @@ export default function Success(props: {
                   </p>
                 </div>
                 <div className="flex justify-between">
-                  <p>Retiro</p>
+                  <p>{t("collectionDate")}</p>
                   <p>
                     {formatDateToTextDate(
                       props.endDate ?? props.reserves[0]?.FechaFin!,
@@ -165,7 +167,7 @@ export default function Success(props: {
               <hr className="my-2 border-[#848484]" />
               <div className="text-xs">
                 <p>
-                  <b>Tokens</b>
+                  <b>{t("tokens")}</b>
                 </p>
                 {props.reserves.map((r, index) => (
                   <div
@@ -173,7 +175,7 @@ export default function Success(props: {
                     className="flex items-center justify-between gap-2"
                   >
                     <div>
-                      <p>Token ({getSize(r.IdSize!)})</p>
+                      <p>{t("token")} ({getSize(r.IdSize!)})</p>
                     </div>
                     <div>
                       <QRCode
@@ -193,18 +195,18 @@ export default function Success(props: {
           <div className="flex items-center justify-between gap-2 pt-2">
             <ButtonCustomComponent
               onClick={() => location.reload()}
-              text="Cerrar"
+              text={t("close")}
               icon={<XCircle className="h-4 w-4" />}
             />
             <ButtonCustomComponent
               onClick={downloadImage}
-              text="Descargar"
+              text={t("download")}
               icon={<DownloadIcon className="h-4 w-4" />}
             />
             <ButtonCustomComponent
               onClick={share}
               disabled={shareDisabled}
-              text="Compartir"
+              text={t("share")}
               icon={<Share2Icon className="h-4 w-4" />}
             />
           </div>

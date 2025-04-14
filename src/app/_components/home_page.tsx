@@ -32,6 +32,7 @@ import Extension from "./extension_page";
 import { Badge } from "~/components/ui/badge";
 import CitySelector from "./city/selector";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
+import { useTranslations } from "next-intl";
 
 export const Icons = {
   spinner: Loader2,
@@ -42,6 +43,8 @@ export default function HomePage(props: {
   sizes: Size[];
   stores: Store[];
 }) {
+  const t = useTranslations('HomePage');
+
   const [city, setCity] = useState<City | null>(null);
   const [stores, setStores] = useState<Store[]>();
   const [store, setStore] = useState<Store | null>(null);
@@ -61,7 +64,6 @@ export default function HomePage(props: {
   const [reserves, setReserves] = useState<Reserve[]>([]);
   const [loadingPay, setLoadingPay] = useState<boolean>(false);
   const [failedResponse, setFailedResponse] = useState<boolean>(false);
-  const router = useRouter();
   const [responseError, setResponseError] = useState<string>();
   const [nReserve, setNReserve] = useState<number>(0);
   // const [token, setToken] = useState<number[]>([]);
@@ -83,7 +85,6 @@ export default function HomePage(props: {
   const { data: coins } = api.coin.get.useQuery();
   const [terms, setTerms] = useState<boolean>();
   const [isExtension, setIsExtension] = useState<boolean>(false);
-  const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
 
   const [errors, setErrors] = useState({
     name: "",
@@ -100,13 +101,13 @@ export default function HomePage(props: {
   };
   const handleSubmit = () => {
     const newErrors = {
-      name: client.name ? "" : "Nombre es obligatorio",
-      surname: client.surname ? "" : "Apellido es obligatorio",
-      email: isValidEmail(client.email!) ? "" : "Correo electrónico no válido",
-      prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
-      telefono: client.telefono ? "" : "Debe ingresar un telefono válido",
-      terms: terms ? "" : "Debe aceptar los términos y condiciones",
-      dni: client.dni ? "" : "Debe ingresar un DNI/Pasaporte válido",
+      name: client.name ? "" : t("mandatoryName"),
+      surname: client.surname ? "" : t("mandatorySurname"),
+      email: isValidEmail(client.email!) ? "" : t("invalidEmail"),
+      prefijo: client.prefijo ? "" : t("mandatoryPrefix"),
+      telefono: client.telefono ? "" : t("invalidPhone"),
+      terms: terms ? "" : t("acceptTerms"),
+      dni: client.dni ? "" : t("needsDni"),
     };
 
     if (Object.values(newErrors).some((error) => error)) {
@@ -125,14 +126,14 @@ export default function HomePage(props: {
     }
   }, [stores, props]);
 
-  const envVariable = process.env.NEXT_PUBLIC_NODE_ENV || "Cargando...";
+  const envVariable = process.env.NEXT_PUBLIC_NODE_ENV || t("loading");
 
   function AlertFailedResponse() {
     return (
       <AlertDialog defaultOpen={true}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hubo un error.</AlertDialogTitle>
+            <AlertDialogTitle>{t("someError")}</AlertDialogTitle>
             <AlertDialogDescription>{responseError}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -141,7 +142,7 @@ export default function HomePage(props: {
                 location.reload();
               }}
             >
-              Aceptar
+              {t("accept")}
             </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -166,6 +167,7 @@ export default function HomePage(props: {
                 city={city}
                 setCity={setCity}
                 setStores={setStores}
+                t={t}
               />}
             {(!store && (city !== null || props.cities.length === 0) && Array.isArray(storesFinal)) && (
               <div>
@@ -175,6 +177,7 @@ export default function HomePage(props: {
                       stores={storesFinal}
                       store={store}
                       setStore={setStore}
+                      t={t}
                       goBack={() => {
                         setStore(null);
                         setCity(null);
@@ -185,7 +188,7 @@ export default function HomePage(props: {
                   <div className="flex flex-col items-center justify-center ">
                     <ButtonCustomComponent
                       onClick={() => setIsExtension(true)}
-                      text="Extender reserva"
+                      text={t("extendReserve")}
                     />
                   </div>{" "}
                 </div>
@@ -200,6 +203,7 @@ export default function HomePage(props: {
                   setEndDate={setEndDate}
                   days={days}
                   setDays={setDays}
+                  t={t}
                   goBack={() => {
                     setStore(null);
                     setTotal(0);
@@ -225,6 +229,7 @@ export default function HomePage(props: {
                 failedResponse={failedResponse}
                 total={total}
                 setTotal={setTotal}
+                t={t}
                 goBack={() => {
                   setEndDate(undefined);
                   setStartDate(undefined);
@@ -251,6 +256,7 @@ export default function HomePage(props: {
                       setTerms={setTerms}
                       setCupon={setCupon}
                       editable={true}
+                      t={t}
                     />
                   </div>
                   <div className="w-full lg:w-auto">
@@ -267,11 +273,12 @@ export default function HomePage(props: {
                       sizes={props.sizes}
                       cupon={cupon}
                       isExt={false}
+                      t={t}
                     />
                     <div className="flex justify-end py-2">
                       <div className="mr-2">
                         <ButtonCustomComponent
-                          text="Editar"
+                          text={t("edit")}
                           onClick={() => {
                             setsizeSelected(false);
                             setFailedResponse(false);
@@ -280,7 +287,7 @@ export default function HomePage(props: {
                         />
                       </div>
                       <ButtonCustomComponent
-                        text={"Continuar al pago"}
+                        text={t("continueToPayment")}
                         onClick={async () => {
                           try {
                             let failed = false;
@@ -308,13 +315,9 @@ export default function HomePage(props: {
                                         response ==
                                         "El locker está desconectado"
                                       ) {
-                                        setResponseError(
-                                          "El sistema de reservas se encuentra temporalmente fuera de servicio. Por favor, intente en unos minutos. Disculpe las molestias.",
-                                        );
+                                        setResponseError(t("outOfService"));
                                       } else {
-                                        setResponseError(
-                                          "Alguien reservó su locker mientras ud. operaba. Se reiniciará la selección.",
-                                        );
+                                        setResponseError(t("reservedWhileOperating"));
                                       }
 
                                       failed = true;
@@ -371,6 +374,7 @@ export default function HomePage(props: {
                     total={total}
                     cupon={cupon}
                     isExt={false}
+                    t={t}
                   />
                 )}
               </div>
@@ -388,6 +392,7 @@ export default function HomePage(props: {
                     sizes={props.sizes}
                     startDate={startDate}
                     endDate={endDate}
+                    t={t}
                   />
                 </div>
               </div>
@@ -397,7 +402,7 @@ export default function HomePage(props: {
       )}
       {isExtension && (
         <div className="container absolute">
-          <Extension sizes={props.sizes} onBack={() => {
+          <Extension t={t} sizes={props.sizes} onBack={() => {
             setIsExtension(false);
           }} />
         </div>

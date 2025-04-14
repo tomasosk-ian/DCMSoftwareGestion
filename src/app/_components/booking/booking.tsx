@@ -9,6 +9,8 @@ import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
 import { format } from "date-fns";
 import { Cupon } from "~/server/api/routers/cupones";
+import type { Translations } from "~/translations";
+
 interface GroupedItem {
   IdSize: number;
   Cantidad: number;
@@ -18,7 +20,7 @@ interface GroupedItem {
   Total?: number;
   Fee: Fee;
 }
-export default function Booking(props: {
+export default function Booking({ t, ...props }: {
   store: Store;
   startDate: string;
   endDate: string;
@@ -31,6 +33,7 @@ export default function Booking(props: {
   sizes: Size[];
   cupon: Cupon | undefined;
   isExt: boolean;
+  t: Translations;
 }) {
   const { data: fees } = api.fee.getByStore.useQuery({ id: props.store.identifier });
 
@@ -39,7 +42,7 @@ export default function Booking(props: {
 
   useEffect(() => {
     const grouped = props.reserves.reduce((acc, item) => {
-      if (item.Cantidad >= 1) {
+      if (item.Cantidad === 1 || (typeof item.Cantidad === 'number' && item.Cantidad >= 1)) {
         const existing = acc.find((group) => group.IdSize === item.IdSize);
         const days = daysBetweenDates(props.startDate!, props.endDate!);
         const fee = fees?.find((f: Fee) => f.size == item.IdSize)!;
@@ -113,7 +116,7 @@ export default function Booking(props: {
       {groupedItems && (
         <div className="w-96 overflow-hidden rounded-3xl bg-white shadow-md">
           <div className="bg-[#848484] px-6 pb-1 pt-3">
-            <p className="text-lg font-bold text-white">Tu reserva</p>
+            <p className="text-lg font-bold text-white">{t("yourReserve")}</p>
           </div>
           <div className="flex items-baseline justify-between bg-gray-100 px-6 py-4">
             <p className=" text-2xl font-bold text-orange-500">
@@ -133,7 +136,7 @@ export default function Booking(props: {
                 >
                   <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2h-4l-4 4v-4H4a2 2 0 01-2-2V5z"></path>
                 </svg>
-                <p>Entrega</p>
+                <p>{t("deliveryDate")}</p>
               </div>
               <p className="font-semibold">
                 {formatDateToTextDate(props.startDate)}
@@ -148,7 +151,7 @@ export default function Booking(props: {
                 >
                   <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2h-4l-4 4v-4H4a2 2 0 01-2-2V5z"></path>
                 </svg>
-                <p>Recogida</p>
+                <p>{t("collectionDate")}</p>
               </div>
               <p className="font-semibold">
                 {formatDateToTextDate(props.endDate)}
@@ -164,7 +167,7 @@ export default function Booking(props: {
                   className="flex justify-between  space-x-14 text-sm"
                 >
                   <p>
-                    LOCKER{" "}
+                    {t("lockerMayus") + " "}
                     {
                       props.sizes.find((s: Size) => s.id === size.IdSize)
                         ?.nombre
@@ -184,21 +187,21 @@ export default function Booking(props: {
                 return (
                   <div key={size.IdSize} className="justify-between pb-3">
                     <span>
-                      Locker{" "}
+                      {t("locker") + " "}
                       {
                         props.sizes.find((s: Size) => s.id === size.IdSize)
                           ?.nombre
                       }
                     </span>
                     <div className="flex justify-between pt-1 text-sm">
-                      <span>Primer día</span>
+                      <span>{t("firstDay")}</span>
                       <span>{size.FirstDayTotal}</span>
                     </div>
                     {size.Days! > 1 && (
                       <div className="flex justify-between text-sm">
-                        <span>Días adicionales {size.Days! - 1}</span>
+                        <span>{t("additionalDays")} {size.Days! - 1}</span>
                         <span className="text-red-500">
-                          -{size.Fee?.discount ?? 0}% aplicado
+                          -{size.Fee?.discount ?? 0}% {t("applied")}
                         </span>
                         <span>{size.RestDaysTotal ?? 0}</span>
                       </div>
@@ -208,7 +211,7 @@ export default function Booking(props: {
               })}
 
               <div className="flex justify-between pt-2">
-                <span>Subtotal</span>
+                <span>{t("subtotal")}</span>
                 <span>{subTotal}</span>
               </div>
             </div>
@@ -221,17 +224,17 @@ export default function Booking(props: {
                   <a className="text-xs font-bold text-red-500 no-underline ">
                     ARS
                   </a>
-                  {props.cupon.valor_descuento} descuento aplicado
+                  {props.cupon.valor_descuento} {t("descuento aplicado")}
                 </span>
               )}
               {props.cupon?.tipo_descuento == "porcentaje" && (
                 <span className="text-xs text-red-500">
-                  -{props.cupon.valor_descuento}% descuento aplicado
+                  -{props.cupon.valor_descuento}% {t("descuento aplicado")}
                 </span>
               )}
             </div>
             <div className="flex justify-between ">
-              <p className="font-bold text-black">Total</p>
+              <p className="font-bold text-black">{t("total")}</p>
               <div className="flex items-baseline">
                 <p className="text-xs font-bold text-black"> ARS </p>
                 <p className=" font-bold text-black">{props.total}</p>

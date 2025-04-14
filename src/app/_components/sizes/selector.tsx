@@ -14,8 +14,9 @@ import ButtonCustomComponent from "~/components/buttonCustom";
 import { ChevronLeftCircle, ChevronRightIcon } from "lucide-react";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
 import type { Store } from "~/server/api/routers/store";
+import type { Translations } from "~/translations";
 
-export default function SizeSelector(props: {
+export default function SizeSelector({ t, ...props }: {
   size: Size | null;
   setSize: (size: Size) => void;
   store: Store,
@@ -33,6 +34,7 @@ export default function SizeSelector(props: {
   setTotal: (total: number) => void;
   total: number;
   goBack: () => void;
+  t: Translations
 }) {
   const [values, setValues] = useState<Record<string, {
     cantidad: number,
@@ -208,20 +210,21 @@ export default function SizeSelector(props: {
           <div className="flex flex-row">
             <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.goBack} />
             <h2 className="mb-4 text-center text-2xl font-semibold">
-              Selecciona tamaño de tu Locker.
+              {t("chooseSize")}
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {isLoading && (
-              <div className="col-span-full text-center">Cargando...</div>
+              <div className="col-span-full text-center">{t("loading")}</div>
             )}
             {!isLoading && sizes?.length === 0 && (
-              <div className="col-span-full text-center">No hay tamaños.</div>
+              <div className="col-span-full text-center">{t("noSizes")}</div>
             )}
             {!isLoading &&
               sizes.sort((a, b) => a.alto * (a.ancho ?? 1) * (a.profundidad ?? 1) - b.alto * (b.ancho ?? 1) * (b.profundidad ?? 1)).map((size) => (
                 <div key={size.id} className="h-full px-5 pb-5">
                   <SizeCard
+                    t={t}
                     coin={coin}
                     size={size}
                     disabledMinus={(values[size.id]?.cantidad ?? 0) === 0}
@@ -252,7 +255,7 @@ export default function SizeSelector(props: {
               <ButtonCustomComponent
                 disabled={Object.keys(values).length === 0}
                 onClick={applyReserve}
-                text={`Finalizar ${coin?.description}${Object.keys(values).length === 0 ? 0 : props.total}`}
+                text={`${t("finishSizes")} ${coin?.description}${Object.keys(values).length === 0 ? 0 : props.total}`}
                 after={true}
                 icon={<ChevronRightIcon className="h-4 w-4 " />}
               />
