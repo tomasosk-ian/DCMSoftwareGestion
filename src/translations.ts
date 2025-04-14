@@ -3,6 +3,11 @@ import type { useTranslations } from "next-intl";
 export const Messages = {
   es: {
     HomePage: {
+      language: "Idioma",
+      home: "Home",
+      lockers: "Lockers",
+      faq: "Preguntas Frecuentes",
+      contact: "Contacto",
       mandatoryName: "Nombre es obligatorio",
       mandatorySurname: "Apellido es obligatorio",
       invalidEmail: "Correo electrónico no válido",
@@ -81,6 +86,11 @@ export const Messages = {
   },
   en: {
     HomePage: {
+      language: "Language",
+      home: "Home",
+      lockers: "Lockers",
+      faq: "Frequently asked questions",
+      contact: "Contact",
       mandatoryName: "First name is required",
       mandatorySurname: "Last name is required",
       invalidEmail: "Invalid email",
@@ -161,4 +171,5 @@ export const Messages = {
 
 export type Translations = ReturnType<typeof useTranslations>;
 export type Languages = "en" | "es";
+export const LanguagesEnum = ["en", "es"] as const;
 export const DefaultLanguage: "en" | "es" = "es";

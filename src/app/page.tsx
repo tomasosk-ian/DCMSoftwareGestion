@@ -409,7 +409,7 @@ export default async function Home() {
         <main>
           <NextIntlClientProvider>
             <div>
-              <Header />
+              <Header lang={locale} />
               <HomePage cities={cities} sizes={sizes} stores={stores} />
             </div>
           </NextIntlClientProvider>

@@ -1,13 +1,18 @@
 import {getRequestConfig} from 'next-intl/server';
-import { DefaultLanguage, type Languages, Messages } from '~/translations';
+import { cookies } from 'next/headers';
+import { DefaultLanguage, type Languages, LanguagesEnum, Messages } from '~/translations';
 
-export default getRequestConfig(async () => {
+export default getRequestConfig(async ({ locale }) => {
   // Provide a static locale, fetch a user setting,
   // read from `cookies()`, `headers()`, etc.
-  const locale: Languages = DefaultLanguage;
- 
+  const ck = cookies();
+  let lang: Languages | undefined = (ck.get("lang")?.value ?? locale) as Languages | undefined;
+  if (!lang || !LanguagesEnum.find(v => v === lang)) {
+    lang = DefaultLanguage;
+  }
+
   return {
-    locale,
-    messages: Messages,
+    locale: lang,
+    messages: Messages[lang],
   };
 });
