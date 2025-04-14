@@ -121,10 +121,14 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
       {failed && <AlertFailedResponse />}
 
       <div className="flex flex-col items-center justify-center ">
-        <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.onBack} />
-
-        {!email && <SelectEmail email={email} setEmail={setEmail} />}
-        {email && !token && (
+        {!email && <>
+          <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.onBack} />
+          <SelectEmail email={email} setEmail={setEmail} />
+        </>}
+        {email && !token && <>
+          <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+            setEmail("");
+          }} />
           <SelectToken
             token={token}
             email={email}
@@ -132,8 +136,11 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
             setClient={setClient}
             setFailed={setFailed}
           />
-        )}
-        {token && !reserve && (
+        </>}
+        {token && !reserve && <>
+          <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+            setToken(undefined);
+          }} />
           <div className="flex flex-col items-center justify-center ">
             <DateExtension
               startDate={startDate}
@@ -148,10 +155,14 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
               setFailed={setFailed}
             />
           </div>
-        )}{" "}
+          </>}{" "}
         {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
         {stores && reserve && !loadingPay && !pagoOk && (
           <div>
+            <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+              setReserve(undefined);
+              setEndDate(undefined);
+            }} />
             <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
               <div className="w-full lg:w-auto">
                 <UserForm
@@ -233,7 +244,7 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
                 </div>
               </div>
             </div>
-            {reserve && !pagoOk && !loadingPay && (
+            {reserve && !pagoOk && !loadingPay && <>
               <div className="flex flex-row-reverse">
                 {!loadingPay && (
                   <Payment
@@ -257,7 +268,7 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
                   />
                 )}
               </div>
-            )}
+            </>}
           </div>
         )}
         {pagoOk && (
