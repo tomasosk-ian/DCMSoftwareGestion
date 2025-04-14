@@ -269,6 +269,16 @@ export default function HomePage(props: {
                       isExt={false}
                     />
                     <div className="flex justify-end py-2">
+                      <div className="mr-2">
+                        <ButtonCustomComponent
+                          text="Editar"
+                          onClick={() => {
+                            setsizeSelected(false);
+                            setFailedResponse(false);
+                            setReserves([]);
+                          }}
+                        />
+                      </div>
                       <ButtonCustomComponent
                         text={"Continuar al pago"}
                         onClick={async () => {
@@ -297,14 +307,15 @@ export default function HomePage(props: {
                                       if (
                                         response ==
                                         "El locker está desconectado"
-                                      )
+                                      ) {
                                         setResponseError(
                                           "El sistema de reservas se encuentra temporalmente fuera de servicio. Por favor, intente en unos minutos. Disculpe las molestias.",
                                         );
-                                      else
+                                      } else {
                                         setResponseError(
                                           "Alguien reservó su locker mientras ud. operaba. Se reiniciará la selección.",
                                         );
+                                      }
 
                                       failed = true;
                                       setFailedResponse(true);
