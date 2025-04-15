@@ -3,9 +3,10 @@ import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Coin } from "~/server/api/routers/coin";
 import { Size } from "~/server/api/routers/sizes";
+import { Translations } from "~/translations";
 import { api } from "~/trpc/react";
 
-export default function SizeCard(props: {
+export default function SizeCard({ t, ...props }: {
   size: Size;
   onClickPlus: () => void;
   onClickMinus: () => void;
@@ -13,6 +14,7 @@ export default function SizeCard(props: {
   disabledMinus?: boolean;
   value: string;
   coin: Coin;
+  t: Translations,
 }) {
   const tarifa = api.fee.getById.useQuery({ id: props.size.tarifa! });
   const [bgColor, setBgColor] = useState("#FFFFFF");
@@ -82,19 +84,19 @@ export default function SizeCard(props: {
           </div>
           <div className="mt-4 flex justify-start text-sm">
             <span className="text-gray-700">
-              Primer día {props.coin.description}
+              {t("firstDay")} {props.coin.description}
               {tarifa.data?.value}
             </span>{" "}
           </div>
           <div className="mt-1 flex justify-start text-sm">
             <span className="text-gray-700">
-              Día adicional {props.coin.description}
+              {t("additionalDay")} {props.coin.description}
               {(tarifa.data?.value! * (100 - tarifa.data?.discount!)) / 100}
             </span>
           </div>
           {props.size.cantidad !== 0 && (
             <div className="mt-2 flex items-center justify-between gap-4 text-sm">
-              <span className=" text-gray-700">Número de lockers</span>
+              <span className=" text-gray-700">{t("lockerCount")}</span>
               <div className="flex items-center md:pr-1">
                 <button
                   className="xs:h-6 xs:w-6 flex h-10 w-10 items-center justify-center rounded-l bg-orange-500 font-bold text-white hover:bg-orange-600 md:h-8 md:w-8"
@@ -123,7 +125,7 @@ export default function SizeCard(props: {
           )}
           {props.size.cantidad === 0 && (
             <div className="mt-4 text-center text-red-600">
-              No hay lockers disponibles
+              {t("noLockers")}
             </div>
           )}
         </Card>

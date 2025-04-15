@@ -12,15 +12,6 @@ import type { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 
 export const feeRouter = createTRPCRouter({
-  get: publicProcedure.query(({ ctx }) => {
-    const result = ctx.db.query.feeData.findMany({
-      with: {
-        store: true,
-      },
-      orderBy: (feeData, { desc }) => [desc(feeData.identifier)],
-    });
-    return result;
-  }),
   getByStore: publicProcedure
     .input(z.object({
       id: z.string()
@@ -137,4 +128,4 @@ export const feeRouter = createTRPCRouter({
     }),
 });
 
-export type Fee = RouterOutputs["fee"]["get"][number];
+export type Fee = RouterOutputs["fee"]["getByStore"][number];

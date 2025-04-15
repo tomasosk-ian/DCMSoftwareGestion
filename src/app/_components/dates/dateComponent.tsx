@@ -7,8 +7,9 @@ import { es } from "date-fns/locale";
 import { Button } from "~/components/ui/button";
 import { ChevronLeftCircle } from "lucide-react";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
+import type { Translations } from "~/translations";
 
-export default function DateComponent(props: {
+export default function DateComponent({ t, ...props }: {
   startDate: string;
   setStartDate: (startDate: string) => void;
   endDate: string;
@@ -16,6 +17,7 @@ export default function DateComponent(props: {
   days: number;
   setDays: (days: number) => void;
   goBack: () => void;
+  t: Translations,
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
@@ -57,10 +59,10 @@ export default function DateComponent(props: {
           <div className="flex flex-row">
             <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.goBack} />
             <h2 className="text-3xl font-semibold">
-              ¿Cuántos días necesitas tu locker?
+              {t("chooseDate")}
             </h2>
           </div>
-          <p>Reservas desde las 00:00 hs hasta las 23:59</p>
+          <p>{t("dateReservesText")}</p>
           <div className="justify-center">
             <div className="w-full">
               <Calendar
@@ -88,11 +90,11 @@ export default function DateComponent(props: {
                     isNaN(props.days) ||
                     props.days == 0
                   }
-                  text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
+                  text={`${t("apply")} ${isNaN(props.days) ? 0 : props.days} ${t("days")}`}
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
-                <ButtonCustomComponent onClick={onlyToday} text={`Solo hoy`} />
+                <ButtonCustomComponent onClick={onlyToday} text={t("dateOnlyToday")} />
               </div>
             </div>
           </div>

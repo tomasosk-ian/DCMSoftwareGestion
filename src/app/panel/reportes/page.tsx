@@ -27,7 +27,7 @@ export default function LockerOcupationPage() {
   const [tempStartDate, setTempStartDate] = useState("2024-01-01");
   const [tempEndDate, setTempEndDate] = useState("2024-12-31");
 
-  const [lockersSerie, setLockersSerie] = useState<null | string[]>(null);
+  const [lockersSerie, setLockersSerie] = useState<null | string[]>(tempLockersSerie);
   const [startDate, setStartDate] = useState(tempStartDate);
   const [endDate, setEndDate] = useState(tempEndDate);
 
@@ -52,17 +52,21 @@ export default function LockerOcupationPage() {
       endDate,
       filterSerie: lockersSerie,
     });
-  const { data: ocupationData } = api.reports.getOcupattion.useQuery({
-    startDate,
-    endDate,
-    filterSerie: lockersSerie,
-  });
+
+  const { data: ocupationData } =
+    api.reports.getOcupattion.useQuery({
+      startDate,
+      endDate,
+      filterSerie: lockersSerie,
+    });
+  
   const { data: sizes } = api.reports.getSizes.useQuery();
   const { data: transactionsData } =
     api.transaction.getTransactionsByDate.useQuery({
       startDate,
       endDate,
     });
+
   const { data: capacityBySize } =
     api.reports.getTotalBoxesAmountPerSize.useQuery();
 
@@ -205,6 +209,7 @@ export default function LockerOcupationPage() {
           </label>
           <MultiSelect 
             onValueChange={setTempLockersSerie}
+            defaultValue={tempLockersSerie ?? []}
             value={tempLockersSerie ?? []}
             options={dataLockers.map(v => ({
               label: v.nroSerieLocker,

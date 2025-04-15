@@ -22,6 +22,7 @@ import { type Store } from "~/server/api/routers/store";
 import { api } from "~/trpc/react";
 import { PublicConfigMetodoPago } from "~/lib/config";
 import { loadMercadoPago } from "@mercadopago/sdk-js";
+import type { Translations } from "~/translations";
 
 declare global {
   interface Window {
@@ -35,7 +36,7 @@ declare global {
   }
 }
 
-export default function Payment(props: {
+export default function Payment({ t, ...props }: {
   checkoutNumber: string;
   setLoadingPay: (loadingPay: boolean) => void;
   reserves: Reserve[];
@@ -51,6 +52,7 @@ export default function Payment(props: {
   setPagoOk: (pagoOk: boolean) => void;
   cupon: Cupon | null | undefined;
   isExt: boolean;
+  t: Translations;
 }) {
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();

@@ -24,12 +24,17 @@ import SelectToken from "./email-select copy/component";
 import DateExtension from "./extension-date/component";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
+import type { Translations } from "~/translations";
 
 export const Icons = {
   spinner: Loader2,
 };
 
-export default function Extension(props: { sizes: Size[], onBack: () => void; }) {
+export default function Extension({ t, ...props }: {
+  sizes: Size[],
+  onBack: () => void;
+  t: Translations;
+}) {
   const [email, setEmail] = useState("");
   const [token, setToken] = useState<number>();
   const [inputToken, setInputToken] = useState(false);
@@ -75,15 +80,21 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
     telefono: 0,
     dni: "0",
   });
+  
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   const handleSubmit = () => {
     const newErrors = {
-      name: client.name ? "" : "Nombre es obligatorio",
-      surname: client.surname ? "" : "Apellido es obligatorio",
-      email: client.email ? "" : "Apellido es obligatorio",
-      prefijo: client.prefijo ? "" : "Prefijo es obligatorio",
-      telefono: client.telefono ? "" : "Telefono es obligatorio",
-      terms: terms ? "" : "Debe aceptar los términos y condiciones",
-      dni: client.dni ? "" : "Debe ingresar un DNI/Pasaporte válido",
+      name: client.name ? "" : t("mandatoryName"),
+      surname: client.surname ? "" : t("mandatorySurname"),
+      email: isValidEmail(client.email!) ? "" : t("invalidEmail"),
+      prefijo: client.prefijo ? "" : t("mandatoryPrefix"),
+      telefono: client.telefono ? "" : t("invalidPhone"),
+      terms: terms ? "" : t("acceptTerms"),
+      dni: client.dni ? "" : t("needsDni"),
     };
     // Si hay errores, retorna false
     if (Object.values(newErrors).some((error) => error)) {
@@ -93,14 +104,15 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
 
     return true;
   };
+
   function AlertFailedResponse() {
     return (
       <AlertDialog defaultOpen={true}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hubo un error.</AlertDialogTitle>
+            <AlertDialogTitle>{t("someError")}</AlertDialogTitle>
             <AlertDialogDescription>
-              No se encuentra la reserva.
+              {t("reserveNotFound")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -109,7 +121,7 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
                 location.reload();
               }}
             >
-              Aceptar
+              {t("accept")}
             </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -121,21 +133,30 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
       {failed && <AlertFailedResponse />}
 
       <div className="flex flex-col items-center justify-center ">
-        <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.onBack} />
-
-        {!email && <SelectEmail email={email} setEmail={setEmail} />}
-        {email && !token && (
+        {!email && <>
+          <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.onBack} />
+          <SelectEmail t={t} email={email} setEmail={setEmail} />
+        </>}
+        {email && !token && <>
+          <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+            setEmail("");
+          }} />
           <SelectToken
+            t={t}
             token={token}
             email={email}
             setToken={setToken}
             setClient={setClient}
             setFailed={setFailed}
           />
-        )}
-        {token && !reserve && (
+        </>}
+        {token && !reserve && <>
+          <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+            setToken(undefined);
+          }} />
           <div className="flex flex-col items-center justify-center ">
             <DateExtension
+              t={t}
               startDate={startDate}
               setStartDate={setStartDate}
               endDate={endDate}
@@ -148,13 +169,18 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
               setFailed={setFailed}
             />
           </div>
-        )}{" "}
+          </>}{" "}
         {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
         {stores && reserve && !loadingPay && !pagoOk && (
           <div>
+            <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
+              setReserve(undefined);
+              setEndDate(undefined);
+            }} />
             <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
               <div className="w-full lg:w-auto">
                 <UserForm
+                  t={t}
                   client={client}
                   setClient={setClient}
                   errors={errors}
@@ -167,6 +193,7 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
               </div>
               <div className="w-full lg:w-auto">
                 <Booking
+                  t={t}
                   store={stores.find((s) => s.lockers.some(l => l.serieLocker == reserve.NroSerie))!}
                   startDate={startDate!}
                   endDate={endDate!}
@@ -182,7 +209,7 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
                 />
                 <div className="flex justify-end py-2">
                   <ButtonCustomComponent
-                    text={"Continuar al pago"}
+                    text={t("continueToPayment")}
                     onClick={async () => {
                       try {
                         let failed = false;
@@ -233,10 +260,11 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
                 </div>
               </div>
             </div>
-            {reserve && !pagoOk && !loadingPay && (
+            {reserve && !pagoOk && !loadingPay && <>
               <div className="flex flex-row-reverse">
                 {!loadingPay && (
                   <Payment
+                    t={t}
                     checkoutNumber={checkoutNumber!}
                     setLoadingPay={setLoadingPay}
                     client={client}
@@ -257,13 +285,14 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
                   />
                 )}
               </div>
-            )}
+            </>}
           </div>
         )}
         {pagoOk && (
           <div>
             <div>
               <Success
+                t={t}
                 reserves={reserves}
                 store={stores?.find((s) => s.lockers.some(l => l.serieLocker == reserve!.NroSerie))!}
                 nReserve={nReserve!}
@@ -272,6 +301,7 @@ export default function Extension(props: { sizes: Size[], onBack: () => void; })
                 checkoutNumber={checkoutNumber!}
                 sizes={props.sizes}
                 endDate={endDate}
+                startDate={startDate}
               />
             </div>
           </div>

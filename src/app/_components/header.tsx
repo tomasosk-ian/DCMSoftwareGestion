@@ -1,4 +1,13 @@
-export default async function Home() {
+"use client"
+import ButtonCustomComponent from "~/components/buttonCustom";
+import { setLang } from "../actions";
+import { useTranslations } from "next-intl";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Languages } from "~/translations";
+
+export default function Home({ lang }: { lang?: string }) {
+  const t = useTranslations("HomePage");
+
   return (
     <div>
       <div
@@ -36,14 +45,14 @@ export default async function Home() {
             <li className="menu-item menu-item-type-post_type menu-item-object-page menu-item-home current-menu-item page_item page-item-11 current_page_item menu-item-27 first depth-0">
               <a href="https://lockersurbanos.com.ar/" data-level="1">
                 <span className="menu-item-text">
-                  <span className="menu-text">Home</span>
+                  <span className="menu-text">{t("home")}</span>
                 </span>
               </a>
             </li>
             <li className="menu-item menu-item-type-custom menu-item-object-custom menu-item-30 depth-0">
               <a href="https://lockersurbanos.com.ar/#!/lockers" data-level="1">
                 <span className="menu-item-text">
-                  <span className="menu-text">Lockers</span>
+                  <span className="menu-text">{t("lockers")}</span>
                 </span>
               </a>
             </li>
@@ -53,14 +62,14 @@ export default async function Home() {
                 data-level="1"
               >
                 <span className="menu-item-text">
-                  <span className="menu-text">Preguntas Frecuentes</span>
+                  <span className="menu-text">{t("faq")}</span>
                 </span>
               </a>
             </li>
             <li className="menu-item menu-item-type-post_type menu-item-object-page menu-item-28 last depth-0">
               <a href="https://lockersurbanos.com.ar/contacto/" data-level="1">
                 <span className="menu-item-text">
-                  <span className="menu-text">Contacto</span>
+                  <span className="menu-text">{t("contact")}</span>
                 </span>
               </a>
             </li>
@@ -89,6 +98,20 @@ export default async function Home() {
                   Facebook page opens in new window
                 </span>
               </a>
+            </div>
+            <div className="max-w-[140px] pl-4">
+              <Select
+                defaultValue={lang}
+                onValueChange={(v) => setLang(v as Languages).catch(console.error)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("language")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="es">Español</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </header>

@@ -6,8 +6,9 @@ import ButtonCustomComponent from "../../../components/buttonCustom";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/reserves";
 import { es } from "date-fns/locale";
+import { Translations } from "~/translations";
 
-export default function DateComponent(props: {
+export default function DateComponent({ t, ...props }: {
   startDate: string | undefined;
   setStartDate: (startDate: string) => void;
   endDate: string | undefined;
@@ -18,6 +19,7 @@ export default function DateComponent(props: {
   email: string;
   setReserve: (reserve: Reserve) => void;
   setFailed: (failed: boolean) => void;
+  t: Translations;
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
@@ -69,7 +71,7 @@ export default function DateComponent(props: {
       {!props.endDate && (
         <div className="container flex flex-col items-center justify-center gap-6 ">
           <h2 className="text-3xl font-semibold">
-            ¿Hasta cuándo querés extender tu reserva?
+            {t("extendReserveTitle")}
           </h2>
           <div className="justify-center">
             <div className="w-full">
@@ -97,14 +99,14 @@ export default function DateComponent(props: {
                     isNaN(props.days) ||
                     props.days == 0
                   }
-                  text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
+                  text={`${t("apply")} ${isNaN(props.days) ? 0 : props.days} ${t("days")}`}
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
                 <ButtonCustomComponent
                   disabled={new Date() <= new Date(reserve.FechaFin!)}
                   onClick={onlyToday}
-                  text={`Hasta hoy`}
+                  text={t("dateOnlyToday")}
                 />
               </div>
             </div>
