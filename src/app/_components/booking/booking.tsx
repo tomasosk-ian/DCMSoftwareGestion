@@ -1,13 +1,13 @@
 "use client";
 import { Store } from "~/server/api/routers/store";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { Fee } from "~/server/api/routers/fee";
 import { Coin } from "~/server/api/routers/coin";
-import { format } from "date-fns";
+import { format, Locale } from "date-fns";
 import { Cupon } from "~/server/api/routers/cupones";
 import type { Translations } from "~/translations";
 
@@ -97,6 +97,7 @@ export default function Booking({ t, ...props }: {
       props.setTotal(newTotal);
     }
   }, [props.cupon]);
+
   function daysBetweenDates(date1: string, date2: string): number {
     const startDate = new Date(date1);
     const endDate = new Date(date2);
@@ -106,11 +107,18 @@ export default function Booking({ t, ...props }: {
     const differenceInDays = differenceInTime / (1000 * 3600 * 24);
     return Math.round(differenceInDays);
   }
+
   function formatDateToTextDate(dateString: string): string {
+    let locale: Locale = es;
+    if (document.documentElement.lang === "en") {
+      locale = enUS;
+    }
+
     const date = new Date(dateString);
-    const formattedDate = format(date, "eee dd MMMM", { locale: es });
+    const formattedDate = format(date, "eee dd MMMM", { locale });
     return formattedDate;
   }
+  
   return (
     <>
       {groupedItems && (
@@ -175,7 +183,7 @@ export default function Booking({ t, ...props }: {
                   </p>
                   <p className="font-semibold">
                     {size.Cantidad}{" "}
-                    {size.Cantidad === 1 ? "unidad" : "unidades"}
+                    {size.Cantidad === 1 ? t("unit") : t("units")}
                   </p>
                 </div>
               );

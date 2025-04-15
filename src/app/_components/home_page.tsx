@@ -299,32 +299,30 @@ export default function HomePage(props: {
                                 const nreserve = await reserveToClient({
                                   clientId: res.id,
                                 });
-                                setNReserve(nreserve!);
-                                await Promise.all(
-                                  reserves.map(async (reserve: Reserve) => {
-                                    //creo items para esta reserva
-                                    reserve.client = client.email;
-                                    const response = await reservarBox(
-                                      reserve!,
-                                    );
-                                    const IdTransaction = parseInt(response);
-                                    if (!isNaN(IdTransaction)) {
-                                      reserve.IdTransaction = IdTransaction;
-                                    } else {
-                                      if (
-                                        response ==
-                                        "El locker está desconectado"
-                                      ) {
-                                        setResponseError(t("outOfService"));
-                                      } else {
-                                        setResponseError(t("reservedWhileOperating"));
-                                      }
 
-                                      failed = true;
-                                      setFailedResponse(true);
+                                setNReserve(nreserve!);
+                                for (const reserve of reserves) {
+                                  reserve.client = client.email;
+                                  const response = await reservarBox(
+                                    reserve!,
+                                  );
+                                  const IdTransaction = parseInt(response);
+                                  if (!isNaN(IdTransaction)) {
+                                    reserve.IdTransaction = IdTransaction;
+                                  } else {
+                                    if (
+                                      response ==
+                                      "El locker está desconectado"
+                                    ) {
+                                      setResponseError(t("outOfService"));
+                                    } else {
+                                      setResponseError(t("reservedWhileOperating"));
                                     }
-                                  }),
-                                );
+
+                                    failed = true;
+                                    setFailedResponse(true);
+                                  }
+                                }
 
                                 return res;
                               });

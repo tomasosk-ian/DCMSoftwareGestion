@@ -73,20 +73,6 @@ export default function Home({ lang }: { lang?: string }) {
                 </span>
               </a>
             </li>
-            <div className="max-w-[140px]">
-              <Select
-                defaultValue={lang}
-                  onValueChange={(v) => setLang(v as Languages).catch(console.error)}
-                >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("language")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="es">Español</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </ul>
           <div className="mini-widgets">
             <div className="soc-ico show-on-desktop in-top-bar-right in-menu-second-switch disabled-bg custom-border border-on hover-disabled-bg hover-custom-border hover-border-on first last">
@@ -112,6 +98,20 @@ export default function Home({ lang }: { lang?: string }) {
                   Facebook page opens in new window
                 </span>
               </a>
+            </div>
+            <div className="max-w-[140px] pl-4">
+              <Select
+                defaultValue={lang}
+                onValueChange={(v) => setLang(v as Languages).catch(console.error)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("language")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="es">Español</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </header>

@@ -82,6 +82,8 @@ export const Messages = {
       tokenInvalidDigits: "El token debe tener 6 dígitos.",
       tokenInsert: "Inserte el token del box",
       extendReserveTitle: "¿Hasta cuándo querés extender tu reserva?",
+      unit: "unidad",
+      units: "unidades",
     }
   },
   en: {
@@ -165,6 +167,8 @@ export const Messages = {
       tokenInvalidDigits: "The token must have 6 digits.",
       tokenInsert: "Insert the box token",
       extendReserveTitle: "How long do you want to extend your reservation?",
+      unit: "unit",
+      units: "units",
     }
   }
 };
