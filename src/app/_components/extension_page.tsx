@@ -30,11 +30,13 @@ export const Icons = {
   spinner: Loader2,
 };
 
+let paymentDisabledRef = false;
 export default function Extension({ t, ...props }: {
   sizes: Size[],
   onBack: () => void;
   t: Translations;
 }) {
+  const [paymentDisabled, setPaymentDisabled] = useState(false);
   const [email, setEmail] = useState("");
   const [token, setToken] = useState<number>();
   const [inputToken, setInputToken] = useState(false);
@@ -128,6 +130,56 @@ export default function Extension({ t, ...props }: {
       </AlertDialog>
     );
   }
+
+  async function onContinueToPayment() {
+    if (!reserve) {
+      throw new Error("!reserve onContinueToPayment");
+    }
+
+    try {
+      let failed = false;
+      if (handleSubmit()) {
+        //creo una reserva para este cliente y seteo el numero de reserva
+        const nreserve = await reserveToClient({
+          clientId: client.identifier,
+        });
+        setNReserve(nreserve!);
+        reserve.client = client.email;
+        const response = parseInt(
+          await reserveExtesion({
+            idToken: reserve.IdTransaction!,
+            newEndDate: endDate,
+            Token1: reserve.Token1!,
+            nReserve: nreserve!,
+          }),
+        );
+
+        if (!isNaN(response)) {
+          reserve.IdTransaction = response;
+        } else {
+          failed = true;
+          setFailed(true);
+        }
+        setReserve(reserve);
+        if (!failed) {
+          const checkoutNumber = await test({
+            amount: total,
+            reference: client.identifier.toString(),
+            mail: client.email!,
+            name: client.name!,
+            uid: client.identifier,
+            phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
+            identification: client.dni ?? "",
+            cantidad: 1,
+          });
+          setCheckoutNumber(checkoutNumber);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <div className="container absolute">
       {failed && <AlertFailedResponse />}
@@ -194,6 +246,7 @@ export default function Extension({ t, ...props }: {
               <div className="w-full lg:w-auto">
                 <Booking
                   t={t}
+                  onEdit={undefined}
                   store={stores.find((s) => s.lockers.some(l => l.serieLocker == reserve.NroSerie))!}
                   startDate={startDate!}
                   endDate={endDate!}
@@ -210,49 +263,23 @@ export default function Extension({ t, ...props }: {
                 <div className="flex justify-end py-2">
                   <ButtonCustomComponent
                     text={t("continueToPayment")}
-                    onClick={async () => {
-                      try {
-                        let failed = false;
-                        if (handleSubmit()) {
-                          //creo una reserva para este cliente y seteo el numero de reserva
-                          const nreserve = await reserveToClient({
-                            clientId: client.identifier,
-                          });
-                          setNReserve(nreserve!);
-                          reserve.client = client.email;
-                          const response = parseInt(
-                            await reserveExtesion({
-                              idToken: reserve.IdTransaction!,
-                              newEndDate: endDate,
-                              Token1: reserve.Token1!,
-                              nReserve: nreserve!,
-                            }),
-                          );
-
-                          if (!isNaN(response)) {
-                            reserve.IdTransaction = response;
-                          } else {
-                            failed = true;
-                            setFailed(true);
-                          }
-                          setReserve(reserve);
-                          if (!failed) {
-                            const checkoutNumber = await test({
-                              amount: total,
-                              reference: client.identifier.toString(),
-                              mail: client.email!,
-                              name: client.name!,
-                              uid: client.identifier!,
-                              phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
-                              identification: client.dni ?? "",
-                              cantidad: 1,
-                            });
-                            setCheckoutNumber(checkoutNumber);
-                          }
-                        }
-                      } catch (error) {
-                        console.log(error);
+                    disabled={paymentDisabled}
+                    onClick={() => {
+                      if (paymentDisabledRef) {
+                        return;
                       }
+
+                      paymentDisabledRef = true;
+                      setPaymentDisabled(true);
+                      onContinueToPayment().then(v => {
+                        console.log('to payment ok', v);
+                        setPaymentDisabled(false);
+                        paymentDisabledRef = false;
+                      }).catch(e => {
+                        console.error('to payment error', e);
+                        setPaymentDisabled(false);
+                        paymentDisabledRef = false;
+                      });
                     }}
                     after={true}
                     icon={<ChevronRightIcon className="h-4 w-4 " />}

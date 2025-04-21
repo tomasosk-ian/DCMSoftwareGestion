@@ -27,7 +27,6 @@ import { useMemo, useState } from "react";
 import UserForm from "./user/userForm";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import { Cupon } from "~/server/api/routers/cupones";
-import { useRouter } from "next/navigation";
 import Extension from "./extension_page";
 import { Badge } from "~/components/ui/badge";
 import CitySelector from "./city/selector";
@@ -38,6 +37,7 @@ export const Icons = {
   spinner: Loader2,
 };
 
+let paymentDisabledRef = false;
 export default function HomePage(props: {
   cities: City[];
   sizes: Size[];
@@ -45,6 +45,7 @@ export default function HomePage(props: {
 }) {
   const t = useTranslations('HomePage');
 
+  const [paymentDisabled, setPaymentDisabled] = useState(false);
   const [city, setCity] = useState<City | null>(null);
   const [stores, setStores] = useState<Store[]>();
   const [store, setStore] = useState<Store | null>(null);
@@ -149,6 +150,74 @@ export default function HomePage(props: {
       </AlertDialog>
     );
   }
+
+  async function onContinueToPayment(client: {
+    identifier: number;
+    name: string | null;
+    surname: string | null;
+    email: string | null;
+    prefijo: number | null;
+    telefono: number | null;
+    dni: string | null;
+  }) {
+    try {
+      let failed = false;
+      if (handleSubmit()) {
+        const clientResponse = await createClient(
+          client,
+        ).then(async (res: any) => {
+          //creo una reserva para este cliente y seteo el numero de reserva
+          const nreserve = await reserveToClient({
+            clientId: res.id,
+          });
+
+          setNReserve(nreserve!);
+          for (const reserve of reserves) {
+            reserve.client = client.email;
+            const response = await reservarBox(
+              reserve!,
+            );
+            const IdTransaction = parseInt(response);
+            if (!isNaN(IdTransaction)) {
+              reserve.IdTransaction = IdTransaction;
+            } else {
+              if (
+                response ==
+                "El locker está desconectado"
+              ) {
+                setResponseError(t("outOfService"));
+              } else {
+                setResponseError(t("reservedWhileOperating"));
+              }
+
+              failed = true;
+              setFailedResponse(true);
+            }
+          }
+
+          return res;
+        });
+        if (!failed) {
+          setReserva(true);
+          const checkoutNumber = await test({
+            amount: total,
+            reference: clientResponse.id.toString(),
+            mail: client.email!,
+            name: client.name!,
+            uid: client.identifier!,
+            cantidad: reserves.length,
+            phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
+            identification: client.dni ?? "0",
+          });
+          setCheckoutNumber(checkoutNumber);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setPaymentDisabled(false);
+  }
+
   return (
     <>
       {envVariable === "testing" ||
@@ -274,76 +343,32 @@ export default function HomePage(props: {
                       cupon={cupon}
                       isExt={false}
                       t={t}
+                      onEdit={() => {
+                        setsizeSelected(false);
+                        setFailedResponse(false);
+                        setReserves([]);
+                      }}
                     />
                     <div className="flex justify-end py-2">
-                      <div className="mr-2">
-                        <ButtonCustomComponent
-                          text={t("edit")}
-                          onClick={() => {
-                            setsizeSelected(false);
-                            setFailedResponse(false);
-                            setReserves([]);
-                          }}
-                        />
-                      </div>
                       <ButtonCustomComponent
+                        disabled={paymentDisabled}
                         text={t("continueToPayment")}
-                        onClick={async () => {
-                          try {
-                            let failed = false;
-                            if (handleSubmit()) {
-                              const clientResponse = await createClient(
-                                client,
-                              ).then(async (res: any) => {
-                                //creo una reserva para este cliente y seteo el numero de reserva
-                                const nreserve = await reserveToClient({
-                                  clientId: res.id,
-                                });
-
-                                setNReserve(nreserve!);
-                                for (const reserve of reserves) {
-                                  reserve.client = client.email;
-                                  const response = await reservarBox(
-                                    reserve!,
-                                  );
-                                  const IdTransaction = parseInt(response);
-                                  if (!isNaN(IdTransaction)) {
-                                    reserve.IdTransaction = IdTransaction;
-                                  } else {
-                                    if (
-                                      response ==
-                                      "El locker está desconectado"
-                                    ) {
-                                      setResponseError(t("outOfService"));
-                                    } else {
-                                      setResponseError(t("reservedWhileOperating"));
-                                    }
-
-                                    failed = true;
-                                    setFailedResponse(true);
-                                  }
-                                }
-
-                                return res;
-                              });
-                              if (!failed) {
-                                setReserva(true);
-                                const checkoutNumber = await test({
-                                  amount: total,
-                                  reference: clientResponse.id.toString(),
-                                  mail: client.email!,
-                                  name: client.name!,
-                                  uid: client.identifier!,
-                                  cantidad: reserves.length,
-                                  phone: `${client.prefijo ?? 0}${client.telefono ?? 0}`,
-                                  identification: client.dni ?? "0",
-                                });
-                                setCheckoutNumber(checkoutNumber);
-                              }
-                            }
-                          } catch (error) {
-                            console.log(error);
+                        onClick={() => {
+                          if (paymentDisabledRef) {
+                            return;
                           }
+
+                          paymentDisabledRef = true;
+                          setPaymentDisabled(true);
+                          onContinueToPayment(client).then(v => {
+                            console.log('to payment ok', v);
+                            setPaymentDisabled(false);
+                            paymentDisabledRef = false;
+                          }).catch(e => {
+                            console.error('to payment error', e);
+                            setPaymentDisabled(false);
+                            paymentDisabledRef = false;
+                          });
                         }}
                         after={true}
                         icon={<ChevronRightIcon className="h-4 w-4 " />}
