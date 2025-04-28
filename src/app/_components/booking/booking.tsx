@@ -10,6 +10,8 @@ import { Coin } from "~/server/api/routers/coin";
 import { format, Locale } from "date-fns";
 import { Cupon } from "~/server/api/routers/cupones";
 import type { Translations } from "~/translations";
+import { EditIcon } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 interface GroupedItem {
   IdSize: number;
@@ -34,6 +36,7 @@ export default function Booking({ t, ...props }: {
   cupon: Cupon | undefined;
   isExt: boolean;
   t: Translations;
+  onEdit?: () => void;
 }) {
   const { data: fees } = api.fee.getByStore.useQuery({ id: props.store.identifier });
 
@@ -123,8 +126,15 @@ export default function Booking({ t, ...props }: {
     <>
       {groupedItems && (
         <div className="w-96 overflow-hidden rounded-3xl bg-white shadow-md">
-          <div className="bg-[#848484] px-6 pb-1 pt-3">
-            <p className="text-lg font-bold text-white">{t("yourReserve")}</p>
+          <div className="bg-[#848484] px-6 pb-2 pt-3 flex items-center">
+            <p className="text-lg font-bold text-white mb-1">{t("yourReserve")}</p>
+            {props.onEdit && <Button
+              className="items-center justify-center p-0 pl-4 rounded-full bg-t1ransparent hover:bg-transparent"
+              variant={"ghost"}
+              onClick={props.onEdit}
+            >
+              <EditIcon className="stroke-[#ff813a]"/>
+            </Button>}
           </div>
           <div className="flex items-baseline justify-between bg-gray-100 px-6 py-4">
             <p className=" text-2xl font-bold text-orange-500">
