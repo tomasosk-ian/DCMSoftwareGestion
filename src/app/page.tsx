@@ -1,6 +1,5 @@
 import { api } from "~/trpc/server";
 import HomePage from "./_components/home_page";
-import Header from "./_components/header";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from "next-intl/server";
@@ -409,8 +408,7 @@ export default async function Home() {
         <main>
           <NextIntlClientProvider>
             <div>
-              <Header lang={locale} />
-              <HomePage cities={cities} sizes={sizes} stores={stores} />
+              <HomePage lang={locale} cities={cities} sizes={sizes} stores={stores} />
             </div>
           </NextIntlClientProvider>
         </main>

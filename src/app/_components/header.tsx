@@ -4,9 +4,11 @@ import { setLang } from "../actions";
 import { useTranslations } from "next-intl";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Languages } from "~/translations";
+import { SidebarTrigger, useSidebar } from "~/components/ui/sidebar";
 
 export default function Home({ lang }: { lang?: string }) {
   const t = useTranslations("HomePage");
+  const { toggleSidebar } = useSidebar();
 
   return (
     <div>
@@ -117,17 +119,17 @@ export default function Home({ lang }: { lang?: string }) {
         </header>
         <div className="mobile-header-bar">
           <div className="mobile-navigation">
-            <a
-              href="https://lockersurbanos.com.ar/#"
+            <button
               className="dt-mobile-menu-icon"
               aria-label="Mobile menu icon"
+              onClick={() => toggleSidebar()}
             >
               <div className="lines-button">
                 <span className="menu-line"></span>
                 <span className="menu-line"></span>
                 <span className="menu-line"></span>
               </div>
-            </a>
+            </button>
           </div>
           <div className="mobile-mini-widgets"></div>
           <div className="mobile-branding">

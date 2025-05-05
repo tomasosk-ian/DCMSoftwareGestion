@@ -6,6 +6,7 @@ import { Store } from "~/server/api/routers/store";
 import { Size } from "~/server/api/routers/sizes";
 import SizeSelector from "./sizes/selector";
 import { api } from "~/trpc/react";
+import Header from "./header";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import DateComponent from "./dates/dateComponent";
 import Booking from "./booking/booking";
@@ -32,6 +33,8 @@ import { Badge } from "~/components/ui/badge";
 import CitySelector from "./city/selector";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
 import { useTranslations } from "next-intl";
+import { SidebarProvider } from "~/components/ui/sidebar";
+import { AppSidebar } from "~/components/app-sidebar";
 
 export const Icons = {
   spinner: Loader2,
@@ -42,6 +45,7 @@ export default function HomePage(props: {
   cities: City[];
   sizes: Size[];
   stores: Store[];
+  lang?: string;
 }) {
   const t = useTranslations('HomePage');
 
@@ -220,216 +224,224 @@ export default function HomePage(props: {
 
   return (
     <>
-      {envVariable === "testing" ||
-        (envVariable === "development" && (
-          <div className="px-8 text-left">
-            <Badge>{envVariable}</Badge>
-          </div>
-        ))}
-      {!isExtension && (
-        <div className="container absolute">
-          {failedResponse && <AlertFailedResponse />}
-          <div className="flex flex-col items-center justify-center ">
-            {((!city && props.cities.length > 0) || !Array.isArray(storesFinal)) && 
-              <CitySelector
-                cities={props.cities}
-                city={city}
-                setCity={setCity}
-                setStores={setStores}
-                t={t}
-              />}
-            {(!store && (city !== null || props.cities.length === 0) && Array.isArray(storesFinal)) && (
-              <div>
-                <div className="flex flex-col items-center justify-center ">
-                  <div className="flex flex-col items-center justify-center ">
-                    <StoreSelector
-                      stores={storesFinal}
-                      store={store}
-                      setStore={setStore}
-                      t={t}
-                      goBack={() => {
-                        setStore(null);
-                        setCity(null);
-                        setStores(undefined);
-                      }}
-                    />{" "}
-                  </div>
-                  <div className="flex flex-col items-center justify-center ">
-                    <ButtonCustomComponent
-                      onClick={() => setIsExtension(true)}
-                      text={t("extendReserve")}
-                    />
-                  </div>{" "}
+      <SidebarProvider>
+        <div className="min-w-full min-h-full">
+          <Header lang={props.lang} />
+          <div className="min-w-full">
+            <AppSidebar lang={props.lang} />
+            {envVariable === "testing" ||
+              (envVariable === "development" && (
+                <div className="px-8 text-left">
+                  <Badge>{envVariable}</Badge>
                 </div>
-              </div>
-            )}
-            {store && (
-              <div>
-                <DateComponent
-                  startDate={startDate!}
-                  setStartDate={setStartDate}
-                  endDate={endDate!}
-                  setEndDate={setEndDate}
-                  days={days}
-                  setDays={setDays}
-                  t={t}
-                  goBack={() => {
-                    setStore(null);
-                    setTotal(0);
-                  }}
-                />
-              </div>
-            )}
-            {endDate && store && (
-              <SizeSelector
-                store={store}
-                inicio={startDate}
-                fin={endDate}
-                size={size}
-                setSize={setSize}
-                sizeSelected={sizeSelected}
-                setSizeSelected={setsizeSelected}
-                reserves={reserves}
-                setReserves={setReserves}
-                startDate={startDate!}
-                endDate={endDate}
-                coins={coins!}
-                setFailedResponse={setFailedResponse}
-                failedResponse={failedResponse}
-                total={total}
-                setTotal={setTotal}
-                t={t}
-                goBack={() => {
-                  setEndDate(undefined);
-                  setStartDate(undefined);
-                  setDays(0);
-                }}
-              />
-            )}
-            {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
-            {sizeSelected && !reserva && !loadingPay && (
-              <div>
-                <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
-                  setsizeSelected(false);
-                  setFailedResponse(false);
-                  setReserves([]);
-                }} />
-                <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
-                  <div className="w-full lg:w-auto">
-                    <UserForm
-                      client={client}
-                      setClient={setClient}
-                      errors={errors}
-                      setErrors={setErrors}
-                      terms={terms!}
-                      setTerms={setTerms}
-                      setCupon={setCupon}
-                      editable={true}
+              ))}
+            {!isExtension && (
+              <div className="container absolute">
+                {failedResponse && <AlertFailedResponse />}
+                <div className="flex flex-col items-center justify-center ">
+                  {((!city && props.cities.length > 0) || !Array.isArray(storesFinal)) && 
+                    <CitySelector
+                      cities={props.cities}
+                      city={city}
+                      setCity={setCity}
+                      setStores={setStores}
                       t={t}
-                    />
-                  </div>
-                  <div className="w-full lg:w-auto">
-                    <Booking
-                      store={store!}
-                      startDate={startDate!}
-                      endDate={endDate!}
+                    />}
+                  {(!store && (city !== null || props.cities.length === 0) && Array.isArray(storesFinal)) && (
+                    <div>
+                      <div className="flex flex-col items-center justify-center ">
+                        <div className="flex flex-col items-center justify-center ">
+                          <StoreSelector
+                            stores={storesFinal}
+                            store={store}
+                            setStore={setStore}
+                            t={t}
+                            goBack={() => {
+                              setStore(null);
+                              setCity(null);
+                              setStores(undefined);
+                            }}
+                          />{" "}
+                        </div>
+                        <div className="flex flex-col items-center justify-center ">
+                          <ButtonCustomComponent
+                            onClick={() => setIsExtension(true)}
+                            text={t("extendReserve")}
+                          />
+                        </div>{" "}
+                      </div>
+                    </div>
+                  )}
+                  {store && (
+                    <div>
+                      <DateComponent
+                        startDate={startDate!}
+                        setStartDate={setStartDate}
+                        endDate={endDate!}
+                        setEndDate={setEndDate}
+                        days={days}
+                        setDays={setDays}
+                        t={t}
+                        goBack={() => {
+                          setStore(null);
+                          setTotal(0);
+                        }}
+                      />
+                    </div>
+                  )}
+                  {endDate && store && (
+                    <SizeSelector
+                      store={store}
+                      inicio={startDate}
+                      fin={endDate}
+                      size={size}
+                      setSize={setSize}
+                      sizeSelected={sizeSelected}
+                      setSizeSelected={setsizeSelected}
                       reserves={reserves}
+                      setReserves={setReserves}
+                      startDate={startDate!}
+                      endDate={endDate}
+                      coins={coins!}
+                      setFailedResponse={setFailedResponse}
+                      failedResponse={failedResponse}
                       total={total}
                       setTotal={setTotal}
-                      coin={coin!}
-                      setCoin={setCoin}
-                      coins={coins!}
-                      sizes={props.sizes}
-                      cupon={cupon}
-                      isExt={false}
                       t={t}
-                      onEdit={() => {
+                      goBack={() => {
+                        setEndDate(undefined);
+                        setStartDate(undefined);
+                        setDays(0);
+                      }}
+                    />
+                  )}
+                  {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
+                  {sizeSelected && !reserva && !loadingPay && (
+                    <div>
+                      <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
                         setsizeSelected(false);
                         setFailedResponse(false);
                         setReserves([]);
-                      }}
-                    />
-                    <div className="flex justify-end py-2">
-                      <ButtonCustomComponent
-                        disabled={paymentDisabled}
-                        text={t("continueToPayment")}
-                        onClick={() => {
-                          if (paymentDisabledRef) {
-                            return;
-                          }
+                      }} />
+                      <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
+                        <div className="w-full lg:w-auto">
+                          <UserForm
+                            client={client}
+                            setClient={setClient}
+                            errors={errors}
+                            setErrors={setErrors}
+                            terms={terms!}
+                            setTerms={setTerms}
+                            setCupon={setCupon}
+                            editable={true}
+                            t={t}
+                          />
+                        </div>
+                        <div className="w-full lg:w-auto">
+                          <Booking
+                            store={store!}
+                            startDate={startDate!}
+                            endDate={endDate!}
+                            reserves={reserves}
+                            total={total}
+                            setTotal={setTotal}
+                            coin={coin!}
+                            setCoin={setCoin}
+                            coins={coins!}
+                            sizes={props.sizes}
+                            cupon={cupon}
+                            isExt={false}
+                            t={t}
+                            onEdit={() => {
+                              setsizeSelected(false);
+                              setFailedResponse(false);
+                              setReserves([]);
+                            }}
+                          />
+                          <div className="flex justify-end py-2">
+                            <ButtonCustomComponent
+                              disabled={paymentDisabled}
+                              text={t("continueToPayment")}
+                              onClick={() => {
+                                if (paymentDisabledRef) {
+                                  return;
+                                }
 
-                          paymentDisabledRef = true;
-                          setPaymentDisabled(true);
-                          onContinueToPayment(client).then(v => {
-                            console.log('to payment ok', v);
-                            setPaymentDisabled(false);
-                            paymentDisabledRef = false;
-                          }).catch(e => {
-                            console.error('to payment error', e);
-                            setPaymentDisabled(false);
-                            paymentDisabledRef = false;
-                          });
-                        }}
-                        after={true}
-                        icon={<ChevronRightIcon className="h-4 w-4 " />}
-                      />
+                                paymentDisabledRef = true;
+                                setPaymentDisabled(true);
+                                onContinueToPayment(client).then(v => {
+                                  console.log('to payment ok', v);
+                                  setPaymentDisabled(false);
+                                  paymentDisabledRef = false;
+                                }).catch(e => {
+                                  console.error('to payment error', e);
+                                  setPaymentDisabled(false);
+                                  paymentDisabledRef = false;
+                                });
+                              }}
+                              after={true}
+                              icon={<ChevronRightIcon className="h-4 w-4 " />}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  {reserva && !pagoOk && !loadingPay && (
+                    <div className="flex flex-row-reverse">
+                      {!loadingPay && (
+                        <Payment
+                          checkoutNumber={checkoutNumber!}
+                          setLoadingPay={setLoadingPay}
+                          client={client}
+                          coin={coin!}
+                          endDate={endDate!}
+                          startDate={startDate!}
+                          nReserve={nReserve}
+                          reserves={reserves}
+                          setPagoOk={setPagoOk}
+                          setReserves={setReserves}
+                          sizes={props.sizes}
+                          store={store!}
+                          total={total}
+                          cupon={cupon}
+                          isExt={false}
+                          t={t}
+                        />
+                      )}
+                    </div>
+                  )}
+                  {pagoOk && (
+                    <div>
+                      <div>
+                        <Success
+                          reserves={reserves}
+                          store={store!}
+                          nReserve={nReserve}
+                          total={total}
+                          coin={coin}
+                          checkoutNumber={checkoutNumber!}
+                          sizes={props.sizes}
+                          startDate={startDate}
+                          endDate={endDate}
+                          t={t}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
-            {reserva && !pagoOk && !loadingPay && (
-              <div className="flex flex-row-reverse">
-                {!loadingPay && (
-                  <Payment
-                    checkoutNumber={checkoutNumber!}
-                    setLoadingPay={setLoadingPay}
-                    client={client}
-                    coin={coin!}
-                    endDate={endDate!}
-                    startDate={startDate!}
-                    nReserve={nReserve}
-                    reserves={reserves}
-                    setPagoOk={setPagoOk}
-                    setReserves={setReserves}
-                    sizes={props.sizes}
-                    store={store!}
-                    total={total}
-                    cupon={cupon}
-                    isExt={false}
-                    t={t}
-                  />
-                )}
-              </div>
-            )}
-            {pagoOk && (
-              <div>
-                <div>
-                  <Success
-                    reserves={reserves}
-                    store={store!}
-                    nReserve={nReserve}
-                    total={total}
-                    coin={coin}
-                    checkoutNumber={checkoutNumber!}
-                    sizes={props.sizes}
-                    startDate={startDate}
-                    endDate={endDate}
-                    t={t}
-                  />
-                </div>
+            {isExtension && (
+              <div className="container absolute">
+                <Extension t={t} sizes={props.sizes} onBack={() => {
+                  setIsExtension(false);
+                }} />
               </div>
             )}
           </div>
         </div>
-      )}
-      {isExtension && (
-        <div className="container absolute">
-          <Extension t={t} sizes={props.sizes} onBack={() => {
-            setIsExtension(false);
-          }} />
-        </div>
-      )}
+      </SidebarProvider>
     </>
   );
 }
