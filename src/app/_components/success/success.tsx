@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CheckCircle, DownloadIcon, Share2Icon, XCircle } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import QRCode from "react-qr-code";
@@ -13,6 +13,7 @@ import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
 import type { Translations } from "~/translations";
+import { useIsMobile } from "~/hooks/use-mobile";
 
 export default function Success({ t, ...props }: {
   reserves: Reserve[];
@@ -27,8 +28,10 @@ export default function Success({ t, ...props }: {
   t: Translations;
 }) {
   const targetRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
-  const [shareDisabled, setShareDisabled] = useState(!(('share' in navigator && navigator.canShare())));
+  const [failedToShareNative, setFailedToShareNative] = useState(false);
+  const canShareNative = useMemo(() => (('share' in navigator && navigator.canShare())), [navigator]);
   useEffect(() => {
     window.scrollTo({
       top: 110,
@@ -64,23 +67,41 @@ export default function Success({ t, ...props }: {
   };
   
   const share = async () => {
-    if (!targetRef.current) return;
+    if (!targetRef.current) {
+      return;
+    }
 
-    const canvas = await html2canvas(targetRef.current, { scale: 2 });
-    canvas.toBlob((v) => {
-      if (!v) {
-        console.error("canvas toBlob !v");
-        setShareDisabled(true);
-      } else {
-        navigator.share({
-          files: [new File([v], `comprobante_${props.checkoutNumber}.jpg`)]
-        }).then(v => console.log('compartido', v))
-          .catch(e => {
-            setShareDisabled(true);
-            console.error('navigator share error', e)
-          });
-      }
-    });
+    let message = `${t("shareWhatsappHeader")}\n${t("nReserve")}: ${props.nReserve}`;
+    for (const r of props.reserves) {
+      message += `\n${t("token")} (${getSize(r.IdSize!)}): ${r.Token1}`;
+    }
+
+    let url: null | string = null;
+    if (canShareNative && !failedToShareNative) {
+      const canvas = await html2canvas(targetRef.current, { scale: 2 });
+      canvas.toBlob((v) => {
+        if (!v) {
+          console.error("canvas toBlob !v");
+          setFailedToShareNative(true);
+        } else {
+          navigator.share({
+            files: [new File([v], `comprobante_${props.checkoutNumber}.jpg`)]
+          }).then(v => console.log('compartido', v))
+            .catch(e => {
+              setFailedToShareNative(true);
+              console.error('navigator share error', e)
+            });
+        }
+      });
+    } else if (isMobile) {
+      url = "whatsapp://send?text=" + encodeURIComponent(message);
+    } else {
+      url = "https://web.whatsapp.com/send?text=" + encodeURIComponent(message);
+    }
+
+    if (url !== null) {
+      window.open(url, '_blank');
+    }
   }
 
   return (
@@ -205,8 +226,7 @@ export default function Success({ t, ...props }: {
             />
             <ButtonCustomComponent
               onClick={share}
-              disabled={shareDisabled}
-              text={t("share")}
+              text={(canShareNative && !failedToShareNative) ? t("share") : t("shareWhatsapp")}
               icon={<Share2Icon className="h-4 w-4" />}
             />
           </div>
