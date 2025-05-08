@@ -86,7 +86,16 @@ export default function SizeSelector({ t, ...props }: {
       let restante = c.cantidad;
       while (restante > 0) {
         const alguno = dispLockersPorSize[parseInt(idSize)]!.pop()!;
-        const cantidad = Math.min(restante, alguno[1]);
+        if (alguno[1] <= 0) {
+          continue;
+        } else if (alguno[1] > 1) {
+          dispLockersPorSize[parseInt(idSize)]!.push([alguno[0], alguno[1] - 1]);
+        }
+
+        // ↑↑
+        // const cantidad = Math.min(restante, alguno[1]);
+
+        const cantidad = 1;
         restante -= cantidad;
         newReserves.push({
           IdLocker: null,
