@@ -228,6 +228,8 @@ export default function Extension({ t, ...props }: {
             <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
               setReserve(undefined);
               setEndDate(undefined);
+              setStartDate(undefined);
+              setDays(0);
             }} />
             <div className="flex flex-col items-center lg:flex-row lg:space-x-10">
               <div className="w-full lg:w-auto">
