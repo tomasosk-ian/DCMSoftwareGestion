@@ -180,6 +180,19 @@ export default function LockerOcupationPage() {
 
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
 
+  const sizesFiltrados = useMemo(() => {
+    if (!sizes || !ocupationData) {
+      return []
+    } else {
+      return [...new Map(sizes.map(v => [v.nombre, v]))]
+        .filter(([_, V]) => {
+          const p = ocupationData.map(d => V.nombre ? (d.sizes[V.nombre] ?? 0) : 0);
+          return p.reduce((x, y) => x + y, 0) > 0;
+        })
+        .map(([_, V]) => V);
+    }
+  }, [sizes, ocupationData]);
+
   if (!ocupationData || !sizes) return <div>No hay datos disponibles</div>;
 
   return (
@@ -225,11 +238,13 @@ export default function LockerOcupationPage() {
           <thead>
             <tr>
               <th className="border px-4 py-2">Día/Mes</th>
-              {sizes.map((size) => (
-                <th key={size.id} className="border px-4 py-2">
-                  {size.nombre}
-                </th>
-              ))}
+              {sizesFiltrados
+                .map((size) => (
+                  <th key={size.id} className="border px-4 py-2">
+                    {size.nombre}
+                  </th>
+                ))
+              }
               <th className="border px-4 py-2">Total</th>
               <th className="border px-4 py-2">%</th>
             </tr>
@@ -238,7 +253,7 @@ export default function LockerOcupationPage() {
             {ocupationData.map((entry) => (
               <tr key={entry.day}>
                 <td className="border px-4 py-2">{entry.day}</td>
-                {sizes.map((size) => (
+                {sizesFiltrados.map((size) => (
                   <td key={size.id} className="border px-4 py-2">
                     {entry.sizes[size.nombre!] || 0}
                   </td>
@@ -251,7 +266,7 @@ export default function LockerOcupationPage() {
             ))}
             <tr>
               <td className="border px-4 py-2 font-bold">Totales</td>
-              {sizes.map((size) => (
+              {sizesFiltrados.map((size) => (
                 <td key={size.id} className="border px-4 py-2 font-bold">
                   {totalBySize[size.nombre!] || 0}
                 </td>
@@ -261,7 +276,7 @@ export default function LockerOcupationPage() {
             </tr>
             <tr>
               <td className="border px-4 py-2 font-bold">Capacidad</td>
-              {sizes.map((size) => (
+              {sizesFiltrados.map((size) => (
                 <td key={size.id} className="border px-4 py-2 font-bold">
                   {capacityBySize ? capacityBySize[size.nombre!] || 0 : 0}
                 </td>
