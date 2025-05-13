@@ -19,13 +19,14 @@ import {
   Cell,
 } from "recharts";
 import { MultiSelect } from "~/components/multi-select";
+import dayjs from "dayjs";
 
 export default function LockerOcupationPage() {
   const router = useRouter();
 
   const [tempLockersSerie, setTempLockersSerie] = useState<null | string[]>(null);
-  const [tempStartDate, setTempStartDate] = useState("2024-01-01");
-  const [tempEndDate, setTempEndDate] = useState("2024-12-31");
+  const [tempStartDate, setTempStartDate] = useState(dayjs(Date.now()).format("YYYY-MM-DD"));
+  const [tempEndDate, setTempEndDate] = useState(dayjs(Date.now()).format("YYYY-12-31"));
 
   const [lockersSerie, setLockersSerie] = useState<null | string[]>(tempLockersSerie);
   const [startDate, setStartDate] = useState(tempStartDate);
