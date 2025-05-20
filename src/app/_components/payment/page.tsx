@@ -131,7 +131,8 @@ export default function Payment({ t, ...props }: {
                   store_address: props.store.address ?? "",
                   store_name: props.store.name,
                   total: props.total
-                }
+                },
+                href: window.location.href,
               });
 
               return res.preferenceId;
