@@ -7,7 +7,7 @@ import {
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { TRPCError } from "@trpc/server";
 import { eq, inArray } from "drizzle-orm";
-import { schema } from "~/server/db";
+import { db, schema } from "~/server/db";
 import { type PrivateConfigKeys } from "~/lib/config";
 import { MpMeta } from "~/lib/types";
 
@@ -31,6 +31,7 @@ export const mpRouter = createTRPCRouter({
       price: z.number().min(1),
       IdTransactions: z.array(z.number()),
       meta: z.custom<MpMeta>(),
+      href: z.string(),
     }))
     .mutation(async ({ input, ctx }) => {
       const claveConfigMpWhUrl: PrivateConfigKeys = 'mercadopago_webhook_url';
@@ -90,19 +91,50 @@ export const mpRouter = createTRPCRouter({
       };
 
       const preference = new Preference(mpClient);
+      const url = new URL(input.href);
+      let back_url = "";
+
+      if (url.protocol.startsWith("https")) {
+        back_url += "https://";
+      } else {
+        back_url += "http://";
+      }
+
+      back_url += url.host;
+      back_url += "/";
+
+      const [p] = await db.insert(schema.pagos)
+        .values({
+          mpMetaJson: JSON.stringify(meta),
+          idTransactionsJson: JSON.stringify(r),
+        })
+        .returning();
+
       try {
         const res = await preference.create({
           body: {
             notification_url: `${whUrl}api/mp-pago?source_news=webhooks`,
+            back_urls: {
+              success: back_url,
+              pending: back_url,
+              failure: back_url,
+            },
             items: [
               {
                 id: "id",
                 title: input.productName,
-                description: input.productDescription,
+                description: input.productDescription ?? "Reserva de locker",
                 quantity: input.quantity,
                 unit_price: input.price,
+                category_id: "services",
               }
             ],
+            payer: {
+              name: meta?.client_name,
+              surname: meta?.client_surname,
+              email: meta?.client_email,
+            },
+            external_reference: p?.identifier.toString() ?? "",
             metadata: meta
           },
         });

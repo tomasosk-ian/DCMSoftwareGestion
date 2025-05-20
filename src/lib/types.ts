@@ -6,6 +6,7 @@ export type MpMeta = {
   coin_description: null | string,
   client_email: string,
   client_name: string,
+  client_surname: string,
   total: number,
   is_ext: boolean,
   start_date: string,

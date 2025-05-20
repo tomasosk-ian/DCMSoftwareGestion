@@ -289,3 +289,15 @@ export const cuponesData = sqliteTable(
     compoundKey: primaryKey(vt.identifier),
   }),
 );
+
+export const pagos = sqliteTable(
+  "test_pagos",
+  {
+    identifier: integer("identifier").primaryKey({ autoIncrement: true }),
+    mpMetaJson: text("mpMetaJson"),
+    idTransactionsJson: text("idTransactionsJson"),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
