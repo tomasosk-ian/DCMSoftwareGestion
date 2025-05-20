@@ -133,8 +133,6 @@ export default function Payment({ t, ...props }: {
                   store_name: props.store.name,
                   total: props.total
                 },
-                clientId: props.client.identifier,
-                storeId: props.store.identifier,
                 href: window.location.href,
               });
 
