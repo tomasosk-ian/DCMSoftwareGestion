@@ -7,7 +7,7 @@ import {
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { TRPCError } from "@trpc/server";
 import { eq, inArray } from "drizzle-orm";
-import { schema } from "~/server/db";
+import { db, schema } from "~/server/db";
 import { type PrivateConfigKeys } from "~/lib/config";
 import { MpMeta } from "~/lib/types";
 
@@ -32,8 +32,26 @@ export const mpRouter = createTRPCRouter({
       IdTransactions: z.array(z.number()),
       meta: z.custom<MpMeta>(),
       href: z.string(),
+      clientId: z.number(),
+      storeId: z.string(),
     }))
     .mutation(async ({ input, ctx }) => {
+      const client = await ctx.db.query.clients.findFirst({
+        where: eq(schema.clients.identifier, input.clientId)
+      });
+
+      if (!client) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "No existe el cliente" });
+      }
+
+      const store = await ctx.db.query.stores.findFirst({
+        where: eq(schema.stores.identifier, input.storeId)
+      });
+
+      if (!store) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "No existe el local" });
+      }
+
       const claveConfigMpWhUrl: PrivateConfigKeys = 'mercadopago_webhook_url';
       const claveMpWhUrl = await ctx.db.query.privateConfig.findFirst({
         where: eq(schema.privateConfig.key, claveConfigMpWhUrl)
@@ -103,6 +121,15 @@ export const mpRouter = createTRPCRouter({
       back_url += url.host;
       back_url += "/";
 
+      const [p] = await db.insert(schema.pagos)
+        .values({
+          mpMetaJson: JSON.stringify(meta),
+          idTransactionsJson: JSON.stringify(r),
+          clientId: input.clientId,
+          storeId: input.storeId
+        })
+        .returning();
+
       try {
         const res = await preference.create({
           body: {
@@ -124,8 +151,10 @@ export const mpRouter = createTRPCRouter({
             ],
             payer: {
               name: meta?.client_name,
+              surname: meta?.client_surname,
               email: meta?.client_email,
             },
+            external_reference: p?.identifier.toString() ?? "",
             metadata: meta
           },
         });

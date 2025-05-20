@@ -289,3 +289,28 @@ export const cuponesData = sqliteTable(
     compoundKey: primaryKey(vt.identifier),
   }),
 );
+
+export const pagos = sqliteTable(
+  "test_pagos",
+  {
+    identifier: integer("identifier").primaryKey({ autoIncrement: true }),
+    mpMetaJson: text("mpMetaJson"),
+    idTransactionsJson: text("idTransactionsJson"),
+    clientId: integer("clientId").references(() => clients.identifier, { onDelete: 'cascade' }),
+    storeId: text("storeId").references(() => stores.identifier, { onDelete: 'cascade' }),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier),
+  }),
+);
+
+export const pagosRelations = relations(pagos, ({ one }) => ({
+  store: one(stores, {
+    fields: [pagos.storeId],
+    references: [stores.identifier]
+  }),
+  client: one(clients, {
+    fields: [pagos.clientId],
+    references: [clients.identifier]
+  }),
+}));

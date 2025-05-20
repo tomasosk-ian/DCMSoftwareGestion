@@ -122,6 +122,7 @@ export default function Payment({ t, ...props }: {
                 meta: {
                   client_email: props.client.email!,
                   client_name: props.client.name ?? "",
+                  client_surname: props.client.surname ?? "",
                   coin_description: props.coin.description,
                   cupon_id: props.cupon?.identifier,
                   end_date: props.endDate,
@@ -132,6 +133,8 @@ export default function Payment({ t, ...props }: {
                   store_name: props.store.name,
                   total: props.total
                 },
+                clientId: props.client.identifier,
+                storeId: props.store.identifier,
                 href: window.location.href,
               });
 

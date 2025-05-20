@@ -109,8 +109,28 @@ export async function POST(request: NextRequest) {
 
   const mp = getMpClient(claveMp.value);
   const payment = await new Payment(mp).get({id: body.data.id});
+  if (!payment.external_reference) {
+    console.error("mp-pago: api mp pago sin external_reference", payment, body);
+    return NextResponse.json(null, { status: 400 });
+  }
+
+  const pago = await db.query.pagos.findFirst({
+    where: eq(schema.pagos.identifier, Number(payment.external_reference)),
+  });
+
+  if (!pago) {
+    console.error("mp-pago: api mp pago external_reference no existe pago", payment, body);
+    return NextResponse.json(null, { status: 400 });
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const meta: MpMeta = payment.metadata;
+  const metaPago: MpMeta = pago.mpMetaJson ? JSON.parse(pago.mpMetaJson) : undefined;
+  if (!metaPago) {
+    console.error("mp-pago: api mp pago external_reference pago sin metadatoos", payment, body);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const meta: MpMeta = metaPago ?? payment.metadata;
   const trans = (meta.id_transactions ?? []).filter(v => typeof v === 'number');
 
   if (meta.id_transactions && Array.isArray(meta.id_transactions) && payment.status === "approved") {
@@ -119,7 +139,6 @@ export async function POST(request: NextRequest) {
       const reserves = await db.query.reservas.findMany({
         where: inArray(schema.reservas.IdTransaction, trans)
       });
-
       
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       let sizes: {
