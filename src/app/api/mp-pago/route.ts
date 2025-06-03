@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
                 Token1: reserve.Token1,
                 FechaCreacion: new Date().toISOString(),
                 FechaInicio: startDate,
-                FechaFin: format(endDate, "yyyy-MM-dd'T'23:59:59"),
+                FechaFin: endDate,
                 Contador: reserve.Contador,
                 Confirmado: reserve.Confirmado,
                 Modo: reserve.Modo,

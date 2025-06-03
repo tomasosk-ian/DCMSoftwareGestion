@@ -218,7 +218,7 @@ export default function Payment({ t, ...props }: {
                 Contador: reserve.Contador,
                 FechaCreacion: reserve.FechaCreacion,
                 FechaInicio: props.startDate,
-                FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
+                FechaFin: props.endDate,
                 IdFisico: reserve.IdFisico,
                 IdBox: reserve.IdBox,
                 IdSize: reserve.IdSize,

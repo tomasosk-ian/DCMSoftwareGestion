@@ -24,21 +24,19 @@ export default function DateComponent({ t, ...props }: {
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
 
+  const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
   const { data: reserve, isLoading } = api.reserve.getByToken.useQuery({
     token: props.token,
     email: props.email,
   });
+
   useEffect(() => {
     if (reserve) {
-      const today = new Date();
-      today.setHours(23, 59, 0, 0);
-      const fromDate = new Date(reserve.FechaFin!);
-      // const days = differenceInDays(today, fromDate);
-      // props.setDays(days + 1);
-      setRange({ from: fromDate });
+      setRange({ from: new Date(reserve.FechaFin!) });
     }
     if (!reserve && !isLoading) props.setFailed(true);
   }, [reserve, isLoading]);
+
   function getDays() {
     if (range) {
       const fromDate = range.from!;
@@ -48,23 +46,59 @@ export default function DateComponent({ t, ...props }: {
       props.setDays(differenceInDays);
     }
   }
+
   function handleClick() {
+    const lastFecha = new Date(range!.from!.getTime() + 1000);
     const nextDay = new Date(range!.from!);
     nextDay.setDate(nextDay.getDate() + 1);
-    props.setStartDate(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      const rangeTo = new Date(range!.to!);
+      rangeTo.setUTCHours(nextDay.getUTCHours());
+      rangeTo.setMinutes(nextDay.getMinutes());
+      rangeTo.setSeconds(nextDay.getSeconds());
+
+      start = format(lastFecha, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(rangeTo, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(nextDay, "yyyy-MM-dd'T'00:00:00");
+      end = format(range!.to!, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
+
     props.setReserve(reserve!);
     getDays();
   }
+
   function onlyToday() {
     const today = new Date(Date.now());
     const nextDay = new Date(range!.from!);
-    nextDay.setDate(nextDay.getDate() + 1);
-    props.setStartDate(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
+    nextDay.setTime(nextDay.getTime() + (1000 * 60 * 60 * 24));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      const nextNextDay = new Date(nextDay.getTime());
+      nextNextDay.setDate(nextNextDay.getTime() + (1000 * 60 * 60 * 24));
+
+      start = format(nextDay, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(nextNextDay, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(nextDay, "yyyy-MM-dd'T'00:00:00");
+      end = format(today, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
+
     props.setReserve(reserve!);
     getDays();
   }
+
   if (!reserve) return <div>cargando...</div>;
   return (
     <div>

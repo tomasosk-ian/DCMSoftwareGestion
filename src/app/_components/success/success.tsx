@@ -14,6 +14,7 @@ import { Size } from "~/server/api/routers/sizes";
 import { Store } from "~/server/api/routers/store";
 import type { Translations } from "~/translations";
 import { useIsMobile } from "~/hooks/use-mobile";
+import { api } from "~/trpc/react";
 
 export default function Success({ t, ...props }: {
   reserves: Reserve[];
@@ -29,6 +30,9 @@ export default function Success({ t, ...props }: {
 }) {
   const targetRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+
+  const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
+  const isReserveModeNow = useMemo(() => (plazoReserva?.value.trim().toLowerCase() ?? "false") === "true", [plazoReserva]);
 
   const [failedToShareNative, setFailedToShareNative] = useState(false);
   const canShareNative = useMemo(() => (('share' in navigator && navigator.canShare())), [navigator]);
@@ -47,7 +51,11 @@ export default function Success({ t, ...props }: {
   function formatDateToTextDate(dateString?: string): string {
     if (dateString) {
       const date = new Date(dateString);
-      return format(date, "eee dd MMMM", { locale: es });
+      if (isReserveModeNow) {
+        return format(date, "eee dd MMMM HH:mm", { locale: es });
+      } else {
+        return format(date, "eee dd MMMM", { locale: es });
+      }
     }
     return "";
   }

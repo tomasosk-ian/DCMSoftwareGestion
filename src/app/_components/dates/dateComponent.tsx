@@ -1,13 +1,14 @@
 import { Calendar } from "~/components/ui/calendar";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ButtonCustomComponent from "../../../components/buttonCustom";
 import { es } from "date-fns/locale";
 import { Button } from "~/components/ui/button";
 import { ChevronLeftCircle } from "lucide-react";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
 import type { Translations } from "~/translations";
+import { api } from "~/trpc/react";
 
 export default function DateComponent({ t, ...props }: {
   startDate: string;
@@ -19,17 +20,29 @@ export default function DateComponent({ t, ...props }: {
   goBack: () => void;
   t: Translations,
 }) {
+  const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
   const [range, setRange] = useState<DateRange | undefined>();
-  const [date, setDate] = useState<Date>();
-  useEffect(() => {
-    const fromDate = new Date();
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date();
-    toDate.setHours(23, 59, 0, 0);
-    props.setDays(0);
 
-    setRange({ from: fromDate, to: toDate });
-  }, []);
+  useEffect(() => {
+    if (plazoReserva && typeof range === 'undefined') {
+      if (plazoReserva?.value.trim().toLowerCase() === "true") {
+        const today = Date.now();
+        const end = today + (1000 * 60 * 60 * 24) - 1000;
+
+        setRange({ from: new Date(today), to: new Date(end) });
+      } else {
+        const fromDate = new Date();
+        fromDate.setHours(0, 0, 0, 0);
+        const toDate = new Date();
+        toDate.setHours(23, 59, 0, 0);
+
+        setRange({ from: fromDate, to: toDate });
+      }
+
+      props.setDays(0);
+    }
+  }, [plazoReserva]);
+
   function getDays() {
     if (range) {
       const fromDate = range.from!;
@@ -39,19 +52,53 @@ export default function DateComponent({ t, ...props }: {
       props.setDays(differenceInDays);
     }
   }
+
   function handleClick() {
     const today = Date.now();
-    // props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(today + (props.days * 1000 * 60 * 60 * 24) - 1000, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(today, "yyyy-MM-dd'T'00:00:00");
+      end = format(range!.to!, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
     getDays();
   }
+
   function onlyToday() {
     const today = Date.now();
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(today + (1000 * 60 * 60 * 24) - 1000, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(today, "yyyy-MM-dd'T'00:00:00");
+      end = format(today, "yyyy-MM-dd'T'23:59:59");
+    }
+    
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
     getDays();
   }
+
+  const textoReservas = useMemo(() => {
+    if (typeof plazoReserva === 'undefined') {
+      return "";
+    } else if (plazoReserva.value.trim().toLowerCase() === "true") {
+      return t("dateReservesTextNow");
+    } else {
+      return t("dateReservesText");
+    }
+  }, [t, plazoReserva]);
+
   return (
     <div>
       {!props.endDate && (
@@ -62,16 +109,20 @@ export default function DateComponent({ t, ...props }: {
               {t("chooseDate")}
             </h2>
           </div>
-          <p>{t("dateReservesText")}</p>
+          <p>{textoReservas}</p>
           <div className="justify-center">
             <div className="w-full">
               <Calendar
                 mode="range"
                 selected={range}
                 onSelect={(e) => {
-                  const days = differenceInDays(e?.to!, e?.from!);
+                  if (!e) {
+                    return;
+                  }
+
+                  const days = differenceInDays(e.to!, e.from!);
                   props.setDays(days + 1);
-                  setRange({ to: e?.to!, from: range?.from });
+                  setRange({ to: e.to!, from: range?.from });
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>
