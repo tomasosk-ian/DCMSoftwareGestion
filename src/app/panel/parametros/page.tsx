@@ -379,6 +379,82 @@ function FormMetodoPago({ invalidate }: { invalidate: () => void }) {
   </div>
 }
 
+function FormPlazoReserva({ invalidate }: { invalidate: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [isHabilitado, setIsHabilitado] = useState(false);
+  const { mutateAsync: setPublicKey, isLoading: isLoadingPublic } = api.config.setPublicKeyAdmin.useMutation();
+  const { data: claveOriginal, refetch: refetch1 } = api.config.getKey.useQuery({ key: 'reserve_from_now' });
+  const isLoading = isLoadingPublic;
+
+  useEffect(() => {
+    if (open) {
+      setIsHabilitado((claveOriginal?.value.trim().toLowerCase() ?? "false") === "true");
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (claveOriginal) {
+      setIsHabilitado(claveOriginal.value.trim().toLowerCase() === "true");
+    } else {
+      setIsHabilitado(false);
+    }
+  }, [claveOriginal]);
+
+  async function handle() {
+    await setPublicKey({ key: 'reserve_from_now', value: String(isHabilitado) });
+    await refetch1();
+    invalidate();
+    setOpen(false);
+  }
+
+  return <div className="m-2">
+    <Button onClick={() => setOpen(true)} className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]">
+      {isLoading ? (
+        <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+      ) : (
+        <PlusCircleIcon className="h-5 mr-1 stroke-1" />
+      )}
+      Configurar plazo de reserva
+    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>Configurar plazo de reserva</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex flex-col">
+            <Label htmlFor="valor" className="mb-2">Plazo de reserva</Label>
+            <Select onValueChange={v => setIsHabilitado(v === "true")} value={isHabilitado ? "true" : "false"}>
+              <SelectTrigger className="font-bold">
+                <SelectValue placeholder="Plazo de reserva" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={"false"}>Hacer reservas desde 00:00hs a 23:59hs</SelectItem>
+                <SelectItem value={"true"}>Hacer reservas desde ahora</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter className="sm:justify-center">
+          <Button
+            disabled={isLoading}
+            onClick={handle}
+            className="flex rounded-full w-fit justify-self-center text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]"
+          >
+            {isLoading ? (
+              <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+            ) : (
+              <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+            )}
+            Guardar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
+}
+
 export default function LockerOcupationPage() {
   // Consulta de datos con fechas seleccionadas
   const { data: timeOut } = api.params.getTimeOut.useQuery();
@@ -400,6 +476,7 @@ export default function LockerOcupationPage() {
           {/* <InsertClavePublica invalidate={invalidate} />
           <InsertClavePrivada invalidate={invalidate} /> */}
           <FormMetodoPago invalidate={invalidate} />
+          <FormPlazoReserva invalidate={invalidate} />
         </div>
       </div>
       <section className="space-y-2">

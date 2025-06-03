@@ -1,13 +1,14 @@
 import { Calendar } from "~/components/ui/calendar";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ButtonCustomComponent from "../../../components/buttonCustom";
 import { es } from "date-fns/locale";
 import { Button } from "~/components/ui/button";
 import { ChevronLeftCircle } from "lucide-react";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
 import type { Translations } from "~/translations";
+import { api } from "~/trpc/react";
 
 export default function DateComponent({ t, ...props }: {
   startDate: string;
@@ -19,8 +20,10 @@ export default function DateComponent({ t, ...props }: {
   goBack: () => void;
   t: Translations,
 }) {
+  const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
+
   useEffect(() => {
     const fromDate = new Date();
     fromDate.setHours(0, 0, 0, 0);
@@ -30,6 +33,7 @@ export default function DateComponent({ t, ...props }: {
 
     setRange({ from: fromDate, to: toDate });
   }, []);
+
   function getDays() {
     if (range) {
       const fromDate = range.from!;
@@ -39,6 +43,7 @@ export default function DateComponent({ t, ...props }: {
       props.setDays(differenceInDays);
     }
   }
+
   function handleClick() {
     const today = Date.now();
     // props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
@@ -46,12 +51,24 @@ export default function DateComponent({ t, ...props }: {
     props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
     getDays();
   }
+
   function onlyToday() {
     const today = Date.now();
     props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
     props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
     getDays();
   }
+
+  const textoReservas = useMemo(() => {
+    if (typeof plazoReserva === 'undefined') {
+      return "";
+    } else if (plazoReserva.value.trim().toLowerCase() === "true") {
+      return t("dateReservesTextNow");
+    } else {
+      return t("dateReservesText");
+    }
+  }, [t, plazoReserva]);
+
   return (
     <div>
       {!props.endDate && (
@@ -62,7 +79,7 @@ export default function DateComponent({ t, ...props }: {
               {t("chooseDate")}
             </h2>
           </div>
-          <p>{t("dateReservesText")}</p>
+          <p>{textoReservas}</p>
           <div className="justify-center">
             <div className="w-full">
               <Calendar
