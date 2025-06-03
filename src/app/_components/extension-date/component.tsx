@@ -48,6 +48,7 @@ export default function DateComponent({ t, ...props }: {
   }
 
   function handleClick() {
+    const lastFecha = new Date(range!.from!.getTime() + 1000);
     const nextDay = new Date(range!.from!);
     nextDay.setDate(nextDay.getDate() + 1);
     let start, end;
@@ -58,7 +59,7 @@ export default function DateComponent({ t, ...props }: {
       rangeTo.setMinutes(nextDay.getMinutes());
       rangeTo.setSeconds(nextDay.getSeconds());
 
-      start = format(nextDay, "yyyy-MM-dd'T'HH:mm:ss");
+      start = format(lastFecha, "yyyy-MM-dd'T'HH:mm:ss");
       end = format(rangeTo, "yyyy-MM-dd'T'HH:mm:ss");
     } else {
       start = format(nextDay, "yyyy-MM-dd'T'00:00:00");
@@ -81,7 +82,7 @@ export default function DateComponent({ t, ...props }: {
 
     if (plazoReserva?.value.trim().toLowerCase() === "true") {
       const nextNextDay = new Date(nextDay.getTime());
-      nextNextDay.setDate(nextDay.getTime() + (1000 * 60 * 60 * 24));
+      nextNextDay.setDate(nextNextDay.getTime() + (1000 * 60 * 60 * 24));
 
       start = format(nextDay, "yyyy-MM-dd'T'HH:mm:ss");
       end = format(nextNextDay, "yyyy-MM-dd'T'HH:mm:ss");
