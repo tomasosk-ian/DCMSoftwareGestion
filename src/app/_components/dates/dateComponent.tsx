@@ -22,17 +22,26 @@ export default function DateComponent({ t, ...props }: {
 }) {
   const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
   const [range, setRange] = useState<DateRange | undefined>();
-  const [date, setDate] = useState<Date>();
 
   useEffect(() => {
-    const fromDate = new Date();
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date();
-    toDate.setHours(23, 59, 0, 0);
-    props.setDays(0);
+    if (plazoReserva && typeof range === 'undefined') {
+      if (plazoReserva?.value.trim().toLowerCase() === "true") {
+        const today = Date.now();
+        const end = today + (1000 * 60 * 60 * 24) - 1000;
 
-    setRange({ from: fromDate, to: toDate });
-  }, []);
+        setRange({ from: new Date(today), to: new Date(end) });
+      } else {
+        const fromDate = new Date();
+        fromDate.setHours(0, 0, 0, 0);
+        const toDate = new Date();
+        toDate.setHours(23, 59, 0, 0);
+
+        setRange({ from: fromDate, to: toDate });
+      }
+
+      props.setDays(0);
+    }
+  }, [plazoReserva]);
 
   function getDays() {
     if (range) {
@@ -46,16 +55,37 @@ export default function DateComponent({ t, ...props }: {
 
   function handleClick() {
     const today = Date.now();
-    // props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(today + (props.days * 1000 * 60 * 60 * 24) - 1000, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(today, "yyyy-MM-dd'T'00:00:00");
+      end = format(range!.to!, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
     getDays();
   }
 
   function onlyToday() {
     const today = Date.now();
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(today + (1000 * 60 * 60 * 24) - 1000, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(today, "yyyy-MM-dd'T'00:00:00");
+      end = format(today, "yyyy-MM-dd'T'23:59:59");
+    }
+    
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
     getDays();
   }
 
@@ -86,9 +116,13 @@ export default function DateComponent({ t, ...props }: {
                 mode="range"
                 selected={range}
                 onSelect={(e) => {
-                  const days = differenceInDays(e?.to!, e?.from!);
+                  if (!e) {
+                    return;
+                  }
+
+                  const days = differenceInDays(e.to!, e.from!);
                   props.setDays(days + 1);
-                  setRange({ to: e?.to!, from: range?.from });
+                  setRange({ to: e.to!, from: range?.from });
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>
