@@ -34,8 +34,8 @@ export function ReserveExcel({ allReservesData }: { allReservesData: {
         data.client ?? "",
         data.dataReserve?.NroSerie ?? "",
         dayjs(data.dataReserve?.FechaCreacion).format("DD-MM-YYYY"),
-        dayjs(data.dataReserve?.FechaInicio).format("DD-MM-YYYY"),
-        dayjs(data.dataReserve?.FechaFin).format("DD-MM-YYYY"),
+        dayjs(data.dataReserve?.FechaInicio).format("DD-MM-YYYY HH:mm"),
+        dayjs(data.dataReserve?.FechaFin).format("DD-MM-YYYY HH:mm"),
       ]);
     }
 
