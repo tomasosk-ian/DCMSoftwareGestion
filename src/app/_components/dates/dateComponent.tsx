@@ -10,7 +10,10 @@ import ButtonIconCustomComponent from "~/components/button-icon-custom";
 import type { Translations } from "~/translations";
 import { api } from "~/trpc/react";
 
-export default function DateComponent({ t, ...props }: {
+export default function DateComponent({
+  t,
+  ...props
+}: {
   startDate: string;
   setStartDate: (startDate: string) => void;
   endDate: string;
@@ -18,16 +21,18 @@ export default function DateComponent({ t, ...props }: {
   days: number;
   setDays: (days: number) => void;
   goBack: () => void;
-  t: Translations,
+  t: Translations;
 }) {
-  const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
+  const { data: plazoReserva } = api.config.getKey.useQuery({
+    key: "reserve_from_now",
+  });
   const [range, setRange] = useState<DateRange | undefined>();
 
   useEffect(() => {
-    if (plazoReserva && typeof range === 'undefined') {
+    if (plazoReserva && typeof range === "undefined") {
       if (plazoReserva?.value.trim().toLowerCase() === "true") {
         const today = Date.now();
-        const end = today + (1000 * 60 * 60 * 24) - 1000;
+        const end = today + 1000 * 60 * 60 * 24 - 1000;
 
         setRange({ from: new Date(today), to: new Date(end) });
       } else {
@@ -59,7 +64,10 @@ export default function DateComponent({ t, ...props }: {
 
     if (plazoReserva?.value.trim().toLowerCase() === "true") {
       start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
-      end = format(today + (props.days * 1000 * 60 * 60 * 24) - 1000, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(
+        today + props.days * 1000 * 60 * 60 * 24 - 1000,
+        "yyyy-MM-dd'T'HH:mm:ss",
+      );
     } else {
       start = format(today, "yyyy-MM-dd'T'00:00:00");
       end = format(range!.to!, "yyyy-MM-dd'T'23:59:59");
@@ -77,12 +85,12 @@ export default function DateComponent({ t, ...props }: {
 
     if (plazoReserva?.value.trim().toLowerCase() === "true") {
       start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
-      end = format(today + (1000 * 60 * 60 * 24) - 1000, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(today + 1000 * 60 * 60 * 24 - 1000, "yyyy-MM-dd'T'HH:mm:ss");
     } else {
       start = format(today, "yyyy-MM-dd'T'00:00:00");
       end = format(today, "yyyy-MM-dd'T'23:59:59");
     }
-    
+
     console.log("date range", start, end);
     props.setStartDate(start);
     props.setEndDate(end);
@@ -90,7 +98,7 @@ export default function DateComponent({ t, ...props }: {
   }
 
   const textoReservas = useMemo(() => {
-    if (typeof plazoReserva === 'undefined') {
+    if (typeof plazoReserva === "undefined") {
       return "";
     } else if (plazoReserva.value.trim().toLowerCase() === "true") {
       return t("dateReservesTextNow");
@@ -104,10 +112,13 @@ export default function DateComponent({ t, ...props }: {
       {!props.endDate && (
         <div className="container flex flex-col items-center justify-center  ">
           <div className="flex flex-row">
-            <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.goBack} />
-            <h2 className="text-3xl font-semibold">
-              {t("chooseDate")}
-            </h2>
+            <ButtonIconCustomComponent
+              className="mx-4"
+              noWFull={true}
+              icon={<ChevronLeftCircle />}
+              onClick={props.goBack}
+            />
+            <h2 className="text-3xl font-semibold">{t("chooseDate")}</h2>
           </div>
           <p>{textoReservas}</p>
           <div className="justify-center">
@@ -117,6 +128,7 @@ export default function DateComponent({ t, ...props }: {
                 selected={range}
                 onSelect={(e) => {
                   if (!e) {
+                    console.log("PORONGA capo");
                     return;
                   }
 
@@ -145,7 +157,10 @@ export default function DateComponent({ t, ...props }: {
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
-                <ButtonCustomComponent onClick={onlyToday} text={t("dateOnlyToday")} />
+                <ButtonCustomComponent
+                  onClick={onlyToday}
+                  text={t("dateOnlyToday")}
+                />
               </div>
             </div>
           </div>
