@@ -35,15 +35,15 @@ export const mobbexRouter = createTRPCRouter({
         throw new Error(errorResponse.message || "Unknown error");
       }
 
-      const configMobbexApiKey: PrivateConfigKeys = 'mobbex_api_key';
-      const configMobbexAccessToken: PrivateConfigKeys = 'mobbex_access_token';
+      const configMobbexApiKey: PrivateConfigKeys = "mobbex_api_key";
+      const configMobbexAccessToken: PrivateConfigKeys = "mobbex_access_token";
 
       const mobbexApiKey = await ctx.db.query.privateConfig.findFirst({
-        where: eq(schema.privateConfig.key, configMobbexApiKey)
+        where: eq(schema.privateConfig.key, configMobbexApiKey),
       });
 
       const mobbexAccessToken = await ctx.db.query.privateConfig.findFirst({
-        where: eq(schema.privateConfig.key, configMobbexAccessToken)
+        where: eq(schema.privateConfig.key, configMobbexAccessToken),
       });
 
       if (!mobbexApiKey) {
@@ -89,7 +89,7 @@ export const mobbexRouter = createTRPCRouter({
             total: input.amount,
           },
         ],
-        options: { domain: "https://lockersurbanos.com.ar/" },
+        options: { domain: "https://dcm.com.ar/" },
         return_url: "https://mobbex.com/sale/return?session=56789",
         webhook: "https://mobbex.com/sale/webhook?user=1234",
         timeout: timeOutValidatedResult.data,

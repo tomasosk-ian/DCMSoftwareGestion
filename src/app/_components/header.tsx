@@ -41,7 +41,7 @@ export default function Home({ lang }: { lang?: string }) {
               />
               <img
                 className="mobile-logo preload-me"
-                src="./Lockers Urbanos _ Guarda equipajes en Bariloche – Una solución inteligente para el guardado de equipaje_files/logo_m.png"
+                src="./dcm.png"
                 width="183"
                 height="64"
                 sizes="183px"
