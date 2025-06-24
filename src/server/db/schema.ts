@@ -322,6 +322,10 @@ export const companies = sqliteTable(
   }),
 );
 
+export const companiesRelations = relations(companies, ({ many }) => ({
+  usuarioEntidades: many(usuarioEntidad),
+}));
+
 export const userRoles = sqliteTable(
   "userRoles",
   {
