@@ -165,7 +165,7 @@ export const reserveRouter = createTRPCRouter({
     .input(
       z.object({
         idTransactions: z.array(z.number()),
-        entityId: z.string(),
+        entityId: z.string().min(1),
       }),
     )
     .mutation(async ({ input }) => {
@@ -192,7 +192,7 @@ export const reserveRouter = createTRPCRouter({
       z.object({
         token: z.number(),
         email: z.string(),
-        entityId: z.string(),
+        entityId: z.string().min(1),
       }),
     )
     .query(async ({ input }) => {
@@ -248,7 +248,7 @@ export const reserveRouter = createTRPCRouter({
     .input(
       z.object({
         clientId: z.number(),
-        entityId: z.string(),
+        entityId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -293,11 +293,11 @@ export const reserveRouter = createTRPCRouter({
         client: z.string().nullable().optional(),
         identifier: z.string().nullable().optional(),
         nReserve: z.number().optional(),
-        entidadId: z.string(),
+        entityId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const client = await getClientByEmail(input.client!, input.entidadId);
+      const client = await getClientByEmail(input.client!, input.entityId);
       const identifier = createId();
 
       await db.insert(schema.reservas).values({

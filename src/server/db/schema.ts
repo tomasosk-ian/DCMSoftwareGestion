@@ -455,7 +455,8 @@ export const roles = sqliteTable(
   {
     id: columnId,
     name: text("name").notNull(),
-    companyId: text("companyId"),
+    companyId: text("companyId")
+      .references(() => companies.id, { onDelete: "cascade" }),
     createdAt,
   },
   (table) => ({
