@@ -20,7 +20,14 @@ export default function StoreSelector({ t, ...props }: {
   t: Translations,
 }) {
   if (!props.stores || props.stores.length === 0) {
-    return <Title>{t("noStores")}</Title>;
+    return <div>
+      <div className="flex flex-row">
+        <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={props.goBack} />
+        <h2 className="text-3xl font-semibold">
+          <Title>{t("noStores")}</Title>
+        </h2>
+      </div>
+    </div>;
   } else {
     return (
       <main className="flex justify-center sm:p-4 md:p-6 lg:p-8">
