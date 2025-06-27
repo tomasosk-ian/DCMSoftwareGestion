@@ -221,8 +221,8 @@ export const reservas = sqliteTable(
 
 export const reservasRelations = relations(reservas, ({ one }) => ({
   clients: one(clients, {
-    fields: [reservas.client],
-    references: [clients.email],
+    fields: [reservas.client, reservas.entidadId],
+    references: [clients.email, clients.entidadId],
   }),
   entidad: one(companies, {
     fields: [reservas.entidadId],
