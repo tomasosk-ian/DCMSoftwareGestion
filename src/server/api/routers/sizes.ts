@@ -1,6 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { env } from "~/env";
+import { trpcTienePermisoCtxAny } from "~/lib/roles";
 import { createId } from "~/lib/utils";
 
 import {
@@ -10,7 +11,7 @@ import {
 } from "~/server/api/trpc";
 import { db, schema } from "~/server/db";
 
-async function sizesList(localId?: string): Promise<z.infer<typeof responseValidator>> {
+async function sizesList(localId: string | null, entityId: string | null): Promise<z.infer<typeof responseValidator>> {
   const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
   // Handle the response from the external API
@@ -22,6 +23,9 @@ async function sizesList(localId?: string): Promise<z.infer<typeof responseValid
   }
 
   const reservedBoxData = await sizeResponse.json();
+  const allLocales = await db.query.stores.findMany({
+    where: eq(schema.stores.entidadId, entityId ?? "")
+  });
 
   const validatedData = responseValidator.parse(reservedBoxData);
   await Promise.all(
@@ -34,6 +38,25 @@ async function sizesList(localId?: string): Promise<z.infer<typeof responseValid
             eq(schema.feeData.localId, localId),
           ),
         });
+
+        if (!entityId) {
+          const store = await db.query.stores.findFirst({
+            where: eq(schema.stores.identifier, localId)
+          });
+
+          if (store) {
+            entityId = store.entidadId ?? entityId;
+          }
+        }
+      } else if (typeof entityId === 'string') {
+        if (allLocales.length > 0) {
+          fee = await db.query.feeData.findFirst({
+            where: and(
+              eq(schema.feeData.size, v.id),
+              inArray(schema.feeData.localId, allLocales.map(v => v.identifier)),
+            ),
+          });
+        }
       } else {
         fee = await db.query.feeData.findFirst({
           where: eq(schema.feeData.size, v.id),
@@ -58,6 +81,7 @@ async function sizesList(localId?: string): Promise<z.infer<typeof responseValid
         // Si el tamaño no existe, insértalo
         await db.insert(schema.sizes).values({
           ...v,
+          entidadId: entityId ?? fee?.entidadId,
         });
       }
     }),
@@ -92,6 +116,15 @@ async function sizeExpand(v: LockerSize, localId: string): Promise<LockerSize> {
       eq(schema.feeData.localId, localId),
     ),
   });
+
+  let entityId = null;
+  const store = await db.query.stores.findFirst({
+    where: eq(schema.stores.identifier, localId)
+  });
+
+  if (store) {
+    entityId = store.entidadId ?? entityId;
+  }
   
   v.tarifa = fee?.identifier;
 
@@ -112,6 +145,7 @@ async function sizeExpand(v: LockerSize, localId: string): Promise<LockerSize> {
     // Si el tamaño no existe, insértalo
     await db.insert(schema.sizes).values({
       ...v,
+      entidadId: entityId ?? fee?.entidadId,
     });
   }
 
@@ -122,11 +156,20 @@ export const sizeRouter = createTRPCRouter({
   get: publicProcedure
     .input(
       z.object({
-        store: z.string().optional(),
+        store: z.string().nullable(),
       }),
     )
     .query(async ({ input }) => {
-      return sizesList(input.store);
+      return sizesList(input.store, null);
+    }),
+  getProt: protectedProcedure
+    .input(
+      z.object({
+        store: z.string().nullable(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return sizesList(input.store, ctx.orgId ?? "");
     }),
   getAvailability: publicProcedure
     .input(
@@ -185,13 +228,18 @@ export const sizeRouter = createTRPCRouter({
       return Object.fromEntries(Object.entries(sizesLockersMap).filter(v => typeof v[1].size.tarifa === 'string'));
     }),
 
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         sizeId: z.number(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      await trpcTienePermisoCtxAny(ctx, [
+        "panel:locales",
+        "panel:sizes"
+      ]);
+
       const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
       // Handle the response from the external API
@@ -217,14 +265,19 @@ export const sizeRouter = createTRPCRouter({
       return size;
     }),
 
-  changeImage: publicProcedure
+  changeImage: protectedProcedure
     .input(
       z.object({
         id: z.number(),
         image: z.string().nullable(),
       }),
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
+      await trpcTienePermisoCtxAny(ctx, [
+        "panel:locales",
+        "panel:sizes"
+      ]);
+
       return ctx.db
         .update(schema.sizes)
         .set({ image: input.image })

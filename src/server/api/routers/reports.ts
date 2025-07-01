@@ -1,9 +1,11 @@
 import { and, gte, lte, isNotNull, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { db, schema } from "~/server/db";
 import { env } from "~/env";
 import { lockerValidator } from "./lockers";
+import { TRPCError } from "@trpc/server";
+import { PrivateConfigKeys } from "~/lib/config";
 
 export type DailyOccupation = {
   day: string; // Format "day/month"
@@ -47,12 +49,13 @@ type SizeMap = {
 };
 
 export const reportsRouter = createTRPCRouter({
-  getOcupattion: publicProcedure
+  getOcupattion: protectedProcedure
     .input(
       z.object({
         startDate: z.string(),
         endDate: z.string(),
-        filterSerie: z.array(z.string()).nullable()
+        filterSerie: z.array(z.string()).nullable(),
+        filterEntities: z.array(z.string()).nullable(),
       }),
     )
     .query(async ({ input }) => {
@@ -74,15 +77,36 @@ export const reportsRouter = createTRPCRouter({
         reserves = reserves.filter(v => validSeries.has(v.NroSerie ?? ""));
       }
 
+      if (Array.isArray(input.filterEntities)) {
+        const validEnts = new Set(input.filterEntities);
+        reserves = reserves.filter(v => validEnts.has(v.entidadId ?? ""));
+      }
+
       const sizeMap = await getSizesMap();
       const occupationData = groupOccupationDataByDay(reserves, sizeMap);
 
       return occupationData;
     }),
 
-  getTotalBoxesAmountPerSize: publicProcedure.query(async () => {
+  getTotalBoxesAmountPerSize: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.orgId) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: "Sin entidad" });
+    }
+
+    const tk: PrivateConfigKeys = 'token_empresa';
+    const tkValue = await db.query.privateConfig.findFirst({
+      where: and(
+        eq(schema.privateConfig.key, tk),
+        eq(schema.privateConfig.entidadId, ctx.orgId)
+      )
+    });
+
+    if (!tkValue) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: "Sin token de empresa" });
+    }
+
     const locerResponse = await fetch(
-      `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
+      `${env.SERVER_URL}/api/locker/byTokenEmpresa/${tkValue.value}`,
     );
 
     const reservedBoxData = await locerResponse.json();
@@ -105,17 +129,21 @@ export const reportsRouter = createTRPCRouter({
     return boxCountsBySize;
   }),
 
-  getSizes: publicProcedure.query(async () => {
-    const sizesData = await db.query.sizes.findMany();
+  getSizes: protectedProcedure.query(async ({ ctx }) => {
+    const sizesData = await db.query.sizes.findMany({
+      where: eq(schema.sizes.entidadId, ctx.orgId ?? "")
+    });
+
     return sizesData;
   }),
 
-  getAverageReservationDuration: publicProcedure
+  getAverageReservationDuration: protectedProcedure
     .input(
       z.object({
         startDate: z.string(),
         endDate: z.string(),
-        filterSerie: z.array(z.string()).nullable()
+        filterSerie: z.array(z.string()).nullable(),
+        filterEntities: z.array(z.string()).nullable(),
       }),
     )
     .query(async ({ input }) => {
@@ -129,12 +157,18 @@ export const reportsRouter = createTRPCRouter({
             lte(reserva.FechaFin, endDate),
             isNotNull(reserva.FechaInicio),
             isNotNull(reserva.FechaFin),
+            isNotNull(reserva.nReserve),
           ),
       });
 
       if (Array.isArray(input.filterSerie)) {
         const validSeries = new Set(input.filterSerie);
         reserves = reserves.filter(v => validSeries.has(v.NroSerie ?? ""));
+      }
+
+      if (Array.isArray(input.filterEntities)) {
+        const validEnts = new Set(input.filterEntities);
+        reserves = reserves.filter(v => validEnts.has(v.entidadId ?? ""));
       }
 
       // Calculate the duration of each reservation in days and accumulate data by duration
