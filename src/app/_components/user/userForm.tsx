@@ -21,7 +21,10 @@ import { Cupon } from "~/server/api/routers/cupones";
 import type { Translations } from "~/translations";
 import { Store } from "~/server/api/routers/store";
 
-export default function UserForm({ t, ...props }: {
+export default function UserForm({
+  t,
+  ...props
+}: {
   client: Client;
   store: Store | null;
   setClient: (client: Client) => void;
@@ -237,9 +240,7 @@ export default function UserForm({ t, ...props }: {
           <i
             className="hover:underline"
             onClick={() => {
-              open(
-                "https://lockersurbanos.com.ar/wp-content/uploads/2024/05/Terminos-y-condiciones-Lockers-Urbanos.pdf",
-              );
+              open("");
             }}
           >
             {t("userFormTOS")}
