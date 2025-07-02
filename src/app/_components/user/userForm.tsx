@@ -60,6 +60,11 @@ export default function UserForm({
   const [discountCode, setDiscountCode] = useState<string>("");
   const [applyButton, setApplyButton] = useState<boolean>();
 
+  const { data: tycData } = api.config.getKey.useQuery({
+    entityId: props.store?.entidadId ?? props.client.entidadId ?? "",
+    key: "tyc_link"
+  });
+
   useEffect(() => {
     const phoneNumbers: Record<string, number>[] = [];
     Object.entries(countries).forEach(([countryCode, countryData]) => {
@@ -240,7 +245,7 @@ export default function UserForm({
           <i
             className="hover:underline"
             onClick={() => {
-              open("");
+              open(tycData?.value ?? "");
             }}
           >
             {t("userFormTOS")}

@@ -262,11 +262,21 @@ function FormPlazoReserva({ invalidate }: { invalidate: () => void }) {
   </div>
 }
 
-function FormTokenEmpresa({ invalidate }: { invalidate: () => void }) {
+function FormPrivateGeneric({
+  invalidate,
+  keyName,
+  title,
+  label
+}: {
+  invalidate: () => void,
+  keyName: PrivateConfigKeys,
+  title: string,
+  label: string
+}) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const { mutateAsync: setPrivateKey, isLoading: isLoadingPublic } = api.config.setPrivateKeyAdmin.useMutation();
-  const { data: claveOriginal, refetch: refetch1 } = api.config.getPrivateKey.useQuery({ key: 'token_empresa' });
+  const { data: claveOriginal, refetch: refetch1 } = api.config.getPrivateKey.useQuery({ key: keyName });
   const isLoading = isLoadingPublic;
 
   useEffect(() => {
@@ -280,7 +290,7 @@ function FormTokenEmpresa({ invalidate }: { invalidate: () => void }) {
   }, [claveOriginal]);
 
   async function handle() {
-    await setPrivateKey({ key: 'token_empresa', value: value.trim() });
+    await setPrivateKey({ key: keyName, value: value.trim() });
     await refetch1();
     invalidate();
     setOpen(false);
@@ -293,17 +303,94 @@ function FormTokenEmpresa({ invalidate }: { invalidate: () => void }) {
       ) : (
         <PlusCircleIcon className="h-5 mr-1 stroke-1" />
       )}
-      Configurar token de empresa
+      {title}
     </Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Configurar token de empresa</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex flex-col">
-            <Label htmlFor="valor" className="mb-2">Token</Label>
+            <Label htmlFor="valor" className="mb-2">{label}</Label>
+            <Input
+              value={value}
+              onChange={(v) => setValue(v.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter className="sm:justify-center">
+          <Button
+            disabled={isLoading}
+            onClick={handle}
+            className="flex rounded-full w-fit justify-self-center text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]"
+          >
+            {isLoading ? (
+              <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+            ) : (
+              <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+            )}
+            Guardar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
+}
+
+function FormPublicGeneric({
+  invalidate,
+  keyName,
+  title,
+  label
+}: {
+  invalidate: () => void,
+  keyName: PublicConfigKeys,
+  title: string,
+  label: string
+}) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const { mutateAsync: setPublicKey, isLoading: isLoadingPublic } = api.config.setPublicKeyAdmin.useMutation();
+  const { data: claveOriginal, refetch: refetch1 } = api.config.getKeyProt.useQuery({ key: keyName });
+  const isLoading = isLoadingPublic;
+
+  useEffect(() => {
+    if (open) {
+      setValue(claveOriginal?.value ?? "");
+    }
+  }, [open]);
+
+  useEffect(() => {
+    setValue(claveOriginal?.value ?? "");
+  }, [claveOriginal]);
+
+  async function handle() {
+    await setPublicKey({ key: keyName, value: value.trim() });
+    await refetch1();
+    invalidate();
+    setOpen(false);
+  }
+
+  return <div className="m-2">
+    <Button onClick={() => setOpen(true)} className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#d0d0d0] hover:bg-[#ffffff]">
+      {isLoading ? (
+        <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+      ) : (
+        <PlusCircleIcon className="h-5 mr-1 stroke-1" />
+      )}
+      {title}
+    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex flex-col">
+            <Label htmlFor="valor" className="mb-2">{label}</Label>
             <Input
               value={value}
               onChange={(v) => setValue(v.target.value)}
@@ -332,14 +419,13 @@ function FormTokenEmpresa({ invalidate }: { invalidate: () => void }) {
 export default function LockerOcupationPage() {
   // Consulta de datos con fechas seleccionadas
   const { data: timeOut } = api.params.getTimeOut.useQuery();
-  const { data: privateConfigs, refetch: refetchPrivate } = api.config.listPrivateAdmin.useQuery();
-  const { data: publicConfigs, refetch: refetchPublic } = api.config.listPublicAdmin.useQuery();
-  // const { mutateAsync: deletePrivateKey } = api.config.deletePrivateKeyAdmin.useMutation();
-  // const { mutateAsync: deletePublicKey } = api.config.deletePublicKeyAdmin.useMutation();
+  const util = api.useUtils();
 
   async function invalidate() {
-    await refetchPrivate();
-    await refetchPublic();
+    await util.invalidate();
+    await util.config.getKey.refetch();
+    await util.config.getKeyProt.refetch();
+    await util.config.getPrivateKey.refetch();
   }
 
   return (
@@ -353,7 +439,8 @@ export default function LockerOcupationPage() {
           <FormPlazoReserva invalidate={invalidate} />
         </div>
         <div className="flex flex-row">
-          <FormTokenEmpresa invalidate={invalidate} />
+          <FormPrivateGeneric invalidate={invalidate} keyName="token_empresa" label="Token" title="Configurar token de empresa" />
+          <FormPublicGeneric invalidate={invalidate} keyName="tyc_link" label="URL" title="Configurar URL de términos y condiciones" />
         </div>
       </div>
       <section className="space-y-2">

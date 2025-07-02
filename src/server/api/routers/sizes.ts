@@ -1,8 +1,8 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { env } from "~/env";
 import { trpcTienePermisoCtxAny } from "~/lib/roles";
-import { createId } from "~/lib/utils";
+import { PromisePool } from "@supercharge/promise-pool";
 
 import {
   createTRPCRouter,
@@ -109,47 +109,53 @@ async function disponibilidad(nroSerieLocker: string, inicio: string | null, fin
 }
 
 type LockerSize = z.infer<typeof responseValidator>[number];
-async function sizeExpand(v: LockerSize, localId: string): Promise<LockerSize> {
-  const fee = await db.query.feeData.findFirst({
-    where: and(
-      eq(schema.feeData.size, v.id),
-      eq(schema.feeData.localId, localId),
-    ),
-  });
+const feeDataPreparedSE = db.query.feeData.findFirst({
+  where: and(
+    eq(schema.feeData.size, sql.placeholder("sizeId")),
+    eq(schema.feeData.localId, sql.placeholder("localId")),
+  ),
+}).prepare();
 
+const storesPreparedSE = db.query.stores.findFirst({
+  where: eq(schema.stores.identifier, sql.placeholder("localId"))
+}).prepare();
+
+const sizePreparedSE = db.query.sizes.findFirst({
+  where: eq(schema.sizes.id, sql.placeholder("sizeId")), // Utiliza el nombre correcto del campo
+}).prepare();
+
+async function sizeExpand(lsize: LockerSize, localId: string): Promise<LockerSize> {
   let entityId = null;
-  const store = await db.query.stores.findFirst({
-    where: eq(schema.stores.identifier, localId)
-  });
+
+  const [fee, store, existingSize] = await Promise.all([
+    feeDataPreparedSE.execute({ sizeId: lsize.id, localId }),
+    storesPreparedSE.execute({ localId }),
+    sizePreparedSE.execute({ sizeId: lsize.id })
+  ]);
 
   if (store) {
     entityId = store.entidadId ?? entityId;
   }
-  
-  v.tarifa = fee?.identifier;
 
-  const existingSize = await db.query.sizes.findFirst({
-    where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
-  });
-
+  lsize.tarifa = fee?.identifier;
   if (existingSize) {
     // Si el tamaño ya existe, actualiza los datos
     await db
       .update(schema.sizes)
       .set({
-        ...v,
+        ...lsize,
       })
-      .where(eq(schema.sizes.id, v.id));
-    v.image = existingSize.image;
+      .where(eq(schema.sizes.id, lsize.id));
+    lsize.image = existingSize.image;
   } else {
     // Si el tamaño no existe, insértalo
     await db.insert(schema.sizes).values({
-      ...v,
+      ...lsize,
       entidadId: entityId ?? fee?.entidadId,
     });
   }
 
-  return v;
+  return lsize;
 }
 
 export const sizeRouter = createTRPCRouter({
@@ -201,29 +207,33 @@ export const sizeRouter = createTRPCRouter({
         cantidadSumada: number,
       }> = {};
 
-      for (const locker of store.lockers) {
-        const disp = await disponibilidad(locker.serieLocker, input.inicio, input.fin);
-        for (const lockerSize of disp) {
-          if (sizesLockersMap[lockerSize.id]) {
-            sizesLockersMap[lockerSize.id]!.lockers.push({
-              serie: locker.serieLocker,
-              cantidad: lockerSize.cantidad ?? 0,
-              size: await sizeExpand(lockerSize, store.identifier),
-            });
-            sizesLockersMap[lockerSize.id]!.cantidadSumada += (lockerSize.cantidad ?? 0);
-          } else {
-            sizesLockersMap[lockerSize.id] = {
-              lockers: [{
+      await PromisePool.for(store.lockers)
+        .withConcurrency(16)
+        .process(async (locker) => {
+          const disp = await disponibilidad(locker.serieLocker, input.inicio, input.fin);
+          for (const lockerSize of disp) {
+            if (sizesLockersMap[lockerSize.id]) {
+              const exp = await sizeExpand(lockerSize, store.identifier);
+              sizesLockersMap[lockerSize.id]!.lockers.push({
                 serie: locker.serieLocker,
                 cantidad: lockerSize.cantidad ?? 0,
-                size: await sizeExpand(lockerSize, store.identifier),
-              }],
-              size: await sizeExpand(lockerSize, store.identifier),
-              cantidadSumada: lockerSize.cantidad ?? 0,
-            };
+                size: exp,
+              });
+              sizesLockersMap[lockerSize.id]!.cantidadSumada += (lockerSize.cantidad ?? 0);
+            } else {
+              const exp = await sizeExpand(lockerSize, store.identifier);
+              sizesLockersMap[lockerSize.id] = {
+                lockers: [{
+                  serie: locker.serieLocker,
+                  cantidad: lockerSize.cantidad ?? 0,
+                  size: exp,
+                }],
+                size: { ...exp },
+                cantidadSumada: lockerSize.cantidad ?? 0,
+              };
+            }
           }
-        }
-      }
+        });
 
       return Object.fromEntries(Object.entries(sizesLockersMap).filter(v => typeof v[1].size.tarifa === 'string'));
     }),
