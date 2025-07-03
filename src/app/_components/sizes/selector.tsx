@@ -15,6 +15,7 @@ import { ChevronLeftCircle, ChevronRightIcon } from "lucide-react";
 import ButtonIconCustomComponent from "~/components/button-icon-custom";
 import type { Store } from "~/server/api/routers/store";
 import type { Translations } from "~/translations";
+import dayjs from "dayjs";
 
 export default function SizeSelector({ t, ...props }: {
   size: Size | null;
@@ -132,10 +133,8 @@ export default function SizeSelector({ t, ...props }: {
           );
           const prices: Record<number, number> = {};
           newReserves.forEach((reserve) => {
-            const days = differenceInDays(
-              reserve?.FechaFin!,
-              reserve?.FechaCreacion!,
-            );
+            const days = dayjs(reserve?.FechaFin!).add(1, "second").diff(reserve?.FechaCreacion!, "days");
+            const daysAdicionales = days - 1;
 
             const price = fees?.find(
               (s: Fee) => s.size === reserve.IdSize,
@@ -145,10 +144,10 @@ export default function SizeSelector({ t, ...props }: {
             )?.discount!;
 
             prices[reserve.IdSize!] = price;
-            if (days >= 1) {
+            if (daysAdicionales >= 1) {
               totalPrice +=
                 price * reserve.Cantidad! +
-                (price * reserve.Cantidad! * days * (100 - discount)) / 100; // Sumar al total local
+                (price * reserve.Cantidad! * daysAdicionales * (100 - discount)) / 100; // Sumar al total local
             } else {
               totalPrice += price * reserve.Cantidad!;
             }
