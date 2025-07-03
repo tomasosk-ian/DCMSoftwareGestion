@@ -38,6 +38,7 @@ export default function DateComponent({
         const end = today + 1000 * 60 * 60 * 24 - 1000;
 
         setRange({ from: new Date(today), to: new Date(end) });
+        props.setDays(1);
       } else {
         const fromDate = new Date();
         fromDate.setHours(0, 0, 0, 0);
@@ -45,9 +46,8 @@ export default function DateComponent({
         toDate.setHours(23, 59, 0, 0);
 
         setRange({ from: fromDate, to: toDate });
+        props.setDays(0);
       }
-
-      props.setDays(0);
     }
   }, [plazoReserva]);
 
