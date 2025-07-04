@@ -2,9 +2,16 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import ReservePage from "./reserve-page";
 import { auth } from "@clerk/nextjs/server";
+import { tienePermiso } from "~/lib/permisos";
+import { redirect } from "next/navigation";
 
 export default async function Reserve(props: { params: { nReserve: string } }) {
-  const isAdmin = auth().protect().sessionClaims.metadata.role == "admin";
+  const { perms } = await api.user.self.query();
+  if (!tienePermiso(perms, "panel:reservas")) {
+    redirect("/accessdenied");
+    return <></>;
+  }
+
   const reserve = await api.reserve.getBynReserve.query({
     nReserve: parseInt(props.params.nReserve),
   });
@@ -30,7 +37,7 @@ export default async function Reserve(props: { params: { nReserve: string } }) {
       reserve={reserve}
       sizes={sizes}
       transaction={transaction}
-      isAdmin={isAdmin}
+      isAdmin={tienePermiso(perms, "panel:reservas")}
       store={store}
     />
   );
