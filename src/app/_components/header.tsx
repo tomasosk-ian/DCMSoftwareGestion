@@ -30,7 +30,7 @@ export default function Home({ lang }: { lang?: string }) {
             <div id="site-description" className="assistive-text">
               Una solución inteligente para el guardado de equipaje
             </div>
-            <a className="" href="https://dcm.com.ar/">
+            <a className="" href="https://bagdrop.com.ar/">
               <img
                 className="preload-me"
                 src="./dcm.png"
@@ -73,7 +73,7 @@ export default function Home({ lang }: { lang?: string }) {
           <div className="mobile-navigation"></div>
           <div className="mobile-mini-widgets"></div>
           <div className="mobile-branding">
-            <a className="" href="https://dcm.com.ar/">
+            <a className="" href="https://bagdrop.com.ar/">
               <img
                 className="preload-me"
                 src="./dcm.png"

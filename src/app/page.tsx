@@ -207,19 +207,19 @@ export default async function Home() {
           rel="alternate"
           type="application/rss+xml"
           title="DCM Solutions » Feed"
-          href="https://dcm.com.ar/feed/"
+          href="https://bagdrop.com.ar/feed/"
         />
         <link
           rel="alternate"
           type="application/rss+xml"
           title="DCM Solutions » Feed de los comentarios"
-          href="https://dcm.com.ar/comments/feed/"
+          href="https://bagdrop.com.ar/comments/feed/"
         />
-        <link rel="canonical" href="https://dcm.com.ar/" />
+        <link rel="canonical" href="https://bagdrop.com.ar/" />
 
         <meta property="og:site_name" content="DCM Solutions" />
         <meta property="og:title" content="Home" />
-        <meta property="og:url" content="https://dcm.com.ar/" />
+        <meta property="og:url" content="https://bagdrop.com.ar/" />
         <meta property="og:type" content="website" />
         <link rel="profile" href="https://gmpg.org/xfn/11" />
         <link
