@@ -262,7 +262,7 @@ function FormPlazoReserva({ invalidate }: { invalidate: () => void }) {
   </div>
 }
 
-function FormPrivateGeneric({
+export function FormPrivateGeneric({
   invalidate,
   keyName,
   title,
@@ -339,7 +339,7 @@ function FormPrivateGeneric({
   </div>
 }
 
-function FormPublicGeneric({
+export function FormPublicGeneric({
   invalidate,
   keyName,
   title,
@@ -440,7 +440,6 @@ export default function LockerOcupationPage() {
         </div>
         <div className="flex flex-row">
           <FormPrivateGeneric invalidate={invalidate} keyName="token_empresa" label="Token" title="Configurar token de empresa" />
-          <FormPublicGeneric invalidate={invalidate} keyName="tyc_link" label="URL" title="Configurar URL de términos y condiciones" />
         </div>
       </div>
       <section className="space-y-2">
