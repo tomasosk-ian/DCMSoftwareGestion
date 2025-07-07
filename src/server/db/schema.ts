@@ -152,7 +152,7 @@ export const sizes = sqliteTable(
       .references(() => companies.id, { onDelete: "cascade" }),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.id),
+    compoundKey: primaryKey({ columns: [vt.id, vt.entidadId] }),
   }),
 );
 

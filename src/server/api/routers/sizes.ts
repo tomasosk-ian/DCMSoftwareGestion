@@ -64,9 +64,16 @@ async function sizesList(localId: string | null, entityId: string | null): Promi
       }
 
       v.tarifa = fee?.identifier;
+      entityId = entityId ?? fee?.entidadId ?? null;
+      if (!entityId) {
+        throw new Error("sizesList !entityId " + localId + " " + entityId)
+      }
 
       const existingSize = await db.query.sizes.findFirst({
-        where: eq(schema.sizes.id, v.id), // Utiliza el nombre correcto del campo
+        where: and(
+          eq(schema.sizes.id, v.id),
+          eq(schema.sizes.entidadId, entityId),
+        )
       });
 
       if (existingSize) {
@@ -75,8 +82,14 @@ async function sizesList(localId: string | null, entityId: string | null): Promi
           .update(schema.sizes)
           .set({
             ...v,
+            entidadId: entityId,
           })
-          .where(eq(schema.sizes.id, v.id));
+          .where(
+            and(
+              eq(schema.sizes.id, v.id),
+              eq(schema.sizes.entidadId, entityId),
+            )
+          );
       } else {
         // Si el tamaño no existe, insértalo
         await db.insert(schema.sizes).values({
@@ -121,21 +134,29 @@ const storesPreparedSE = db.query.stores.findFirst({
 }).prepare();
 
 const sizePreparedSE = db.query.sizes.findFirst({
-  where: eq(schema.sizes.id, sql.placeholder("sizeId")), // Utiliza el nombre correcto del campo
+  where: and(
+    eq(schema.sizes.id, sql.placeholder("sizeId")),
+    eq(schema.sizes.entidadId, sql.placeholder("entidadId")),
+  )
 }).prepare();
 
 async function sizeExpand(lsize: LockerSize, localId: string): Promise<LockerSize> {
   let entityId = null;
 
-  const [fee, store, existingSize] = await Promise.all([
+  const [fee, store] = await Promise.all([
     feeDataPreparedSE.execute({ sizeId: lsize.id, localId }),
     storesPreparedSE.execute({ localId }),
-    sizePreparedSE.execute({ sizeId: lsize.id })
   ]);
 
   if (store) {
-    entityId = store.entidadId ?? entityId;
+    entityId = store.entidadId ?? entityId ?? fee?.entidadId;
   }
+
+  if (!entityId) {
+    throw new Error("sizeExpand sin entityId " + lsize.id + " " + localId);
+  }
+
+  const existingSize = await sizePreparedSE.execute({ sizeId: lsize.id, entidadId: entityId });
 
   lsize.tarifa = fee?.identifier;
   if (existingSize) {
@@ -144,14 +165,18 @@ async function sizeExpand(lsize: LockerSize, localId: string): Promise<LockerSiz
       .update(schema.sizes)
       .set({
         ...lsize,
+        entidadId: entityId,
       })
-      .where(eq(schema.sizes.id, lsize.id));
+      .where(and(
+        eq(schema.sizes.id, lsize.id),
+        eq(schema.sizes.entidadId, entityId),
+      ));
     lsize.image = existingSize.image;
   } else {
     // Si el tamaño no existe, insértalo
     await db.insert(schema.sizes).values({
       ...lsize,
-      entidadId: entityId ?? fee?.entidadId,
+      entidadId: entityId,
     });
   }
 
@@ -291,7 +316,12 @@ export const sizeRouter = createTRPCRouter({
       return ctx.db
         .update(schema.sizes)
         .set({ image: input.image })
-        .where(eq(schema.sizes.id, input.id));
+        .where(
+          and(
+            eq(schema.sizes.id, input.id),
+            eq(schema.sizes.entidadId, ctx.orgId ?? ""),
+          )
+        );
     }),
 });
 
