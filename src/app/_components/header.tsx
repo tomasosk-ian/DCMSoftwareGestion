@@ -71,8 +71,25 @@ export default function Home({ lang }: { lang?: string }) {
         </header>
         <div className="mobile-header-bar">
           <div className="mobile-navigation"></div>
-          <div className="mobile-mini-widgets"></div>
-          <div className="mobile-branding">
+          <div className="mobile-mini-widgets">
+            
+          </div>
+          <div className="h-20 py-2">
+            <Select
+              defaultValue={lang}
+              onValueChange={(v) =>
+                setLang(v as Languages).catch(console.error)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("language")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="es">Español</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+              </SelectContent>
+            </Select>
+
             <a className="" href="https://bagdrop.com.ar/">
               <img
                 className="preload-me"
