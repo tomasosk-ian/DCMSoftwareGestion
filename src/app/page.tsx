@@ -201,23 +201,23 @@ export default async function Home() {
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
         />
         <meta name="theme-color" content="#5b9a8b" />
-        <title>DCM Solutions</title>
+        <title>Bagdrop</title>
         <meta name="robots" content="max-image-preview:large" />
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="DCM Solutions » Feed"
+          title="Bagdrop » Feed"
           href="https://bagdrop.com.ar/feed/"
         />
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="DCM Solutions » Feed de los comentarios"
+          title="Bagdrop » Feed de los comentarios"
           href="https://bagdrop.com.ar/comments/feed/"
         />
         <link rel="canonical" href="https://bagdrop.com.ar/" />
 
-        <meta property="og:site_name" content="DCM Solutions" />
+        <meta property="og:site_name" content="Bagdrop" />
         <meta property="og:title" content="Home" />
         <meta property="og:url" content="https://bagdrop.com.ar/" />
         <meta property="og:type" content="website" />
