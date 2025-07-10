@@ -67,7 +67,7 @@ export default function FeePage(props: {
   async function handleChange() {
     try {
       await renameFee({
-        identifier: props.fee!.identifier,
+        identifier: props.fee.identifier,
         description,
         value,
         coin,
@@ -146,7 +146,7 @@ export default function FeePage(props: {
                   </div>
 
                   <div>
-                    <Label className="text-right">Tarifa</Label>
+                    <Label className="text-right">Tamaño</Label>
                     <Select
                       onValueChange={(value: string) => {
                         const intValue = parseInt(value);

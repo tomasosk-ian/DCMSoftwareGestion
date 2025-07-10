@@ -1,29 +1,56 @@
 import { Calendar } from "~/components/ui/calendar";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ButtonCustomComponent from "../../../components/buttonCustom";
 import { es } from "date-fns/locale";
+import { Button } from "~/components/ui/button";
+import { ChevronLeftCircle } from "lucide-react";
+import ButtonIconCustomComponent from "~/components/button-icon-custom";
+import type { Translations } from "~/translations";
+import { api } from "~/trpc/react";
+import { Store } from "~/server/api/routers/store";
 
-export default function DateComponent(props: {
+export default function DateComponent({
+  t,
+  ...props
+}: {
+  store: Store;
   startDate: string;
   setStartDate: (startDate: string) => void;
   endDate: string;
   setEndDate: (endDate: string) => void;
   days: number;
   setDays: (days: number) => void;
+  goBack: () => void;
+  t: Translations;
 }) {
+  const { data: plazoReserva } = api.config.getKey.useQuery({
+    key: "reserve_from_now",
+    entityId: props.store.entidadId ?? ""
+  });
   const [range, setRange] = useState<DateRange | undefined>();
-  const [date, setDate] = useState<Date>();
-  useEffect(() => {
-    const fromDate = new Date();
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date();
-    toDate.setHours(23, 59, 0, 0);
-    props.setDays(0);
 
-    setRange({ from: fromDate, to: toDate });
-  }, []);
+  useEffect(() => {
+    if (plazoReserva && typeof range === "undefined") {
+      if (plazoReserva?.value.trim().toLowerCase() === "true") {
+        const today = Date.now();
+        const end = today + 1000 * 60 * 60 * 24 - 1000;
+
+        setRange({ from: new Date(today), to: new Date(end) });
+        props.setDays(1);
+      } else {
+        const fromDate = new Date();
+        fromDate.setHours(0, 0, 0, 0);
+        const toDate = new Date();
+        toDate.setHours(23, 59, 0, 0);
+
+        setRange({ from: fromDate, to: toDate });
+        props.setDays(0);
+      }
+    }
+  }, [plazoReserva]);
+
   function getDays() {
     if (range) {
       const fromDate = range.from!;
@@ -33,36 +60,84 @@ export default function DateComponent(props: {
       props.setDays(differenceInDays);
     }
   }
+
   function handleClick() {
     const today = Date.now();
-    // props.setStartDate(format(range!.from!, "yyyy-MM-dd'T'00:00:00"));
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(
+        today + props.days * 1000 * 60 * 60 * 24 - 1000,
+        "yyyy-MM-dd'T'HH:mm:ss",
+      );
+    } else {
+      start = format(today, "yyyy-MM-dd'T'00:00:00");
+      end = format(range!.to!, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
     getDays();
   }
+
   function onlyToday() {
     const today = Date.now();
-    props.setStartDate(format(today, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      start = format(today, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(today + 1000 * 60 * 60 * 24 - 1000, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(today, "yyyy-MM-dd'T'00:00:00");
+      end = format(today, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
     getDays();
   }
+
+  const textoReservas = useMemo(() => {
+    if (!plazoReserva) {
+      return "";
+    } else if (plazoReserva.value.trim().toLowerCase() === "true") {
+      return t("dateReservesTextNow");
+    } else {
+      return t("dateReservesText");
+    }
+  }, [t, plazoReserva]);
+
   return (
     <div>
       {!props.endDate && (
         <div className="container flex flex-col items-center justify-center  ">
-          <h2 className="text-3xl font-semibold">
-            ¿Cuántos días necesitas tu locker?
-          </h2>
-          <p>Reservas desde las 00:00 hs hasta las 23:59</p>
+          <div className="flex flex-row">
+            <ButtonIconCustomComponent
+              className="mx-4"
+              noWFull={true}
+              icon={<ChevronLeftCircle />}
+              onClick={props.goBack}
+            />
+            <h2 className="text-3xl font-semibold">{t("chooseDate")}</h2>
+          </div>
+          <p>{textoReservas}</p>
           <div className="justify-center">
             <div className="w-full">
               <Calendar
                 mode="range"
                 selected={range}
                 onSelect={(e) => {
-                  const days = differenceInDays(e?.to!, e?.from!);
+                  if (!e) {
+                    console.log("PORONGA capo");
+                    return;
+                  }
+
+                  const days = differenceInDays(e.to!, e.from!);
                   props.setDays(days + 1);
-                  setRange({ to: e?.to!, from: range?.from });
+                  setRange({ to: e.to!, from: range?.from });
                 }}
                 numberOfMonths={2}
                 disabled={(date) =>
@@ -81,11 +156,14 @@ export default function DateComponent(props: {
                     isNaN(props.days) ||
                     props.days == 0
                   }
-                  text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
+                  text={`${t("apply")} ${isNaN(props.days) ? 0 : props.days} ${t("days")}`}
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
-                <ButtonCustomComponent onClick={onlyToday} text={`Solo hoy`} />
+                <ButtonCustomComponent
+                  onClick={onlyToday}
+                  text={t("dateOnlyToday")}
+                />
               </div>
             </div>
           </div>

@@ -27,9 +27,8 @@ export const env = createEnv({
     SERVER_URL: z.string().url(),
     SENDGRID_API_KEY: z.string(),
     MAIL_SENDER: z.string(),
-    MOBBEX_API_KEY: z.string(),
-    MOBBEX_ACCESS_TOKEN: z.string(),
-    TOKEN_EMPRESA: z.string(),
+
+    TOKEN_EMPRESA: z.string().optional(),
     CLERK_SECRET_KEY: z.string(),
   },
 
@@ -56,8 +55,6 @@ export const env = createEnv({
     SERVER_URL: process.env.SERVER_URL,
     SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
     MAIL_SENDER: process.env.MAIL_SENDER,
-    MOBBEX_API_KEY: process.env.MOBBEX_API_KEY,
-    MOBBEX_ACCESS_TOKEN: process.env.MOBBEX_ACCESS_TOKEN,
     TOKEN_EMPRESA: process.env.TOKEN_EMPRESA,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,

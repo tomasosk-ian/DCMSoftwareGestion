@@ -1,24 +1,22 @@
 "use client";
-import { useState } from "react";
-import { RouterOutputs } from "~/trpc/shared";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { City } from "~/server/api/routers/city";
-import { Store } from "~/server/api/routers/store";
+import type { City } from "~/server/api/routers/city";
+import type { Store } from "~/server/api/routers/store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
-export default function CitySelector(props: {
+import type { Translations } from "~/translations";
+export default function CitySelector({ t, ...props }: {
   cities: City[];
   city: City | null;
   setCity: (city: City) => void;
   setStores: (stores: Store[] | undefined) => void;
+  t: Translations,
 }) {
   const router = useRouter();
   if (props.city != null) {
@@ -30,39 +28,42 @@ export default function CitySelector(props: {
   async function handleChange(city: City) {
     try {
       props.setCity(city);
-      toast.success("Se ha modificado la ciudad.");
+      toast.success(t("cityModified"));
       router.refresh();
     } catch (error) {
       console.log(error);
-      toast.error("Error");
+      toast.error(t("error"));
     }
   }
   return (
     <main className="flex justify-center ">
       {!props.city && (
         <div className="container flex flex-col items-center justify-center gap-6 ">
-          <h2 className="text-3xl font-semibold">
-            ¿Dónde quieres reservar tu consigna?
+          <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl">
+            {t("chooseCity")}
           </h2>
-          <div className="grid grid-cols-4 gap-4 ">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {props.cities.length === 0 && <div className="col-span-full text-center">{t("noCities")}</div>}
             {props.cities.map((city) => {
               return (
-                <Card
-                  className="grid w-[35vh] overflow-hidden shadow-xl"
-                  onClick={() => handleChange(city)}
-                  key={city.identifier}
-                >
-                  <CardHeader>
-                    <CardTitle> {city.name}</CardTitle>
-                    <CardDescription>
-                      Seleccione la ciudad donde desea alquilar.
-                    </CardDescription>
-                  </CardHeader>
-                  <img
-                    className="aspect-video object-cover"
-                    src={city.image ? city.image : "/placeholder.svg"}
-                  ></img>
-                </Card>
+                <div key={"div-" + city.identifier} className="px-5 pb-5">
+                  <Card
+                    className="grid w-[35vh] overflow-hidden shadow-xl"
+                    onClick={() => handleChange(city)}
+                    key={city.identifier}
+                  >
+                    <CardHeader>
+                      <CardTitle> {city.name}</CardTitle>
+                      <CardDescription>
+                        {t("selectCity")}
+                      </CardDescription>
+                    </CardHeader>
+                    <img
+                      className="aspect-video object-cover"
+                      src={city.image ? city.image : "/placeholder.svg"}
+                    ></img>
+                  </Card> 
+                </div>
               );
             })}
           </div>

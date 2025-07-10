@@ -20,8 +20,9 @@ import { type Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { type Size } from "~/server/api/routers/sizes";
 import { type Store } from "~/server/api/routers/store";
 import { api } from "~/trpc/react";
-import { initMercadoPago, Payment as PaymentMp, StatusScreen } from '@mercadopago/sdk-react';
 import { PublicConfigMetodoPago } from "~/lib/config";
+import { loadMercadoPago } from "@mercadopago/sdk-js";
+import type { Translations } from "~/translations";
 
 declare global {
   interface Window {
@@ -35,7 +36,7 @@ declare global {
   }
 }
 
-export default function Payment(props: {
+export default function Payment({ t, ...props }: {
   checkoutNumber: string;
   setLoadingPay: (loadingPay: boolean) => void;
   reserves: Reserve[];
@@ -51,20 +52,35 @@ export default function Payment(props: {
   setPagoOk: (pagoOk: boolean) => void;
   cupon: Cupon | null | undefined;
   isExt: boolean;
+  t: Translations;
 }) {
   const { mutateAsync: confirmarBox } =
     api.lockerReserve.confirmBox.useMutation();
   const { mutateAsync: createReserve } = api.reserve.create.useMutation();
+  const { mutateAsync: getReserves } = api.reserve.getByidTransactionsMut.useMutation();
   const { mutateAsync: useCupon } = api.cupones.useCupon.useMutation();
   const { mutateAsync: createTransaction } =
     api.transaction.create.useMutation();
   const [transaction, setTransaction] = useState<Transaction>();
   const { mutateAsync: sendEmail } = api.email.sendEmail.useMutation();
-  const { mutateAsync: procesarPagoMp } = api.mp.procesarPago.useMutation();
-  const { data: medioPagoRes } = api.config.getKey.useQuery({ key: 'metodo_pago' });
-  const { data: mpPublicKey } = api.config.getKey.useQuery({ key: 'mercadopago_public_key' });
+  const { mutateAsync: mpPreferenceGet } = api.mp.getPreference.useMutation();
+  const { data: medioPagoRes } = api.config.getKey.useQuery({ key: 'metodo_pago', entityId: props.store.entidadId ?? "" });
+  const { data: mpPublicKey } = api.config.getKey.useQuery({ key: 'mercadopago_public_key', entityId: props.store.entidadId ?? "" });
+  const { mutateAsync: isPagadoMp } = api.mp.areReservesPaid.useMutation();
   const [medioConfigurado, setMedioConfigurado] = useState<PublicConfigMetodoPago | null>(null);
   const [mpClavePrimeraCarga, setMpClavePrimeraCarga] = useState<string | null>(null);
+  // const [mpPreference, setMpPreference] = useState("");
+
+  const idTransactions = useMemo(() => props.reserves
+    .map(v => v.IdTransaction)
+    .filter(v => {
+      if (typeof v !== 'number') {
+        console.error("reserva sin IdTransaction");
+        return false;
+      } else {
+        return true;
+      }
+    }) as number[], [props.reserves]);
 
   // solo define mpClavePrimeraCarga si
   // mpPublicKey existe y no se había definido antes
@@ -86,7 +102,69 @@ export default function Payment(props: {
 
   useEffect(() => {
     if (medioConfigurado === PublicConfigMetodoPago.mercadopago && mpClavePrimeraCarga) {
-      initMercadoPago(mpClavePrimeraCarga);
+      (async () => {
+        await loadMercadoPago();
+
+        const mp = new window.MercadoPago(mpClavePrimeraCarga, {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          locale: "es-AR" as unknown as never,
+        });
+  
+        const bricks = mp.bricks();
+        await bricks.create("wallet", "mp-container", {
+          callbacks: {
+            onSubmit: async () => {
+              const res = await mpPreferenceGet({
+                price: props.total,
+                productName: "Reserva de locker",
+                quantity: 1,
+                IdTransactions: idTransactions,
+                meta: {
+                  client_email: props.client.email!,
+                  client_name: props.client.name ?? "",
+                  client_surname: props.client.surname ?? "",
+                  coin_description: props.coin.description,
+                  cupon_id: props.cupon?.identifier,
+                  end_date: props.endDate,
+                  start_date: props.startDate,
+                  is_ext: props.isExt,
+                  n_reserve: props.nReserve,
+                  store_address: props.store.address ?? "",
+                  store_name: props.store.name,
+                  total: props.total,
+                  entidad_id: props.store.entidadId ?? "",
+                },
+                href: window.location.href,
+                entityId: props.store.entidadId ?? "",
+              });
+
+              return res.preferenceId;
+            }
+          },
+          initialization: {
+            redirectMode: 'blank',
+          }
+        });
+
+        const interval = setInterval(() => {
+          isPagadoMp({
+            IdTransactions: idTransactions,
+            entityId: props.store.entidadId ?? "",
+          }).then(e => {
+            console.log('isPagadoMp', e);
+            if (e) {
+              success()
+                .then(console.log)
+                .catch(console.error);
+              clearInterval(interval);
+            }
+          }).catch(e => {
+            console.error("isPagadoMp error", e);
+          })
+        }, 1000)
+      })()
+        .then(console.log)
+        .catch(console.error);
     }
   }, [medioConfigurado, mpClavePrimeraCarga]);
 
@@ -96,9 +174,28 @@ export default function Payment(props: {
     return formattedDate;
   }
 
-  const [mpPaymentId, setMpPaymentId] = useState("");
+  // const [mpPaymentId, setMpPaymentId] = useState("");
 
   async function success() {
+    if (medioConfigurado !== PublicConfigMetodoPago.mobbex) {
+      const reserves = await getReserves({
+        idTransactions: idTransactions,
+        entityId: props.store.entidadId ?? "",
+      });
+
+      if (props.setReserves) {
+        props.setReserves(reserves.map(r => ({
+          ...r,
+          Cantidad: typeof r.Cantidad !== 'number' ? undefined : r.Cantidad,
+          IdTransaction: typeof r.IdTransaction !== 'number' ? undefined : r.IdTransaction,
+        })));
+      }
+
+      props.setLoadingPay(false);
+      props.setPagoOk(true);
+      return;
+    }
+
     try {
       props.setLoadingPay(true);
       const token: [number, string][] = [];
@@ -112,6 +209,7 @@ export default function Payment(props: {
           let response = await confirmarBox({
             idToken: reserve.IdTransaction!,
             nReserve: props.nReserve,
+            entityId: props.store.entidadId ?? "",
           });
 
           if (response) {
@@ -120,15 +218,16 @@ export default function Payment(props: {
                 reserve.Token1!,
                 props.sizes.find((x) => x.id === reserve.IdSize)?.nombre! ?? "",
               ]);
+              
               const updatedReserve = await createReserve({
                 Contador: reserve.Contador,
                 FechaCreacion: reserve.FechaCreacion,
                 FechaInicio: props.startDate,
-                FechaFin: format(props.endDate, "yyyy-MM-dd'T'23:59:59"),
+                FechaFin: props.endDate,
                 IdFisico: reserve.IdFisico,
                 IdBox: reserve.IdBox,
                 IdSize: reserve.IdSize,
-                NroSerie: reserve.NroSerie,
+                NroSerie: reserve.NroSerie!,
                 Token1: reserve.Token1,
                 Cantidad: reserve.Cantidad,
                 client: reserve.client,
@@ -137,6 +236,7 @@ export default function Payment(props: {
                 IdTransaction: reserve.IdTransaction,
                 Modo: reserve.Modo,
                 nReserve: props.nReserve,
+                entityId: props.store.entidadId ?? "",
               });
 
               if (props.setReserves) {
@@ -154,10 +254,11 @@ export default function Payment(props: {
               client: reserve.client,
               amount: props.total,
               nReserve: props.nReserve,
+              entityId: props.store.entidadId ?? "",
             });
 
             if (props.cupon) {
-              await useCupon({ identifier: props.cupon.identifier });
+              await useCupon({ identifier: props.cupon.identifier, entityId: props.store.entidadId ?? "", });
             }
           }
 
@@ -274,56 +375,12 @@ export default function Payment(props: {
     );
   } */
 
-  const mpDone = useMemo(() => typeof mpPaymentId === 'string' && mpPaymentId !== '', [mpPaymentId]);
+  // const mpDone = useMemo(() => typeof mpPaymentId === 'string' && mpPaymentId !== '', [mpPaymentId]);
 
   return (
     <>
       <>
-        {medioConfigurado === PublicConfigMetodoPago.mercadopago && mpClavePrimeraCarga && <>
-          { !mpDone && <PaymentMp
-            initialization={{
-              amount: props.total,
-              payer: {
-                email: props.client.email ?? undefined,
-                firstName: props.client.name ?? undefined,
-                lastName: props.client.surname ?? undefined,
-                identification: props.client.dni ? {
-                  number: props.client.dni,
-                  type: 'id',
-                } : undefined,
-              }
-            }}
-            customization={{
-              paymentMethods: {
-                ticket: "all",
-                creditCard: "all",
-                prepaidCard: "all",
-                debitCard: "all",
-                mercadoPago: "all",
-                bankTransfer: "all",
-                atm: "all",
-              },
-            }}
-            onSubmit={async ({ formData }) => {
-              const res = await procesarPagoMp({
-                ...formData,
-                additional_info: {
-                  ...formData.additional_info,
-                  items: undefined,
-                },
-                issuer_id: Number(formData.issuer_id),
-              });
-
-              setMpPaymentId(String(res.paymentId) ?? "");
-              if (res.status === "approved") {
-                await success();
-              }
-
-              console.log('status', res);
-            }}
-          /> }
-          { mpDone && <StatusScreen initialization={{ paymentId: mpPaymentId }} /> }
-        </> }
+        <div id="mp-container" />
         {medioConfigurado === PublicConfigMetodoPago.mobbex && <>
           <Script
             src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js"

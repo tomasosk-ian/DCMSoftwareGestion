@@ -48,7 +48,7 @@ export default function ClientPage({
   const [telefono, setTelefono] = useState(client!.telefono);
   const [dni, setDni] = useState(client!.dni);
   const { mutateAsync: renameclient, isLoading } =
-    api.client.change.useMutation();
+    api.clients.change.useMutation();
 
   const { data: stores } = api.store.get.useQuery();
   const router = useRouter();
@@ -159,7 +159,7 @@ export default function ClientPage({
                         href={`/panel/reservas/${reserva.nReserve}`}
                         leading={reserva.nReserve}
                         title={`Local: ${
-                          stores?.find((x) => x.serieLocker == reserva.NroSerie)
+                          stores?.find((x) => x.lockers.some(l => l.serieLocker === reserva.NroSerie))
                             ?.name
                         }. Fecha inicio: ${reserva.FechaInicio?.split("T")[0]}. Fecha fin: ${reserva.FechaFin?.split("T")[0]}`}
                       />
@@ -186,7 +186,7 @@ export default function ClientPage({
 
 function DeleteChannel(props: { clientId: number }) {
   const { mutateAsync: deleteChannel, isLoading } =
-    api.client.delete.useMutation();
+    api.clients.delete.useMutation();
 
   const router = useRouter();
 

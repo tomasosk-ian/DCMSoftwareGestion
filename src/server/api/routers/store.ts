@@ -1,5 +1,7 @@
-import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import { trpcTienePermisoCtx } from "~/lib/roles";
 import { createId } from "~/lib/utils";
 
 import {
@@ -12,26 +14,42 @@ import { stores } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 
 export const storeRouter = createTRPCRouter({
-  get: publicProcedure.query(({ ctx }) => {
-    const stores = ctx.db.query.stores.findMany({
-      with: {
-        city: true,
-      },
-    });
-    return stores;
-  }),
+  get: publicProcedure
+    .query(({ ctx }) => {
+      const stores = ctx.db.query.stores.findMany({
+        with: {
+          city: true,
+          lockers: true,
+        },
+      });
+      return stores;
+    }),
 
-  getById: publicProcedure
+  getProt: protectedProcedure
+    .query(({ ctx }) => {
+      const stores = ctx.db.query.stores.findMany({
+        where: eq(schema.stores.entidadId, ctx.orgId ?? ""),
+        with: {
+          city: true,
+          lockers: true,
+        },
+      });
+      return stores;
+    }),
+
+  getById: protectedProcedure
     .input(
       z.object({
         storeId: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      await trpcTienePermisoCtx(ctx, "panel:locales");
       const store = await db.query.stores.findFirst({
         where: eq(schema.stores.identifier, input.storeId),
         with: {
           city: true,
+          lockers: true,
         },
       });
 
@@ -49,29 +67,14 @@ export const storeRouter = createTRPCRouter({
         where: eq(schema.stores.cityId, input.cityId),
         with: {
           city: true,
-        },
-      });
-
-      return store;
-    }),
-  getByNroSerie: publicProcedure
-    .input(
-      z.object({
-        nroSerie: z.string(),
-      }),
-    )
-    .query(async ({ input }) => {
-      const store = await db.query.stores.findFirst({
-        where: eq(schema.stores.serieLocker, input.nroSerie),
-        with: {
-          city: true,
+          lockers: true,
         },
       });
 
       return store;
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1).max(255),
@@ -79,11 +82,17 @@ export const storeRouter = createTRPCRouter({
         cityId: z.string().min(0).max(1023),
         address: z.string().min(0).max(1023),
         organizationName: z.string().min(0).max(1023),
-        serieLocker: z.string().min(0).max(1023),
         description: z.string().min(0).max(1023),
+        serieLocker: z.string().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await trpcTienePermisoCtx(ctx, "panel:locales");
+
+      if (!ctx.orgId) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: "Sin entidad" });
+      }
+
       const identifier = createId();
       await ctx.db.insert(schema.stores).values({
         identifier,
@@ -92,41 +101,86 @@ export const storeRouter = createTRPCRouter({
         cityId: input.cityId,
         address: input.address,
         organizationName: input.organizationName,
-        serieLocker: input.serieLocker,
         description: input.description,
+        entidadId: ctx.orgId
       });
+
+      if (input.serieLocker !== null) {
+        await ctx.db.insert(schema.storesLockers)
+          .values({
+            storeId: identifier,
+            serieLocker: input.serieLocker,
+          });
+      }
 
       return { identifier };
     }),
-  change: publicProcedure
+  change: protectedProcedure
     .input(
       z.object({
         identifier: z.string(),
         name: z.string(),
         image: z.string().nullable().optional(),
         cityId: z.string().min(0).max(1023),
-        serieLocker: z.string().nullable(),
         address: z.string().min(0).max(1023).nullable(),
         organizationName: z.string().min(0).max(1023),
         description: z.string().min(0).max(1023),
+        serieLockers: z.array(z.string()).nullable(),
       }),
     )
-    .mutation(({ ctx, input }) => {
-      return ctx.db
-        .update(stores)
-        .set(input)
-        .where(eq(stores.identifier, input.identifier));
+    .mutation(async ({ ctx, input }) => {
+      await trpcTienePermisoCtx(ctx, "panel:locales");
+      const a = await ctx.db.query.stores.findFirst({
+        where: eq(schema.stores.identifier, input.identifier)
+      });
+
+      if (!a) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      return ctx.db.transaction(async (tx) => {
+        await tx
+          .update(stores)
+          .set({
+            name: input.name,
+            image: input.image,
+            cityId: input.cityId,
+            address: input.address,
+            description: input.description,
+            organizationName: input.organizationName,
+          })
+          .where(and(
+            eq(stores.identifier, input.identifier),
+            eq(stores.entidadId, ctx.orgId ?? ""),
+          ));
+
+        if (Array.isArray(input.serieLockers)) {
+          await tx.delete(schema.storesLockers)
+            .where(eq(schema.storesLockers.storeId, a.identifier));
+          for (const l of input.serieLockers) {
+            await tx.insert(schema.storesLockers)
+              .values({
+                storeId: a.identifier,
+                serieLocker: l,
+              });
+          }
+        }
+      });
     }),
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         id: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await trpcTienePermisoCtx(ctx, "panel:locales");
       await db
         .delete(schema.stores)
-        .where(eq(schema.stores.identifier, input.id));
+        .where(and(
+          eq(schema.stores.identifier, input.id),
+          eq(schema.stores.entidadId, ctx.orgId ?? ""),
+        ));
     }),
 });
 
