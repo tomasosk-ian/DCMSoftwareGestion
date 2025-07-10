@@ -159,7 +159,7 @@ function FormMetodoPago({ invalidate }: { invalidate: () => void }) {
           </div>}
 
           {metodo === 'mercadopago' && <div className="font-bold">
-            <Label htmlFor="clave4">URL de Webhook de Mercado Pago</Label>
+            <Label htmlFor="clave4">URL de Webhook de Mercado Pago (sin path)</Label>
             <Input
               id="clave4"
               value={clave4}
