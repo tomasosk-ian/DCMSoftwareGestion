@@ -42,19 +42,19 @@ export function AppSidebar({ lang }: { lang?: string }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Item text={t("home")} url="https://dcm.com.ar/" />
+              <Item text={t("home")} url="https://bagdrop.com.ar/" />
             </SidebarMenuButton>
             <SidebarMenuButton asChild>
-              <Item text={t("lockers")} url="https://dcm.com.ar/#!/lockers" />
+              <Item text={t("lockers")} url="https://bagdrop.com.ar/#!/lockers" />
             </SidebarMenuButton>
             <SidebarMenuButton asChild>
               <Item
                 text={t("faq")}
-                url="https://dcm.com.ar/preguntas-frecuentes/"
+                url="https://bagdrop.com.ar/preguntas-frecuentes/"
               />
             </SidebarMenuButton>
             <SidebarMenuButton asChild>
-              <Item text={t("contact")} url="https://dcm.com.ar/contacto/" />
+              <Item text={t("contact")} url="https://bagdrop.com.ar/contacto/" />
             </SidebarMenuButton>
             <SidebarMenuButton asChild>
               <div className="mt-8 w-[80%] justify-self-center">
