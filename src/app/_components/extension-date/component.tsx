@@ -8,6 +8,7 @@ import { Reserve } from "~/server/api/routers/reserves";
 import { es } from "date-fns/locale";
 import { Translations } from "~/translations";
 import { Client } from "~/server/api/routers/clients";
+import dayjs from "dayjs";
 
 export default function DateComponent({ t, ...props }: {
   startDate: string | undefined;
@@ -39,7 +40,10 @@ export default function DateComponent({ t, ...props }: {
 
   useEffect(() => {
     if (reserve) {
-      setRange({ from: new Date(reserve.FechaFin!) });
+      setRange({
+        from: new Date(reserve.FechaFin!),
+        to: dayjs(new Date(reserve.FechaFin!)).add(1, "day").toDate(),
+      });
     }
     if (!reserve && !isLoading) props.setFailed(true);
   }, [reserve, isLoading]);
@@ -61,13 +65,23 @@ export default function DateComponent({ t, ...props }: {
     let start, end;
 
     if (plazoReserva?.value.trim().toLowerCase() === "true") {
-      const rangeTo = new Date(range!.to!);
-      rangeTo.setUTCHours(nextDay.getUTCHours());
-      rangeTo.setMinutes(nextDay.getMinutes());
-      rangeTo.setSeconds(nextDay.getSeconds());
+      // let rangeTo = new Date(range!.to!);
+      // rangeTo.setUTCHours(nextDay.getUTCHours());
+      // rangeTo.setMinutes(nextDay.getMinutes());
+      // rangeTo.setSeconds(nextDay.getSeconds());
+
+      // if (Math.abs(dayjs(rangeTo).diff(nextDay, "day")) < 1) {
+      //   rangeTo = nextDay;
+      // }
+
+      // start = format(lastFecha, "yyyy-MM-dd'T'HH:mm:ss");
+      // end = format(rangeTo, "yyyy-MM-dd'T'HH:mm:ss");
 
       start = format(lastFecha, "yyyy-MM-dd'T'HH:mm:ss");
-      end = format(rangeTo, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(
+        lastFecha.getTime() + props.days * 1000 * 60 * 60 * 24 - 1000,
+        "yyyy-MM-dd'T'HH:mm:ss",
+      );
     } else {
       start = format(nextDay, "yyyy-MM-dd'T'00:00:00");
       end = format(range!.to!, "yyyy-MM-dd'T'23:59:59");
