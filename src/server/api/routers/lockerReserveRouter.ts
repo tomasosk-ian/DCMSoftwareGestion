@@ -196,6 +196,7 @@ export const lockerReserveRouter = createTRPCRouter({
         Token1: z.number(),
         newEndDate: z.string().optional(),
         nReserve: z.number(),
+        entityId: z.string().min(1),
       }),
     )
     .mutation(async ({ input }) => {
@@ -221,6 +222,18 @@ export const lockerReserveRouter = createTRPCRouter({
         //       eq(schema.reservas.nReserve, input.nReserve),
         //     ),
         //   );
+
+        const reserve = await db.query.reservas.findFirst({
+          where: and(
+            eq(schema.reservas.entidadId, input.entityId),
+            // eq(schema.reservas.nReserve, input.nReserve),
+            eq(schema.reservas.Token1, input.Token1)
+          )
+        });
+
+        if (!reserve) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
 
         if (!reservationResponse.ok) {
           const errorResponse = await reservationResponse.json();

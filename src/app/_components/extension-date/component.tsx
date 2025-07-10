@@ -39,6 +39,16 @@ export default function DateComponent({ t, ...props }: {
   });
 
   useEffect(() => {
+    if (plazoReserva && typeof range === "undefined") {
+      if (plazoReserva?.value.trim().toLowerCase() === "true") {
+        props.setDays(1);
+      } else {
+        props.setDays(0);
+      }
+    }
+  }, [plazoReserva]);
+
+  useEffect(() => {
     if (reserve) {
       setRange({
         from: new Date(reserve.FechaFin!),
