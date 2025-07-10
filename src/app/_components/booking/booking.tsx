@@ -27,6 +27,7 @@ export default function Booking({ t, ...props }: {
   startDate: string;
   endDate: string;
   reserves: Reserve[];
+  totalPre: number;
   total: number;
   setTotal: (total: number) => void;
   coin: Coin;
@@ -91,12 +92,12 @@ export default function Booking({ t, ...props }: {
 
   useEffect(() => {
     if (props.cupon?.tipo_descuento == "fijo") {
-      const newTotal = props.total - (props.cupon?.valor_descuento ?? 0);
+      const newTotal = props.totalPre - (props.cupon?.valor_descuento ?? 0);
       props.setTotal(newTotal);
     }
     if (props.cupon?.tipo_descuento == "porcentaje") {
       const newTotal =
-        props.total - (props.total * (props.cupon?.valor_descuento ?? 0)) / 100;
+        props.totalPre - (props.totalPre * (props.cupon?.valor_descuento ?? 0)) / 100;
       props.setTotal(newTotal);
     }
   }, [props.cupon]);

@@ -92,6 +92,7 @@ export default function HomePage(props: {
 
   const { mutateAsync: createClient } = api.clients.create.useMutation();
 
+  const [totalPre, setTotalPre] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [coin, setCoin] = useState<Coin>();
   const { mutateAsync: test } = api.mobbex.test.useMutation();
@@ -301,6 +302,7 @@ export default function HomePage(props: {
                         t={t}
                         goBack={() => {
                           setStore(null);
+                          setTotalPre(0);
                           setTotal(0);
                         }}
                       />
@@ -322,8 +324,8 @@ export default function HomePage(props: {
                       coins={coins!}
                       setFailedResponse={setFailedResponse}
                       failedResponse={failedResponse}
-                      total={total}
-                      setTotal={setTotal}
+                      total={totalPre}
+                      setTotal={setTotalPre}
                       t={t}
                       goBack={() => {
                         setEndDate(undefined);
@@ -361,6 +363,7 @@ export default function HomePage(props: {
                             startDate={startDate!}
                             endDate={endDate!}
                             reserves={reserves}
+                            totalPre={totalPre}
                             total={total}
                             setTotal={setTotal}
                             coin={coin!}

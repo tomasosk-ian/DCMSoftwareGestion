@@ -43,6 +43,7 @@ export default function Extension({ t, ...props }: {
   const [endDate, setEndDate] = useState<string>();
   const [days, setDays] = useState<number>(0);
   const [reserve, setReserve] = useState<Reserve>();
+  const [reserva, setReserva] = useState<boolean>(false);
   const [total, setTotal] = useState<number>(100);
   const [coin, setCoin] = useState<Coin>();
   const [nReserve, setNReserve] = useState<number>(0);
@@ -160,17 +161,25 @@ export default function Extension({ t, ...props }: {
             newEndDate: endDate,
             Token1: reserve.Token1!,
             nReserve: nreserve!,
+            entityId: client.entidadId!,
+            reserveData: {
+              nReserve,
+              endDate: endDate!,
+              startDate: startDate!,
+              Cantidad: reserve.Cantidad,
+            }
           }),
         );
-
         if (!isNaN(response)) {
           reserve.IdTransaction = response;
         } else {
           failed = true;
           setFailed(true);
         }
+
         setReserve(reserve);
         if (!failed) {
+          setReserva(true);
           const checkoutNumber = await test({
             amount: total,
             reference: client.identifier.toString(),
@@ -234,7 +243,7 @@ export default function Extension({ t, ...props }: {
           </div>
           </>}{" "}
         {loadingPay && <Icons.spinner className="h-4 w-4 animate-spin" />}
-        {stores && reserve && !loadingPay && !pagoOk && (
+        {stores && reserve && !reserva && !loadingPay && !pagoOk && (
           <div>
             <ButtonIconCustomComponent className="mx-4" noWFull={true} icon={<ChevronLeftCircle />} onClick={() => {
               setReserve(undefined);
@@ -266,6 +275,7 @@ export default function Extension({ t, ...props }: {
                   endDate={endDate!}
                   reserves={[reserve]}
                   total={total}
+                  totalPre={total}
                   setTotal={setTotal}
                   coin={coin!}
                   setCoin={setCoin}
@@ -301,32 +311,32 @@ export default function Extension({ t, ...props }: {
                 </div>
               </div>
             </div>
-            {reserve && !pagoOk && !loadingPay && <>
-              <div className="flex flex-row-reverse">
-                {!loadingPay && (
-                  <Payment
-                    t={t}
-                    checkoutNumber={checkoutNumber!}
-                    setLoadingPay={setLoadingPay}
-                    client={client}
-                    coin={coin!}
-                    endDate={endDate!}
-                    startDate={startDate!}
-                    nReserve={nReserve}
-                    reserves={[reserve]}
-                    setPagoOk={setPagoOk}
-                    setReserves={setReserves}
-                    sizes={props.sizes}
-                    store={store!}
-                    total={total}
-                    cupon={null}
-                    isExt={true}
-                  />
-                )}
-              </div>
-            </>}
           </div>
         )}
+        {reserva && reserve && !pagoOk && !loadingPay && <>
+          <div className="flex flex-row-reverse">
+            {!loadingPay && (
+              <Payment
+                t={t}
+                checkoutNumber={checkoutNumber!}
+                setLoadingPay={setLoadingPay}
+                client={client}
+                coin={coin!}
+                endDate={endDate!}
+                startDate={startDate!}
+                nReserve={nReserve}
+                reserves={[reserve]}
+                setPagoOk={setPagoOk}
+                setReserves={setReserves}
+                sizes={props.sizes}
+                store={store!}
+                total={total}
+                cupon={null}
+                isExt={true}
+              />
+            )}
+          </div>
+        </>}
         {pagoOk && (
           <div>
             <div>
