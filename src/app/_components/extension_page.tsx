@@ -162,6 +162,12 @@ export default function Extension({ t, ...props }: {
             Token1: reserve.Token1!,
             nReserve: nreserve!,
             entityId: client.entidadId!,
+            reserveData: {
+              nReserve,
+              endDate: endDate!,
+              startDate: startDate!,
+              Cantidad: reserve.Cantidad,
+            }
           }),
         );
         if (!isNaN(response)) {

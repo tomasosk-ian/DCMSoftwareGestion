@@ -188,44 +188,44 @@ export async function POST(request: NextRequest) {
           });
 
           if (response) {
-            if (isExt) {
-              token.push([
-                reserve.Token1!,
-                sizes.find((x) => x.id === reserve.IdSize)?.nombre ?? "",
-              ]);
+            // if (isExt) {
+            //   token.push([
+            //     reserve.Token1!,
+            //     sizes.find((x) => x.id === reserve.IdSize)?.nombre ?? "",
+            //   ]);
 
-              const client = await getClientByEmail(reserve.client!, meta.entidad_id);
-              const identifier = createId();
+            //   const client = await getClientByEmail(reserve.client!, meta.entidad_id);
+            //   const identifier = createId();
         
-              await db.insert(schema.reservas).values({
-                identifier,
-                NroSerie: reserve.NroSerie,
-                IdSize: reserve.IdSize,
-                IdBox: reserve.IdBox,
-                IdFisico: reserve.IdFisico,
-                Token1: reserve.Token1,
-                FechaCreacion: new Date().toISOString(),
-                FechaInicio: startDate,
-                FechaFin: endDate,
-                Contador: reserve.Contador,
-                Confirmado: reserve.Confirmado,
-                Modo: reserve.Modo,
-                Cantidad: reserve.Cantidad,
-                IdTransaction: reserve.IdTransaction,
-                client: client?.email,
-                nReserve: nReserve,
-                entidadId: reserve.entidadId,
-              });
+            //   await db.insert(schema.reservas).values({
+            //     identifier,
+            //     NroSerie: reserve.NroSerie,
+            //     IdSize: reserve.IdSize,
+            //     IdBox: reserve.IdBox,
+            //     IdFisico: reserve.IdFisico,
+            //     Token1: reserve.Token1,
+            //     FechaCreacion: new Date().toISOString(),
+            //     FechaInicio: startDate,
+            //     FechaFin: endDate,
+            //     Contador: reserve.Contador,
+            //     Confirmado: reserve.Confirmado,
+            //     Modo: reserve.Modo,
+            //     Cantidad: reserve.Cantidad,
+            //     IdTransaction: reserve.IdTransaction,
+            //     client: client?.email,
+            //     nReserve: nReserve,
+            //     entidadId: reserve.entidadId,
+            //   });
 
-              /* if (setReserves) {
-                setReserves([updatedReserve!]);
-              } */
-            } else {
-              token.push([
-                response,
-                sizes.find((x) => x.id === reserve.IdSize)?.nombre ?? "",
-              ]);
-            }
+            //   /* if (setReserves) {
+            //     setReserves([updatedReserve!]);
+            //   } */
+            // } else {
+            token.push([
+              response,
+              sizes.find((x) => x.id === reserve.IdSize)?.nombre ?? "",
+            ]);
+            // }
 
             await db.insert(schema.transactions).values({
               client: reserve.client,
