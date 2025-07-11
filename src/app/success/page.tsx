@@ -6,6 +6,7 @@ import { PageClient } from "./page-client";
 import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { Inter } from "next/font/google";
+import { PublicConfigKeys } from "~/lib/config";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -62,7 +63,15 @@ export default async function Page({
     )
   });
 
-  const allConfirmed = reserves.reduce((acc, r) => (typeof r.Confirmado === 'boolean' && r.Confirmado) && acc, true);
+  const key: PublicConfigKeys = 'metodo_pago';
+  const medio_pago = await db.query.publicConfig.findFirst({
+    where: and(
+      eq(schema.publicConfig.key, key),
+      eq(schema.publicConfig.entidadId, data.entidad_id),
+    )
+  });
+
+  const allConfirmed = reserves.reduce((acc, r) => ((medio_pago?.value === "mercadopago" && typeof r.mpPagadoOk === 'boolean' && r.mpPagadoOk) || medio_pago?.value !== "mercadopago") && acc, true);
   if (!store || reserves.length < 1 || !allConfirmed) {
     return <div></div>;
   }
