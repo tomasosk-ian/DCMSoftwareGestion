@@ -105,7 +105,7 @@ export const lockerReserveRouter = createTRPCRouter({
       z.object({
         idToken: z.number(),
         nReserve: z.number(),
-        // isExt: z.boolean(),
+        isExt: z.boolean(),
         // newEndDate: z.string().optional(),
       }),
     )
@@ -140,10 +140,18 @@ export const lockerReserveRouter = createTRPCRouter({
       }
 
       const reservedBoxData = await reservationResponse.json();
-      await db
-        .update(schema.reservas)
-        .set({ Token1: reservedBoxData, nReserve: input.nReserve })
-        .where(eq(schema.reservas.IdTransaction, input.idToken));
+      if (!input.isExt) {
+        await db
+          .update(schema.reservas)
+          .set({ Token1: reservedBoxData, nReserve: input.nReserve })
+          .where(eq(schema.reservas.IdTransaction, input.idToken));
+      } else {
+        await db
+          .update(schema.reservas)
+          .set({ nReserve: input.nReserve })
+          .where(eq(schema.reservas.IdTransaction, input.idToken));
+      }
+
       return reservedBoxData;
       // }
       // else {

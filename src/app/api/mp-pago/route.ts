@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
       }
 
       const token: [number, string][] = [];
-      const updatedReserves = await Promise.all(
+      await Promise.all(
         reserves.map(async (reserve) => {
           if (typeof reserve.IdTransaction !== 'number') {
             console.error('mp-pago: mp-pago reserve.IdTransaction no es number', reserve);
@@ -189,6 +189,7 @@ export async function POST(request: NextRequest) {
           let response = await api.lockerReserve.confirmBox.mutate({
             idToken: reserve.IdTransaction,
             nReserve: nReserve,
+            isExt,
           });
 
           if (response) {
