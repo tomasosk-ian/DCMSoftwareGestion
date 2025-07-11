@@ -13,4 +13,6 @@ export type MpMeta = {
   end_date: string,
   cupon_id?: string,
   entidad_id: string,
+  store_id: string,
+  verif_id: string,
 };
