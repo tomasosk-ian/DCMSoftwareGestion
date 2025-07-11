@@ -136,7 +136,6 @@ export const mpRouter = createTRPCRouter({
         .returning();
       
       back_url += `success?entityId=${ent.id}&nReserve=${input.meta.n_reserve}&pagoId=${p!.identifier}&verifId=${verifId}&startDate=${encodeURIComponent(input.meta.start_date)}&endDate=${encodeURIComponent(input.meta.end_date)}`;
-      console.log("BACK URL", back_url);
       
       try {
         const res = await preference.create({
