@@ -13,15 +13,33 @@ import { stores } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 
 export const storeRouter = createTRPCRouter({
-  get: publicProcedure.query(({ ctx }) => {
-    const stores = ctx.db.query.stores.findMany({
-      with: {
-        city: true,
-        lockers: true,
-      },
-    });
-    return stores;
-  }),
+  getSimple: publicProcedure
+    .query(({ ctx }) => {
+      const stores = ctx.db.query.stores.findMany();
+      return stores;
+    }),
+
+  get: publicProcedure
+    .query(({ ctx }) => {
+      const stores = ctx.db.query.stores.findMany({
+        with: {
+          city: true,
+          lockers: true,
+        },
+      });
+      return stores;
+    }),
+
+  getProt: protectedProcedure
+    .query(({ ctx }) => {
+      const stores = ctx.db.query.stores.findMany({
+        with: {
+          city: true,
+          lockers: true,
+        },
+      });
+      return stores;
+    }),
 
   getById: protectedProcedure
     .input(
@@ -155,3 +173,4 @@ export const storeRouter = createTRPCRouter({
 });
 
 export type Store = RouterOutputs["store"]["get"][number];
+export type StoreSimple = RouterOutputs["store"]["getSimple"][number];

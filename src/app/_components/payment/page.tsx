@@ -131,7 +131,9 @@ export default function Payment({ t, ...props }: {
                   n_reserve: props.nReserve,
                   store_address: props.store.address ?? "",
                   store_name: props.store.name,
-                  total: props.total
+                  total: props.total,
+                  store_id: props.store.identifier,
+                  verif_id: "",
                 },
                 href: window.location.href,
               });
@@ -205,6 +207,7 @@ export default function Payment({ t, ...props }: {
           let response = await confirmarBox({
             idToken: reserve.IdTransaction!,
             nReserve: props.nReserve,
+            isExt: props.isExt,
           });
 
           if (response) {
