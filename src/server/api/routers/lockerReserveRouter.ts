@@ -102,7 +102,7 @@ export const lockerReserveRouter = createTRPCRouter({
         idToken: z.number(),
         nReserve: z.number(),
         entityId: z.string().min(1),
-        // isExt: z.boolean(),
+        isExt: z.boolean(),
         // newEndDate: z.string().optional(),
       }),
     )
@@ -112,6 +112,17 @@ export const lockerReserveRouter = createTRPCRouter({
       });
 
       if (!ent) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      const reserva = await db.query.reservas.findFirst({
+        where: and(
+          eq(schema.reservas.IdTransaction, input.idToken),
+          eq(schema.reservas.entidadId, ent.id),
+        )
+      });
+
+      if (!reserva || !reserva.identifier) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
 
@@ -145,14 +156,26 @@ export const lockerReserveRouter = createTRPCRouter({
       }
 
       const reservedBoxData = await reservationResponse.json();
-      await db
-        .update(schema.reservas)
-        .set({ Token1: reservedBoxData, nReserve: input.nReserve })
-        .where(and(
-          eq(schema.reservas.IdTransaction, input.idToken),
-          eq(schema.reservas.entidadId, ent.id),
-        ));
-      return reservedBoxData;
+      if (!input.isExt) {
+        await db
+          .update(schema.reservas)
+          .set({ Token1: reservedBoxData, nReserve: input.nReserve })
+          .where(and(
+            eq(schema.reservas.identifier, reserva.identifier),
+            eq(schema.reservas.entidadId, ent.id),
+          ));
+        return reservedBoxData;
+      } else {
+        await db
+          .update(schema.reservas)
+          .set({ nReserve: input.nReserve })
+          .where(and(
+            eq(schema.reservas.identifier, reserva.identifier),
+            eq(schema.reservas.entidadId, ent.id),
+          ));
+        return reserva.Token1 ?? reservedBoxData;
+      }
+
       // }
       // else {
 
