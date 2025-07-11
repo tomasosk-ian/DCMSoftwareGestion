@@ -6,6 +6,8 @@ import { PageClient } from "./page-client";
 import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { Inter } from "next/font/google";
+import { PublicConfigKeys } from "~/lib/config";
+import { PageRefresh } from "./page-refresh";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -62,6 +64,19 @@ export default async function Page({
     )
   });
 
+  const key: PublicConfigKeys = 'metodo_pago';
+  const medio_pago = await db.query.publicConfig.findFirst({
+    where: and(
+      eq(schema.publicConfig.key, key),
+      eq(schema.publicConfig.entidadId, data.entidad_id),
+    )
+  });
+
+  const allConfirmed = reserves.reduce((acc, r) => ((medio_pago?.value === "mercadopago" && typeof r.mpPagadoOk === 'boolean' && r.mpPagadoOk) || medio_pago?.value !== "mercadopago") && acc, true);
+  if (!allConfirmed) {
+    return <PageRefresh />;
+  }
+  
   if (!store || reserves.length < 1) {
     return <div></div>;
   }
