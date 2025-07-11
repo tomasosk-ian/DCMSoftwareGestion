@@ -7,6 +7,7 @@ import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { Inter } from "next/font/google";
 import { PublicConfigKeys } from "~/lib/config";
+import { PageRefresh } from "./page-refresh";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,7 +73,11 @@ export default async function Page({
   });
 
   const allConfirmed = reserves.reduce((acc, r) => ((medio_pago?.value === "mercadopago" && typeof r.mpPagadoOk === 'boolean' && r.mpPagadoOk) || medio_pago?.value !== "mercadopago") && acc, true);
-  if (!store || reserves.length < 1 || !allConfirmed) {
+  if (!allConfirmed) {
+    return <PageRefresh />;
+  }
+  
+  if (!store || reserves.length < 1) {
     return <div></div>;
   }
 
