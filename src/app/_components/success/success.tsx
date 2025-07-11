@@ -8,20 +8,19 @@ import html2canvas from "html2canvas";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import QRCode from "react-qr-code";
 
-import { Coin } from "~/server/api/routers/coin";
 import { Reserve } from "~/server/api/routers/lockerReserveRouter";
 import { Size } from "~/server/api/routers/sizes";
-import { Store } from "~/server/api/routers/store";
+import { StoreSimple } from "~/server/api/routers/store";
 import type { Translations } from "~/translations";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { api } from "~/trpc/react";
 
 export default function Success({ t, ...props }: {
   reserves: Reserve[];
-  store: Store;
+  store: StoreSimple;
   nReserve: number;
   total: number;
-  coin?: Coin;
+  coin?: { description?: string | null };
   checkoutNumber: string;
   sizes: Size[];
   startDate: string | undefined;
@@ -79,7 +78,7 @@ export default function Success({ t, ...props }: {
       return;
     }
 
-    let message = `${t("shareWhatsappHeader")}\n${t("nReserve")}: ${props.nReserve}`;
+    let message = `${t("shareWhatsappHeader")}\n${t("nReserve")}: ${props.nReserve}\n${t("local")}: ${props.store.name}`;
     for (const r of props.reserves) {
       message += `\n${t("token")} (${getSize(r.IdSize!)}): ${r.Token1}`;
     }

@@ -10,6 +10,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db, schema } from "~/server/db";
 import { type PrivateConfigKeys } from "~/lib/config";
 import { MpMeta } from "~/lib/types";
+import { nanoid } from "nanoid";
 
 // eslint-disable-next-line no-var
 export var mpClient: MercadoPagoConfig | null = null;
@@ -103,10 +104,12 @@ export const mpRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
 
+      const verifId = nanoid();
       const meta: MpMeta = {
         ...input.meta,
         id_transactions: r,
         entidad_id: ent.id,
+        verif_id: verifId,
       };
 
       const preference = new Preference(mpClient);
@@ -120,7 +123,9 @@ export const mpRouter = createTRPCRouter({
       }
 
       back_url += url.host;
-      back_url += "/";
+      if (!back_url.endsWith("/")) {
+        back_url += "/";
+      }
 
       const [p] = await db.insert(schema.pagos)
         .values({
@@ -129,7 +134,9 @@ export const mpRouter = createTRPCRouter({
           entidadId: ent.id,
         })
         .returning();
-
+      
+      back_url += `success?entityId=${ent.id}&nReserve=${input.meta.n_reserve}&pagoId=${p!.identifier}&verifId=${verifId}&startDate=${encodeURIComponent(input.meta.start_date)}&endDate=${encodeURIComponent(input.meta.end_date)}`;
+      
       try {
         const res = await preference.create({
           body: {

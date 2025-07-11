@@ -5,6 +5,7 @@ import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { PublicConfigKeys } from "~/lib/config";
 
 export const getClientByEmail = async (email: string, entity: string) => {
   const client = await db.query.clients.findFirst({
@@ -101,7 +102,7 @@ export const lockerReserveRouter = createTRPCRouter({
         idToken: z.number(),
         nReserve: z.number(),
         entityId: z.string().min(1),
-        // isExt: z.boolean(),
+        isExt: z.boolean(),
         // newEndDate: z.string().optional(),
       }),
     )
@@ -111,6 +112,17 @@ export const lockerReserveRouter = createTRPCRouter({
       });
 
       if (!ent) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      const reserva = await db.query.reservas.findFirst({
+        where: and(
+          eq(schema.reservas.IdTransaction, input.idToken),
+          eq(schema.reservas.entidadId, ent.id),
+        )
+      });
+
+      if (!reserva || !reserva.identifier) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
 
@@ -144,14 +156,26 @@ export const lockerReserveRouter = createTRPCRouter({
       }
 
       const reservedBoxData = await reservationResponse.json();
-      await db
-        .update(schema.reservas)
-        .set({ Token1: reservedBoxData, nReserve: input.nReserve })
-        .where(and(
-          eq(schema.reservas.IdTransaction, input.idToken),
-          eq(schema.reservas.entidadId, ent.id),
-        ));
-      return reservedBoxData;
+      if (!input.isExt) {
+        await db
+          .update(schema.reservas)
+          .set({ Token1: reservedBoxData, nReserve: input.nReserve })
+          .where(and(
+            eq(schema.reservas.identifier, reserva.identifier),
+            eq(schema.reservas.entidadId, ent.id),
+          ));
+        return reservedBoxData;
+      } else {
+        await db
+          .update(schema.reservas)
+          .set({ nReserve: input.nReserve })
+          .where(and(
+            eq(schema.reservas.identifier, reserva.identifier),
+            eq(schema.reservas.entidadId, ent.id),
+          ));
+        return reserva.Token1 ?? reservedBoxData;
+      }
+
       // }
       // else {
 
@@ -196,11 +220,29 @@ export const lockerReserveRouter = createTRPCRouter({
         Token1: z.number(),
         newEndDate: z.string().optional(),
         nReserve: z.number(),
+        entityId: z.string().min(1),
+        reserveData: z.object({
+          nReserve: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+          Cantidad: z.number().nullish(),
+        })
       }),
     )
     .mutation(async ({ input }) => {
       try {
-        console.log("input.idToken", input.idToken);
+        const reserve = await db.query.reservas.findFirst({
+          where: and(
+            eq(schema.reservas.entidadId, input.entityId),
+            // eq(schema.reservas.nReserve, input.nReserve),
+            eq(schema.reservas.Token1, input.Token1)
+          )
+        });
+
+        if (!reserve) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+
         const reservationResponse = await fetch(
           `${env.SERVER_URL}/api/token/extender/${input.idToken}/${input.newEndDate || ""}`,
           {
@@ -226,6 +268,38 @@ export const lockerReserveRouter = createTRPCRouter({
           const errorResponse = await reservationResponse.json();
           console.error("Error en la respuesta del servidor:", errorResponse);
           return errorResponse.message || "Unknown error";
+        }
+
+        const key: PublicConfigKeys = 'metodo_pago';
+        const medio_pago = await db.query.publicConfig.findFirst({
+          where: and(
+            eq(schema.publicConfig.key, key),
+            eq(schema.publicConfig.entidadId, input.entityId),
+          )
+        });
+
+        if (medio_pago?.value === "mercadopago") {
+          const identifier = createId();
+          await db.insert(schema.reservas)
+            .values({
+              identifier,
+              Contador: reserve.Contador,
+              FechaCreacion: new Date().toISOString(),
+              FechaFin: input.reserveData.endDate,
+              FechaInicio: input.reserveData.startDate,
+              Cantidad: input.reserveData.Cantidad,
+              client: reserve.client,
+              Confirmado: false,
+              entidadId: reserve.entidadId,
+              IdFisico: reserve.IdFisico,
+              IdSize: reserve.IdSize,
+              IdTransaction: newIdToken,
+              Modo: reserve.Modo,
+              mpPagadoOk: false,
+              nReserve: input.reserveData.nReserve,
+              NroSerie: reserve.NroSerie,
+              Token1: reserve.Token1,
+            });
         }
 
         return newIdToken;

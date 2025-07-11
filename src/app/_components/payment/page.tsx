@@ -133,6 +133,8 @@ export default function Payment({ t, ...props }: {
                   store_name: props.store.name,
                   total: props.total,
                   entidad_id: props.store.entidadId ?? "",
+                  store_id: props.store.identifier,
+                  verif_id: "",
                 },
                 href: window.location.href,
                 entityId: props.store.entidadId ?? "",
@@ -210,6 +212,7 @@ export default function Payment({ t, ...props }: {
             idToken: reserve.IdTransaction!,
             nReserve: props.nReserve,
             entityId: props.store.entidadId ?? "",
+            isExt: props.isExt,
           });
 
           if (response) {

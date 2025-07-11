@@ -25,27 +25,27 @@ export default function Home({ lang }: { lang?: string }) {
         <header className="header-bar">
           <div className="branding">
             <div id="site-title" className="assistive-text">
-              DCM Solution
+              Bagdrop
             </div>
             <div id="site-description" className="assistive-text">
               Una solución inteligente para el guardado de equipaje
             </div>
-            <a className="" href="https://dcm.com.ar/">
+            <a className="" href="https://bagdrop.com.ar/">
               <img
                 className="preload-me"
-                src="./dcm.png"
-                width="207"
-                height="74"
-                sizes="207px"
-                alt="DCM Solution"
+                src="./Bag-Drop.png"
+                width="100"
+                height="100"
+                sizes="100px"
+                alt="Bagdrop"
               />
               <img
                 className="mobile-logo preload-me"
-                src="./dcm.png"
-                width="183"
-                height="64"
-                sizes="183px"
-                alt="DCM Solution"
+                src="./Bag-Drop.png"
+                width="100"
+                height="100"
+                sizes="100px"
+                alt="Bagdrop"
               />
             </a>
           </div>
@@ -71,16 +71,33 @@ export default function Home({ lang }: { lang?: string }) {
         </header>
         <div className="mobile-header-bar">
           <div className="mobile-navigation"></div>
-          <div className="mobile-mini-widgets"></div>
-          <div className="mobile-branding">
-            <a className="" href="https://dcm.com.ar/">
+          <div className="mobile-mini-widgets">
+            
+          </div>
+          <div className="h-20 py-2">
+            <Select
+              defaultValue={lang}
+              onValueChange={(v) =>
+                setLang(v as Languages).catch(console.error)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("language")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="es">Español</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <a className="" href="https://bagdrop.com.ar/">
               <img
                 className="preload-me"
-                src="./dcm.png"
-                width="207"
-                height="74"
-                sizes="207px"
-                alt="DCM Solution"
+                src="./Bag-Drop.png"
+                width="100"
+                height="100"
+                sizes="100px"
+                alt="Bagdrop"
               />
             </a>
           </div>
