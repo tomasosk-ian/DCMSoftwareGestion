@@ -110,6 +110,14 @@ export const lockerReserveRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      const reserva = await db.query.reservas.findFirst({
+        where: eq(schema.reservas.IdTransaction, input.idToken)
+      });
+
+      if (!reserva || !reserva.identifier) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
       // if (!input.isExt) {
       const reservationResponse = await fetch(
         `${env.SERVER_URL}/api/token/confirmar`,
@@ -144,15 +152,16 @@ export const lockerReserveRouter = createTRPCRouter({
         await db
           .update(schema.reservas)
           .set({ Token1: reservedBoxData, nReserve: input.nReserve })
-          .where(eq(schema.reservas.IdTransaction, input.idToken));
+          .where(eq(schema.reservas.identifier, reserva.identifier));
+        return reservedBoxData;
       } else {
         await db
           .update(schema.reservas)
           .set({ nReserve: input.nReserve })
-          .where(eq(schema.reservas.IdTransaction, input.idToken));
+          .where(eq(schema.reservas.identifier, reserva.identifier));
+        return reserva.Token1 ?? reservedBoxData;
       }
 
-      return reservedBoxData;
       // }
       // else {
 
