@@ -6,7 +6,6 @@ import { PageClient } from "./page-client";
 import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { Inter } from "next/font/google";
-import { useRouter } from "next/router";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,12 +62,7 @@ export default async function Page({
     )
   });
 
-  const router = useRouter();
   const allConfirmed = reserves.reduce((acc, r) => (typeof r.Confirmado === 'boolean' && r.Confirmado) && acc, true);
-  if (!allConfirmed) {
-    setTimeout(() => router.reload(), 5000);
-  }
-
   if (!store || reserves.length < 1 || !allConfirmed) {
     return <div></div>;
   }
