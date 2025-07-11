@@ -135,15 +135,15 @@ export const mpRouter = createTRPCRouter({
         })
         .returning();
       
-      back_url += `success?entityId=${ent.id}&nReserve=${input.meta.n_reserve}&pagoId=${p!.identifier}&verifId=${verifId}&startDate=${encodeURIComponent(input.meta.start_date)}&endDate=${encodeURIComponent(input.meta.end_date)}`;
+      const back_url_success = back_url + `success?entityId=${ent.id}&nReserve=${input.meta.n_reserve}&pagoId=${p!.identifier}&verifId=${verifId}&startDate=${encodeURIComponent(input.meta.start_date)}&endDate=${encodeURIComponent(input.meta.end_date)}`;
       
       try {
         const res = await preference.create({
           body: {
             notification_url: `${whUrl}api/mp-pago?source_news=webhooks`,
             back_urls: {
-              success: back_url,
-              pending: back_url,
+              success: back_url_success,
+              pending: back_url_success,
               failure: back_url,
             },
             items: [
