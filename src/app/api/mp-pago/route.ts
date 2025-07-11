@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       }
 
       const token: [number, string][] = [];
-      const updatedReserves = await Promise.all(
+      await Promise.all(
         reserves.map(async (reserve) => {
           if (typeof reserve.IdTransaction !== 'number') {
             console.error('mp-pago: mp-pago reserve.IdTransaction no es number', reserve);
@@ -185,6 +185,7 @@ export async function POST(request: NextRequest) {
             idToken: reserve.IdTransaction,
             nReserve: nReserve,
             entityId: meta.entidad_id,
+            isExt,
           });
 
           if (response) {
