@@ -11,7 +11,7 @@ import {
 } from "~/server/api/trpc";
 import { db, schema } from "~/server/db";
 
-async function sizesList(localId: string | null, entityId: string | null): Promise<z.infer<typeof responseValidator>> {
+export async function sizesList(localId: string | null, entityId: string | null): Promise<z.infer<typeof responseValidator>> {
   const sizeResponse = await fetch(`${env.SERVER_URL}/api/size`);
 
   // Handle the response from the external API

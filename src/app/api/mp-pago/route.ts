@@ -11,6 +11,7 @@ import { es } from "date-fns/locale";
 import { createId } from "~/lib/utils";
 import { getClientByEmail } from "~/server/api/routers/lockerReserveRouter";
 import { MpMeta } from "~/lib/types";
+import { sizesList } from "~/server/api/routers/sizes";
 
 function formatDateToTextDate(dateString: string): string {
   const date = new Date(dateString);
@@ -151,9 +152,13 @@ export async function POST(request: NextRequest) {
         image?: string | null;
         cantidad?: number | null;
         tarifa?: string | null;
-      }[] | string = await api.size.get.query({
-        store: null,
-      });
+      }[] | string;
+      
+      // sizes = await api.size.get.query({
+      //   store: null,
+      // });
+
+      sizes = await sizesList(null, meta.entidad_id);
 
       const nReserve = meta.n_reserve;
       const isExt = meta.is_ext;
