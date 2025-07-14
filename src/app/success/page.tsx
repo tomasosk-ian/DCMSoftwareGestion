@@ -8,6 +8,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { Inter } from "next/font/google";
 import { PublicConfigKeys } from "~/lib/config";
 import { PageRefresh } from "./page-refresh";
+import { sizesList } from "~/server/api/routers/sizes";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -91,9 +92,13 @@ export default async function Page({
     image?: string | null;
     cantidad?: number | null;
     tarifa?: string | null;
-  }[] | string = await api.size.get.query({
-    store: null,
-  }) ?? [];
+  }[] | string;
+  
+  // sizes = await api.size.get.query({
+  //   store: null,
+  // }) ?? [];
+
+  sizes = await sizesList(null, store.entidadId);
 
   const locale = await getLocale();
   return <html lang={locale}>
