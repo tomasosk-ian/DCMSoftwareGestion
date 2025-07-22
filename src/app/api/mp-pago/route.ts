@@ -12,6 +12,7 @@ import { createId } from "~/lib/utils";
 import { getClientByEmail } from "~/server/api/routers/lockerReserveRouter";
 import { MpMeta } from "~/lib/types";
 import { sizesList } from "~/server/api/routers/sizes";
+import { sendEmailBk } from "~/server/api/routers/email";
 
 function formatDateToTextDate(dateString: string): string {
   const date = new Date(dateString);
@@ -255,7 +256,7 @@ export async function POST(request: NextRequest) {
       );
 
       // if (setReserves) setReserves(updatedReserves);
-      await api.email.sendEmail.mutate({
+      await sendEmailBk({
         to: client_email,
         token,
         client: client_name ?? "",

@@ -5,6 +5,11 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { env } from "~/env";
+import { and, eq } from "drizzle-orm";
+import { db, schema } from "~/server/db";
+import { PublicConfigKeys, PublicConfigMetodoPago } from "~/lib/config";
+import { TRPCError } from "@trpc/server";
+import { RouterInputs } from "~/trpc/shared";
 
 export const emailRouter = createTRPCRouter({
   sendEmail: publicProcedure
@@ -20,87 +25,104 @@ export const emailRouter = createTRPCRouter({
         nReserve: z.number(),
         from: z.string(),
         until: z.string(),
+        entidadId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        var QRCode = require("qrcode");
-        const attachments: {
-          filename: string;
-          content: any;
-          type: string;
-          disposition: string;
-          contentId: string;
-        }[] = [];
-        await Promise.all(
-          input.token.map(async (token, index) => {
-            const img = await QRCode.toDataURL(token[0]!.toString(), {
-              type: "png",
-            });
+      const key: PublicConfigKeys = 'metodo_pago';
+      const medio_pago = await db.query.publicConfig.findFirst({
+        where: and(
+          eq(schema.publicConfig.key, key),
+          eq(schema.publicConfig.entidadId, input.entidadId),
+        )
+      });
 
-            const qrCode = img.split(";base64,").pop();
-            if (qrCode) {
-              attachments.push({
-                filename: `QR_${token[0]}_${token[1]}.png`,
-                content: qrCode,
-                type: "image/png",
-                disposition: "attachment",
-                contentId: `qr_code_${index}`,
-              });
-            }
-          }),
-        );
-        const sgMail = require("@sendgrid/mail");
-        sgMail.setApiKey(env.SENDGRID_API_KEY);
-        const msg = {
-          to: input.to,
-          from: `${env.MAIL_SENDER}`,
-          subject: `Confirmación de reserva locker N° ${input.nReserve}.`,
-          html: `
-         
-          <body>
-          <p>Estimado/a ${input.client},</p>
-          <p>Nos complace confirmar que tu reserva en ${input.local} en ${input.address} ha sido exitosamente procesada. </p>
-
-
-          <p><strong>N° Reserva</strong></p>
-          <p><strong>${input.nReserve}</strong></p>
-
-
-          <p><strong>Período</strong></p>
-          <p>Entrega desde              ${input.from}</p>
-          <p>Recogida hasta             ${input.until}</p>
-        
-          <p><strong>Códigos de acceso (Tokens)</strong></p>
-
-          <p>
-            ${input.token
-              .map((x) => {
-                return `Su código de reserva es <strong>${x[0]} (${x[1]})</strong><br>`;
-              })
-              .join("")}
-          </p>
-
-          <hr>
-
-          <p><strong>Precio Total</strong>         ${input.coin ?? ""} ${input.price}</p>
-
-          
-          <p>Atentamente,</p>
-          
-        </body>`,
-          attachments: attachments,
-        };
-        sgMail
-          .send(msg)
-          .then(() => {
-            console.log("Email sent");
-          })
-          .catch((e: any) => {
-            console.log(e);
-          });
-      } catch (error: any) {
-        console.log(error);
+      if (medio_pago?.value !== PublicConfigMetodoPago.mobbex) {
+        throw new TRPCError({ code: 'BAD_REQUEST' });
       }
+
+      await sendEmailBk(input);
     }),
 });
+
+export async function sendEmailBk(input: Omit<RouterInputs['email']['sendEmail'], 'entidadId'>) {
+  try {
+    var QRCode = require("qrcode");
+    const attachments: {
+      filename: string;
+      content: any;
+      type: string;
+      disposition: string;
+      contentId: string;
+    }[] = [];
+    await Promise.all(
+      input.token.map(async (token, index) => {
+        const img = await QRCode.toDataURL(token[0]!.toString(), {
+          type: "png",
+        });
+
+        const qrCode = img.split(";base64,").pop();
+        if (qrCode) {
+          attachments.push({
+            filename: `QR_${token[0]}_${token[1]}.png`,
+            content: qrCode,
+            type: "image/png",
+            disposition: "attachment",
+            contentId: `qr_code_${index}`,
+          });
+        }
+      }),
+    );
+    const sgMail = require("@sendgrid/mail");
+    sgMail.setApiKey(env.SENDGRID_API_KEY);
+    const msg = {
+      to: input.to,
+      from: `${env.MAIL_SENDER}`,
+      subject: `Confirmación de reserva locker N° ${input.nReserve}.`,
+      html: `
+      
+      <body>
+      <p>Estimado/a ${input.client},</p>
+      <p>Nos complace confirmar que tu reserva en ${input.local} en ${input.address} ha sido exitosamente procesada. </p>
+
+
+      <p><strong>N° Reserva</strong></p>
+      <p><strong>${input.nReserve}</strong></p>
+
+
+      <p><strong>Período</strong></p>
+      <p>Entrega desde              ${input.from}</p>
+      <p>Recogida hasta             ${input.until}</p>
+    
+      <p><strong>Códigos de acceso (Tokens)</strong></p>
+
+      <p>
+        ${input.token
+          .map((x) => {
+            return `Su código de reserva es <strong>${x[0]} (${x[1]})</strong><br>`;
+          })
+          .join("")}
+      </p>
+
+      <hr>
+
+      <p><strong>Precio Total</strong>         ${input.coin ?? ""} ${input.price}</p>
+
+      
+      <p>Atentamente,</p>
+      
+    </body>`,
+      attachments: attachments,
+    };
+    sgMail
+      .send(msg)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((e: any) => {
+        console.log(e);
+      });
+  } catch (error: any) {
+    console.log(error);
+  }
+}

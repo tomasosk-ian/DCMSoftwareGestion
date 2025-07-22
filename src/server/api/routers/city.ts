@@ -21,12 +21,6 @@ export const cityRouter = createTRPCRouter({
     });
     return result;
   }),
-
-  getCity: publicProcedure.input(z.string()).query(({ ctx, input }) => {
-    return ctx.db.query.cities.findFirst({
-      where: eq(cities.identifier, input),
-    });
-  }),
   create: protectedProcedure
     .input(
       z.object({
