@@ -1,19 +1,13 @@
-import { eq } from "drizzle-orm";
+import { eq, InferSelectModel } from "drizzle-orm";
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import type { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 import { clients } from "~/server/db/schema";
 
 export const clientsRouter = createTRPCRouter({
-  get: publicProcedure.query(async ({ ctx }) => {
-    const result = ctx.db.query.clients.findMany({
-      orderBy: (client, { asc }) => [asc(client.email)],
-    });
-    return result;
-  }),
-  getGroupedByEmail: publicProcedure.query(async ({ ctx }) => {
+  getGroupedByEmail: protectedProcedure.query(async ({ ctx }) => {
     const clients = await ctx.db.query.clients.findMany({
       orderBy: (client, { asc }) => [asc(client.email)],
     });
@@ -63,7 +57,7 @@ export const clientsRouter = createTRPCRouter({
         return { id };
       }
     }),
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         identifier: z.number().optional(),
@@ -91,7 +85,7 @@ export const clientsRouter = createTRPCRouter({
 
       return client;
     }),
-  change: publicProcedure
+  change: protectedProcedure
     .input(
       z.object({
         identifier: z.number(),
@@ -109,7 +103,7 @@ export const clientsRouter = createTRPCRouter({
         .set(input)
         .where(eq(clients.identifier, input.identifier));
     }),
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         id: z.number(),
@@ -122,4 +116,4 @@ export const clientsRouter = createTRPCRouter({
     }),
 });
 
-export type Client = RouterOutputs["client"]["get"][number];
+export type Client = InferSelectModel<typeof schema.clients>;

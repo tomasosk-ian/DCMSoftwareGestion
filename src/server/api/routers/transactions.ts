@@ -1,19 +1,13 @@
 import { z } from "zod";
 import { createId } from "~/lib/utils";
-import { and, gte, lte, isNotNull, eq } from "drizzle-orm";
+import { and, gte, lte, isNotNull, eq, InferSelectModel } from "drizzle-orm";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 import { transactions } from "~/server/db/schema";
 
 export const transactionRouter = createTRPCRouter({
-  get: publicProcedure.query(({ ctx }) => {
-    const result = ctx.db.query.transactions.findMany({
-      orderBy: (client, { desc }) => [desc(client.id)],
-    });
-    return result;
-  }),
   create: publicProcedure
     .input(
       z.object({
@@ -37,33 +31,7 @@ export const transactionRouter = createTRPCRouter({
 
       return { identifier };
     }),
-  getById: publicProcedure
-    .input(
-      z.object({
-        Id: z.number(),
-      }),
-    )
-    .query(async ({ input }) => {
-      const channel = await db.query.transactions.findFirst({
-        where: eq(schema.transactions.id, input.Id),
-      });
-
-      return channel;
-    }),
-  // getBynroReserve: publicProcedure
-  //   .input(
-  //     z.object({
-  //       nReserve: z.number(),
-  //     }),
-  //   )
-  //   .query(async ({ input }) => {
-  //     const channel = await db.query.transactions.findFirst({
-  //       where: eq(schema.transactions.nReserve, input.nReserve),
-  //       orderBy: (transaction, { desc }) => [desc(transaction.confirmedAt)],
-  //     });
-  //     return channel;
-  //   }),
-  getBynroReserve: publicProcedure
+  getBynroReserve: protectedProcedure
     .input(
       z.object({
         nReserve: z.number(),
@@ -80,32 +48,7 @@ export const transactionRouter = createTRPCRouter({
 
       return channel;
     }),
-
-  change: publicProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        confirm: z.boolean().optional(),
-      }),
-    )
-    .mutation(({ ctx, input }) => {
-      return ctx.db
-        .update(transactions)
-        .set(input)
-        .where(eq(transactions.id, input.id));
-    }),
-  delete: publicProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await db
-        .delete(schema.cities)
-        .where(eq(schema.cities.identifier, input.id));
-    }),
-  getTransactionsByDate: publicProcedure
+  getTransactionsByDate: protectedProcedure
     .input(
       z.object({
         startDate: z.string(),
@@ -128,4 +71,4 @@ export const transactionRouter = createTRPCRouter({
     }),
 });
 
-export type Transaction = RouterOutputs["transaction"]["get"][number];
+export type Transaction = InferSelectModel<typeof schema.transactions>;

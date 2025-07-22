@@ -23,7 +23,7 @@ export const storeRouter = createTRPCRouter({
     return stores;
   }),
 
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         storeId: z.string(),
@@ -59,7 +59,7 @@ export const storeRouter = createTRPCRouter({
       return store;
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1).max(255),
@@ -93,7 +93,7 @@ export const storeRouter = createTRPCRouter({
 
       return { identifier };
     }),
-  change: publicProcedure
+  change: protectedProcedure
     .input(
       z.object({
         identifier: z.string(),
@@ -141,37 +141,7 @@ export const storeRouter = createTRPCRouter({
         }
       });
     }),
-  changeLockers: publicProcedure
-    .input(
-      z.object({
-        identifier: z.string(),
-        serieLockers: z.array(z.string()),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const a = await ctx.db.query.stores.findFirst({
-        where: eq(schema.stores.identifier, input.identifier)
-      });
-
-      if (!a) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
-      }
-
-      await ctx.db.transaction(async (tx) => {
-        await tx.delete(schema.storesLockers)
-          .where(eq(schema.storesLockers.storeId, a.identifier));
-        for (const l of input.serieLockers) {
-          await tx.insert(schema.storesLockers)
-            .values({
-              storeId: a.identifier,
-              serieLocker: l,
-            });
-        }
-      });
-
-      return "ok"
-    }),
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         id: z.string(),
