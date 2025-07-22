@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, InferSelectModel } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
@@ -9,17 +9,6 @@ import { TRPCError } from "@trpc/server";
 import { trpcTienePermisoCtx } from "~/lib/roles";
 
 export const clientsRouter = createTRPCRouter({
-  get: publicProcedure
-    .input(z.object({
-      entityId: z.string().min(1)
-    }))
-    .query(async ({ ctx, input }) => {
-      const result = ctx.db.query.clients.findMany({
-        orderBy: (client, { asc }) => [asc(client.email)],
-        where: eq(schema.clients.entidadId, input.entityId),
-      });
-      return result;
-    }),
   getGroupedByEmail: protectedProcedure
     .query(async ({ ctx }) => {
       await trpcTienePermisoCtx(ctx, "panel:clientes");
@@ -167,4 +156,4 @@ export const clientsRouter = createTRPCRouter({
     }),
 });
 
-export type Client = RouterOutputs["clients"]["get"][number];
+export type Client = InferSelectModel<typeof schema.clients>;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createId } from "~/lib/utils";
-import { and, gte, lte, isNotNull, eq, inArray } from "drizzle-orm";
+import { and, gte, lte, isNotNull, eq, inArray, InferSelectModel } from "drizzle-orm";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { RouterOutputs } from "~/trpc/shared";
@@ -9,12 +9,6 @@ import { transactions } from "~/server/db/schema";
 import { trpcTienePermisoCtx } from "~/lib/roles";
 
 export const transactionRouter = createTRPCRouter({
-  get: protectedProcedure.query(({ ctx }) => {
-    const result = ctx.db.query.transactions.findMany({
-      orderBy: (client, { desc }) => [desc(client.id)],
-    });
-    return result;
-  }),
   create: publicProcedure
     .input(
       z.object({
@@ -93,4 +87,4 @@ export const transactionRouter = createTRPCRouter({
     }),
 });
 
-export type Transaction = RouterOutputs["transaction"]["get"][number];
+export type Transaction = InferSelectModel<typeof schema.transactions>;
