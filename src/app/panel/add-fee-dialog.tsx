@@ -33,7 +33,7 @@ import { Store } from "~/server/api/routers/store";
 import { api } from "~/trpc/react";
 import { UploadButton } from "~/utils/uploadthing";
 
-export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
+export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[], localId?: string }) {
   const { mutateAsync: createFee, isLoading } = api.fee.create.useMutation();
 
   const [open, setOpen] = useState(false);
@@ -53,6 +53,7 @@ export function AddFeeDialog(props: { coins: Coin[]; sizes: Size[] }) {
         value,
         size,
         discount,
+        localId: props.localId,
       });
 
       toast.success("Tarifa creada correctamente");

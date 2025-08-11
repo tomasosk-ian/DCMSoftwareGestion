@@ -13,14 +13,16 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Input } from "~/components/ui/input";
 import { Client } from "~/server/api/routers/clients";
+import { Translations } from "~/translations";
 import { api } from "~/trpc/react";
 
-export default function SelectToken(props: {
+export default function SelectToken({ t, ...props }: {
   token: number | undefined;
   email: string;
   setToken: (token: number) => void;
   setClient: (client: Client) => void;
   setFailed: (failed: boolean) => void;
+  t: Translations;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<number>();
@@ -44,7 +46,7 @@ export default function SelectToken(props: {
         props.setClient(client!);
       }
     } else {
-      setError("El token debe tener 6 dígitos.");
+      setError(t("tokenInvalidDigits"));
     }
   };
 
@@ -53,7 +55,7 @@ export default function SelectToken(props: {
       <div className="w-full px-4 text-center md:w-1/2 lg:w-1/4">
         <Input
           className="rounded-border-2 mb-4 w-full border-buttonPick focus:border-buttonPick "
-          placeholder="Inserte el token del box"
+          placeholder={t("tokenInsert")}
           name="token"
           type="number"
           value={token}

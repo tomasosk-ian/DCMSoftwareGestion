@@ -1,4 +1,4 @@
-import { eq, lt, gt, isNotNull, and, isNull, SQL } from "drizzle-orm";
+import { eq, lt, gt, isNotNull, and, isNull, SQL, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { format, startOfDay, endOfDay, isAfter, isBefore } from "date-fns";
@@ -123,6 +123,7 @@ export const reserveRouter = createTRPCRouter({
 
     return groupedByNReserve;
   }),
+
   getBynReserve: publicProcedure
     .input(
       z.object({
@@ -139,6 +140,30 @@ export const reserveRouter = createTRPCRouter({
         where: (reservas) =>
           and(
             eq(schema.reservas.nReserve, input.nReserve),
+            isNotNull(reservas.Token1),
+          ),
+        with: { clients: true },
+      });
+
+      if (!reserve.length) throw new Error("Reserve not found");
+
+      return reserve;
+    }),
+
+  getByidTransactionsMut: publicProcedure
+    .input(
+      z.object({
+        idTransactions: z.array(z.number()),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      checkBoxAssigned();
+
+      // Consulta optimizada
+      const reserve = await db.query.reservas.findMany({
+        where: (reservas) =>
+          and(
+            inArray(schema.reservas.IdTransaction, input.idTransactions),
             isNotNull(reservas.Token1),
           ),
         with: { clients: true },
@@ -234,7 +259,7 @@ export const reserveRouter = createTRPCRouter({
     .input(
       z.object({
         IdLocker: z.number().nullable().optional(),
-        NroSerie: z.string().nullable(),
+        NroSerie: z.string(),
         IdSize: z.number().nullable(),
         IdBox: z.number().nullable(),
         IdFisico: z.number().nullable(),

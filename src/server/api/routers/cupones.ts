@@ -12,13 +12,13 @@ import { RouterOutputs } from "~/trpc/shared";
 import { db, schema } from "~/server/db";
 
 export const cuponesRouter = createTRPCRouter({
-  get: publicProcedure.query(({ ctx }) => {
+  get: protectedProcedure.query(({ ctx }) => {
     const result = ctx.db.query.cuponesData.findMany({
       orderBy: (cuponesData, { desc }) => [desc(cuponesData.identifier)],
     });
     return result;
   }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         codigo: z.string().min(0).max(1023),
@@ -54,7 +54,7 @@ export const cuponesRouter = createTRPCRouter({
         return null;
       }
     }),
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         cuponId: z.string(),
@@ -98,7 +98,7 @@ export const cuponesRouter = createTRPCRouter({
 
       return null;
     }),
-  change: publicProcedure
+  change: protectedProcedure
     .input(
       z.object({
         identifier: z.string().min(0).max(1023),
@@ -158,7 +158,7 @@ export const cuponesRouter = createTRPCRouter({
       });
       return response;
     }),
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         cuponId: z.string(),

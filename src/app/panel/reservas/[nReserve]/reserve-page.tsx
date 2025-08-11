@@ -16,7 +16,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -44,6 +44,9 @@ export default function ReservePage(props: {
   isAdmin: boolean;
   store: Store | undefined;
 }) {
+  const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
+  const isReserveModeNow = useMemo(() => (plazoReserva?.value.trim().toLowerCase() ?? "false") === "true", [plazoReserva]);
+
   const { store } = props;
   const [edit, setEdit] = useState(false);
   const { reserve } = props;
@@ -63,10 +66,18 @@ export default function ReservePage(props: {
     const formattedDate = format(date, "eee dd MMMM", { locale: es });
     return formattedDate;
   }
+
+  function formatDateToTextDateComplete(dateString: string): string {
+    const date = new Date(dateString);
+    const formattedDate = format(date, "eee dd MMMM HH:mm", { locale: es });
+    return formattedDate;
+  }
+
   function getSize(idSize: number) {
     const size = props.sizes!.find((s: Size) => s.id === idSize);
     return size!.nombre;
   }
+
   if (reserve.length <= 0) return <Title>No se encontró la reserva</Title>;
   if (!props.transaction)
     return (
@@ -167,11 +178,11 @@ export default function ReservePage(props: {
                 <>
                   <p className="mb-0 mt-3 text-xxs">Fecha inicio</p>
                   <p className="mt-0 text-base font-bold text-orange-500">
-                    {formatDateToTextDate(startDate?.toISOString() ?? "")}
+                    {isReserveModeNow ? formatDateToTextDateComplete(startDate?.toISOString() ?? "") : formatDateToTextDate(startDate?.toISOString() ?? "")}
                   </p>
                   <p className="mb-0 mt-3 text-xxs">Fecha fin</p>
                   <p className="mt-0 text-base font-bold text-orange-500">
-                    {formatDateToTextDate(endDate?.toISOString() ?? "")}
+                    {isReserveModeNow ? formatDateToTextDateComplete(endDate?.toISOString() ?? "") : formatDateToTextDate(endDate?.toISOString() ?? "")}
                   </p>
                 </>
               ) : (

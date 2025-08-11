@@ -6,8 +6,9 @@ import ButtonCustomComponent from "../../../components/buttonCustom";
 import { api } from "~/trpc/react";
 import { Reserve } from "~/server/api/routers/reserves";
 import { es } from "date-fns/locale";
+import { Translations } from "~/translations";
 
-export default function DateComponent(props: {
+export default function DateComponent({ t, ...props }: {
   startDate: string | undefined;
   setStartDate: (startDate: string) => void;
   endDate: string | undefined;
@@ -18,25 +19,24 @@ export default function DateComponent(props: {
   email: string;
   setReserve: (reserve: Reserve) => void;
   setFailed: (failed: boolean) => void;
+  t: Translations;
 }) {
   const [range, setRange] = useState<DateRange | undefined>();
   const [date, setDate] = useState<Date>();
 
+  const { data: plazoReserva } = api.config.getKey.useQuery({ key: "reserve_from_now" });
   const { data: reserve, isLoading } = api.reserve.getByToken.useQuery({
     token: props.token,
     email: props.email,
   });
+
   useEffect(() => {
     if (reserve) {
-      const today = new Date();
-      today.setHours(23, 59, 0, 0);
-      const fromDate = new Date(reserve.FechaFin!);
-      // const days = differenceInDays(today, fromDate);
-      // props.setDays(days + 1);
-      setRange({ from: fromDate });
+      setRange({ from: new Date(reserve.FechaFin!) });
     }
     if (!reserve && !isLoading) props.setFailed(true);
   }, [reserve, isLoading]);
+
   function getDays() {
     if (range) {
       const fromDate = range.from!;
@@ -46,30 +46,66 @@ export default function DateComponent(props: {
       props.setDays(differenceInDays);
     }
   }
+
   function handleClick() {
+    const lastFecha = new Date(range!.from!.getTime() + 1000);
     const nextDay = new Date(range!.from!);
     nextDay.setDate(nextDay.getDate() + 1);
-    props.setStartDate(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(range!.to!, "yyyy-MM-dd'T'23:59:59"));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      const rangeTo = new Date(range!.to!);
+      rangeTo.setUTCHours(nextDay.getUTCHours());
+      rangeTo.setMinutes(nextDay.getMinutes());
+      rangeTo.setSeconds(nextDay.getSeconds());
+
+      start = format(lastFecha, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(rangeTo, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(nextDay, "yyyy-MM-dd'T'00:00:00");
+      end = format(range!.to!, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
+
     props.setReserve(reserve!);
     getDays();
   }
+
   function onlyToday() {
     const today = new Date(Date.now());
     const nextDay = new Date(range!.from!);
-    nextDay.setDate(nextDay.getDate() + 1);
-    props.setStartDate(format(nextDay, "yyyy-MM-dd'T'00:00:00"));
-    props.setEndDate(format(today, "yyyy-MM-dd'T'23:59:59"));
+    nextDay.setTime(nextDay.getTime() + (1000 * 60 * 60 * 24));
+    let start, end;
+
+    if (plazoReserva?.value.trim().toLowerCase() === "true") {
+      const nextNextDay = new Date(nextDay.getTime());
+      nextNextDay.setDate(nextNextDay.getTime() + (1000 * 60 * 60 * 24));
+
+      start = format(nextDay, "yyyy-MM-dd'T'HH:mm:ss");
+      end = format(nextNextDay, "yyyy-MM-dd'T'HH:mm:ss");
+    } else {
+      start = format(nextDay, "yyyy-MM-dd'T'00:00:00");
+      end = format(today, "yyyy-MM-dd'T'23:59:59");
+    }
+
+    console.log("date range", start, end);
+    props.setStartDate(start);
+    props.setEndDate(end);
+
     props.setReserve(reserve!);
     getDays();
   }
+
   if (!reserve) return <div>cargando...</div>;
   return (
     <div>
       {!props.endDate && (
         <div className="container flex flex-col items-center justify-center gap-6 ">
           <h2 className="text-3xl font-semibold">
-            ¿Hasta cuándo querés extender tu reserva?
+            {t("extendReserveTitle")}
           </h2>
           <div className="justify-center">
             <div className="w-full">
@@ -97,14 +133,14 @@ export default function DateComponent(props: {
                     isNaN(props.days) ||
                     props.days == 0
                   }
-                  text={`Aplicar ${isNaN(props.days) ? 0 : props.days} días`}
+                  text={`${t("apply")} ${isNaN(props.days) ? 0 : props.days} ${t("days")}`}
                 />
               </div>
               <div className="px-1 md:mb-0 md:w-1/2 lg:w-1/4">
                 <ButtonCustomComponent
                   disabled={new Date() <= new Date(reserve.FechaFin!)}
                   onClick={onlyToday}
-                  text={`Hasta hoy`}
+                  text={t("dateOnlyToday")}
                 />
               </div>
             </div>

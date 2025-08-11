@@ -159,7 +159,7 @@ export default function ClientPage({
                         href={`/panel/reservas/${reserva.nReserve}`}
                         leading={reserva.nReserve}
                         title={`Local: ${
-                          stores?.find((x) => x.serieLocker == reserva.NroSerie)
+                          stores?.find((x) => x.lockers.some(l => l.serieLocker === reserva.NroSerie))
                             ?.name
                         }. Fecha inicio: ${reserva.FechaInicio?.split("T")[0]}. Fecha fin: ${reserva.FechaFin?.split("T")[0]}`}
                       />

@@ -18,7 +18,7 @@ export const coinRouter = createTRPCRouter({
     });
     return result;
   }),
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -31,7 +31,7 @@ export const coinRouter = createTRPCRouter({
 
       return channel;
     }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         description: z.string().min(0).max(1023).nullable(),
@@ -51,7 +51,7 @@ export const coinRouter = createTRPCRouter({
 
       return { identifier };
     }),
-  change: publicProcedure
+  change: protectedProcedure
     .input(
       z.object({
         identifier: z.string(),
@@ -66,7 +66,7 @@ export const coinRouter = createTRPCRouter({
         .where(eq(coinData.identifier, input.identifier));
     }),
 
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         id: z.string(),

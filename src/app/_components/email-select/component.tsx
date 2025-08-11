@@ -4,10 +4,12 @@ import { useState } from "react";
 import ButtonCustomComponent from "~/components/buttonCustom";
 import { Input } from "~/components/ui/input";
 import { Client } from "~/server/api/routers/clients";
+import { Translations } from "~/translations";
 
-export default function SelectEmail(props: {
+export default function SelectEmail({ t, ...props }: {
   email: string;
   setEmail: (email: string) => void;
+  t: Translations;
 }) {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
@@ -22,7 +24,7 @@ export default function SelectEmail(props: {
       <div className="w-full px-4 text-center md:w-1/2 lg:w-1/4">
         <Input
           className="mb-4 w-full rounded border-2 border-buttonPick focus:border-buttonPick"
-          placeholder="Inserte el mail con el que realizó la reserva"
+          placeholder={t("selectEmailReserve")}
           name="email"
           value={email.toLowerCase()}
           onChange={(e) => {
@@ -35,10 +37,10 @@ export default function SelectEmail(props: {
             if (isValidEmail(email)) {
               props.setEmail(email);
             } else {
-              setError("mail inválido");
+              setError(t("invalidEmail"));
             }
           }}
-          text={`Enviar`}
+          text={t("selectEmailNext")}
         />
         {error && <p className="mt-2 text-red-600">{error}</p>}
       </div>

@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
@@ -16,12 +17,13 @@ export const storeRouter = createTRPCRouter({
     const stores = ctx.db.query.stores.findMany({
       with: {
         city: true,
+        lockers: true,
       },
     });
     return stores;
   }),
 
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         storeId: z.string(),
@@ -32,6 +34,7 @@ export const storeRouter = createTRPCRouter({
         where: eq(schema.stores.identifier, input.storeId),
         with: {
           city: true,
+          lockers: true,
         },
       });
 
@@ -49,29 +52,14 @@ export const storeRouter = createTRPCRouter({
         where: eq(schema.stores.cityId, input.cityId),
         with: {
           city: true,
-        },
-      });
-
-      return store;
-    }),
-  getByNroSerie: publicProcedure
-    .input(
-      z.object({
-        nroSerie: z.string(),
-      }),
-    )
-    .query(async ({ input }) => {
-      const store = await db.query.stores.findFirst({
-        where: eq(schema.stores.serieLocker, input.nroSerie),
-        with: {
-          city: true,
+          lockers: true,
         },
       });
 
       return store;
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1).max(255),
@@ -79,8 +67,8 @@ export const storeRouter = createTRPCRouter({
         cityId: z.string().min(0).max(1023),
         address: z.string().min(0).max(1023),
         organizationName: z.string().min(0).max(1023),
-        serieLocker: z.string().min(0).max(1023),
         description: z.string().min(0).max(1023),
+        serieLocker: z.string().nullable()
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -92,32 +80,68 @@ export const storeRouter = createTRPCRouter({
         cityId: input.cityId,
         address: input.address,
         organizationName: input.organizationName,
-        serieLocker: input.serieLocker,
         description: input.description,
       });
 
+      if (input.serieLocker !== null) {
+        await ctx.db.insert(schema.storesLockers)
+          .values({
+            storeId: identifier,
+            serieLocker: input.serieLocker
+          });
+      }
+
       return { identifier };
     }),
-  change: publicProcedure
+  change: protectedProcedure
     .input(
       z.object({
         identifier: z.string(),
         name: z.string(),
         image: z.string().nullable().optional(),
         cityId: z.string().min(0).max(1023),
-        serieLocker: z.string().nullable(),
         address: z.string().min(0).max(1023).nullable(),
         organizationName: z.string().min(0).max(1023),
         description: z.string().min(0).max(1023),
+        serieLockers: z.array(z.string()).nullable(),
       }),
     )
-    .mutation(({ ctx, input }) => {
-      return ctx.db
-        .update(stores)
-        .set(input)
-        .where(eq(stores.identifier, input.identifier));
+    .mutation(async ({ ctx, input }) => {
+      const a = await ctx.db.query.stores.findFirst({
+        where: eq(schema.stores.identifier, input.identifier)
+      });
+
+      if (!a) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      return ctx.db.transaction(async (tx) => {
+        await tx
+          .update(stores)
+          .set({
+            name: input.name,
+            image: input.image,
+            cityId: input.cityId,
+            address: input.address,
+            description: input.description,
+            organizationName: input.organizationName,
+          })
+          .where(eq(stores.identifier, input.identifier));
+
+        if (Array.isArray(input.serieLockers)) {
+          await tx.delete(schema.storesLockers)
+            .where(eq(schema.storesLockers.storeId, a.identifier));
+          for (const l of input.serieLockers) {
+            await tx.insert(schema.storesLockers)
+              .values({
+                storeId: a.identifier,
+                serieLocker: l,
+              });
+          }
+        }
+      });
     }),
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
         id: z.string(),

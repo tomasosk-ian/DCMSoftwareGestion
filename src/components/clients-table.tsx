@@ -72,9 +72,7 @@ export default function ReservesTable(props: {
       header: "Local",
       cell: ({ row }) => (
         <div className="lowercase">
-          {props.stores &&
-            props.stores.find((x) => x.serieLocker == row.original.NroSerie)
-              ?.name}
+          {props.stores?.find((x) => x.lockers.some(l => l.serieLocker === row.original.NroSerie))?.name}
         </div>
       ),
     },

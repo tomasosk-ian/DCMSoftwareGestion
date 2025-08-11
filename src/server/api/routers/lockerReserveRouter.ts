@@ -4,6 +4,7 @@ import { env } from "~/env";
 import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 import { and, eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 export const getClientByEmail = async (email: string) => {
   const client = await db.query.clients.findFirst({
@@ -124,12 +125,20 @@ export const lockerReserveRouter = createTRPCRouter({
 
       // Handle the response from the external API
       if (!reservationResponse.ok) {
-        // Extract the error message from the response
-        const errorResponse = await reservationResponse.json();
-        console.log(errorResponse);
-        // Throw an error or return the error message
-        return errorResponse.message || "Unknown error";
+        try {
+          const errorResponse: {
+            message?: string
+          } = await reservationResponse.json();
+
+          console.log('errorResponse', errorResponse);
+          return errorResponse?.message ?? "Unknown error";
+        } catch (_) {
+          const error = await reservationResponse.text();
+          console.log('errorText', error);
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error });
+        }
       }
+
       const reservedBoxData = await reservationResponse.json();
       await db
         .update(schema.reservas)

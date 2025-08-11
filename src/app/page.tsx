@@ -1,18 +1,22 @@
 import { api } from "~/trpc/server";
 import HomePage from "./_components/home_page";
-import Header from "./_components/header";
 import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale } from "next-intl/server";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
+
 export default async function Home() {
   const cities = await api.city.get.query();
-  const sizes = await api.size.get.query();
+  const sizes = await api.size.get.query({});
   const stores = await api.store.get.query();
+  const locale = await getLocale();
 
   return (
-    <html lang="es">
+    <html lang={locale}>
       <head>
         <link
           rel="preload"
@@ -402,10 +406,11 @@ export default async function Home() {
       </head>
       <body className={`font-sans ${inter.variable} bg-lockersUrbanos`}>
         <main>
-          <div>
-            <Header />
-            <HomePage cities={cities} sizes={sizes} stores={stores} />
-          </div>
+          <NextIntlClientProvider>
+            <div>
+              <HomePage lang={locale} cities={cities} sizes={sizes} stores={stores} />
+            </div>
+          </NextIntlClientProvider>
         </main>
       </body>
     </html>
