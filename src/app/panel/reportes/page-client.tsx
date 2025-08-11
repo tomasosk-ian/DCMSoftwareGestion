@@ -51,6 +51,7 @@ export default function LockerOcupationPage() {
     api.transaction.getTransactionsByDate.useQuery({
       startDate,
       endDate,
+      filterSerie: lockersSerie,
     });
 
   const { data: capacityBySize } =

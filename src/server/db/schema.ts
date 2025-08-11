@@ -105,6 +105,10 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
     fields: [transactions.client],
     references: [clients.identifier],
   }),
+  reserve: one(reservas, {
+    fields: [transactions.nReserve],
+    references: [reservas.nReserve],
+  }),
 }));
 
 export const sizes = sqliteTable(

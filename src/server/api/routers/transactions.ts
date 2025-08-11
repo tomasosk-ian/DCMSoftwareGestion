@@ -53,19 +53,32 @@ export const transactionRouter = createTRPCRouter({
       z.object({
         startDate: z.string(),
         endDate: z.string(),
+        filterSerie: z.array(z.string()).nullable(),
       }),
     )
     .query(async ({ input }) => {
       const { startDate, endDate } = input;
 
-      const result = await db.query.transactions.findMany({
-        where: (transaction) =>
-          and(
-            gte(transaction.confirmedAt, startDate),
-            lte(transaction.confirmedAt, endDate),
-          ),
+      let result = await db.query.transactions.findMany({
+        where: and(
+          gte(schema.transactions.confirmedAt, startDate),
+          lte(schema.transactions.confirmedAt, endDate)
+        ),
+        with: {
+          reserve: {
+            columns: {
+              NroSerie: true,
+            }
+          }
+        },
         orderBy: (transaction, { asc }) => [asc(transaction.confirmedAt)],
       });
+
+      if (input.filterSerie && input.filterSerie.length > 0) {
+        result = result.filter(r => {
+          return input.filterSerie?.includes(r.reserve?.NroSerie ?? "");
+        });
+      }
 
       return result;
     }),
