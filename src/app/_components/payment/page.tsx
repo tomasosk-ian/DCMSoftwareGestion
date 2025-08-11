@@ -308,7 +308,6 @@ export default function Payment(props: {
               const res = await procesarPagoMp({
                 ...formData,
                 additional_info: {
-                  ...formData.additional_info,
                   items: undefined,
                 },
                 issuer_id: Number(formData.issuer_id),
