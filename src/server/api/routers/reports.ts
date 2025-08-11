@@ -1,6 +1,6 @@
 import { and, gte, lte, isNotNull, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db, schema } from "~/server/db";
 import { env } from "~/env";
 import { lockerValidator } from "./lockers";
@@ -47,26 +47,32 @@ type SizeMap = {
 };
 
 export const reportsRouter = createTRPCRouter({
-  getOcupattion: publicProcedure
+  getOcupattion: protectedProcedure
     .input(
       z.object({
         startDate: z.string(),
         endDate: z.string(),
+        filterSerie: z.array(z.string()).nullable(),
       }),
     )
     .query(async ({ input }) => {
       const { startDate, endDate } = input;
 
       // Get reservations within the date range with assigned lockers
-      const reserves = await db.query.reservas.findMany({
+      let reserves = await db.query.reservas.findMany({
         where: (reserva) =>
           and(
             gte(reserva.FechaInicio, startDate),
             lte(reserva.FechaFin, endDate),
             isNotNull(reserva.nReserve),
-            isNotNull(reserva.IdBox),
+            // isNotNull(reserva.IdBox),
           ),
       });
+
+      if (Array.isArray(input.filterSerie)) {
+        const validSeries = new Set(input.filterSerie);
+        reserves = reserves.filter(v => validSeries.has(v.NroSerie ?? ""));
+      }
 
       const sizeMap = await getSizesMap();
       const occupationData = groupOccupationDataByDay(reserves, sizeMap);
@@ -74,7 +80,15 @@ export const reportsRouter = createTRPCRouter({
       return occupationData;
     }),
 
-  getTotalBoxesAmountPerSize: publicProcedure.query(async () => {
+  getTotalBoxesAmountPerSize: protectedProcedure
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+        filterSerie: z.array(z.string()).nullable(),
+      }),
+    )
+  .query(async ({ ctx, input }) => {
     const locerResponse = await fetch(
       `${env.SERVER_URL}/api/locker/byTokenEmpresa/${env.TOKEN_EMPRESA}`,
     );
@@ -89,41 +103,54 @@ export const reportsRouter = createTRPCRouter({
     // Agrupa todos los lockers por tamaño
     const boxCountsBySize: { [sizeName: string]: number } = {};
 
-    validatedData.data.forEach((locker) => {
+    for (const locker of validatedData.data) {
+      if (Array.isArray(input.filterSerie)) {
+        if (!input.filterSerie.includes(locker.nroSerieLocker)) {
+          continue;
+        }
+      }
+
       locker.boxes.forEach((box) => {
         const sizeName = box.idSizeNavigation?.nombre || "Unknown";
         boxCountsBySize[sizeName] = (boxCountsBySize[sizeName] || 0) + 1;
       });
-    });
+    }
 
     return boxCountsBySize;
   }),
 
-  getSizes: publicProcedure.query(async () => {
+  getSizes: protectedProcedure.query(async () => {
     const sizesData = await db.query.sizes.findMany();
     return sizesData;
   }),
 
-  getAverageReservationDuration: publicProcedure
+  getAverageReservationDuration: protectedProcedure
     .input(
       z.object({
         startDate: z.string(),
         endDate: z.string(),
+        filterSerie: z.array(z.string()).nullable(),
       }),
     )
     .query(async ({ input }) => {
       const { startDate, endDate } = input;
 
       // Fetch reservations within the date range with valid start and end dates
-      const reserves = await db.query.reservas.findMany({
+      let reserves = await db.query.reservas.findMany({
         where: (reserva) =>
           and(
             gte(reserva.FechaInicio, startDate),
             lte(reserva.FechaFin, endDate),
             isNotNull(reserva.FechaInicio),
             isNotNull(reserva.FechaFin),
+            isNotNull(reserva.nReserve),
           ),
       });
+
+      if (Array.isArray(input.filterSerie)) {
+        const validSeries = new Set(input.filterSerie);
+        reserves = reserves.filter(v => validSeries.has(v.NroSerie ?? ""));
+      }
 
       // Calculate the duration of each reservation in days and accumulate data by duration
       const durationMap: { [duration: number]: number } = {};
