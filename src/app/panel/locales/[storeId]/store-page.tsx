@@ -1,15 +1,13 @@
 "use client";
 
 import { CheckIcon, Loader2 } from "lucide-react";
-import { MouseEventHandler, useState } from "react";
+import { type MouseEventHandler, useEffect, useState } from "react";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
-import { RouterOutputs } from "~/trpc/shared";
 import {
   Accordion,
   AccordionContent,
@@ -29,10 +27,10 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import { City } from "~/server/api/routers/city";
+import type { City } from "~/server/api/routers/city";
 import { toast } from "sonner";
 import { UploadButton } from "~/utils/uploadthing";
-import { Store } from "~/server/api/routers/store";
+import type { Store } from "~/server/api/routers/store";
 import {
   Select,
   SelectContent,
@@ -42,17 +40,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Locker } from "~/server/api/routers/lockers";
-import { TRPCError } from "@trpc/server";
+import type { Locker } from "~/server/api/routers/lockers";
+import type { TRPCError } from "@trpc/server";
+import { MultiSelect } from "~/components/multi-select";
+import type { Coin } from "~/server/api/routers/coin";
+import type { Size } from "~/server/api/routers/sizes";
+import { AddFeeDialog } from "../../add-fee-dialog";
+import { List, ListTile } from "~/components/list";
+import type { Fee } from "~/server/api/routers/fee";
 
 export default function StorePage(props: {
   store: Store;
   cities: City[];
   lockers: Locker[];
+  coins: Coin[];
+  sizes: Size[];
+  fees: Fee[];
 }) {
   const [name, setName] = useState(props.store.name);
-  const [cityId, setCity] = useState(props.store.cityId!);
-  const [serieLocker, setSerieLocker] = useState(props.store.serieLocker);
+  const [cityId, setCity] = useState(props.store.cityId);
+  const [serieLockers, setSerieLockers] = useState(props.store.lockers.map(v => v.serieLocker));
   const [address, setAddress] = useState(props.store.address);
   const [description, setDescription] = useState(props.store.description ?? "");
   const [organizationName, setOrganizationName] = useState(
@@ -64,17 +71,22 @@ export default function StorePage(props: {
   const [image, setImage] = useState<string>("");
   const router = useRouter();
 
+  useEffect(() => {
+    const r = props.store.lockers.map(v => v.serieLocker);
+    setSerieLockers(r);
+  }, [props.store]);
+
   async function handleChange() {
     try {
       await renameStore({
-        identifier: props.store!.identifier,
+        identifier: props.store.identifier,
         name,
         image,
         cityId,
-        serieLocker,
         address,
         organizationName,
         description,
+        serieLockers: serieLockers
       });
       toast.success("Se ha modificado el local.");
       router.refresh();
@@ -142,30 +154,6 @@ export default function StorePage(props: {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-right">Locker</Label>
-                    <Select
-                      onValueChange={(value: string) => {
-                        setSerieLocker(value);
-                      }}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder={props.store.serieLocker} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Lockers</SelectLabel>
-                          {props.lockers.map((e) => {
-                            return (
-                              <SelectItem key={e.id} value={e.nroSerieLocker}>
-                                {e.nroSerieLocker}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
                     <Label htmlFor="name">Dirección</Label>
                     <Input
                       id="address"
@@ -185,7 +173,7 @@ export default function StorePage(props: {
                     <Label htmlFor="name">Nombre de organización</Label>
                     <Input
                       id="orgname"
-                      value={organizationName!}
+                      value={organizationName}
                       onChange={(e) => setOrganizationName(e.target.value)}
                     />
                   </div>
@@ -220,7 +208,53 @@ export default function StorePage(props: {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="item-4" className="border-none">
+          <AccordionItem value="item-3">
+            <AccordionTrigger>
+              <h2 className="text-md">Tarifas</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Card className="p-5">
+                <div>
+                  <AddFeeDialog coins={props.coins} sizes={props.sizes} localId={props.store.identifier} />
+                  <List className="mt-3">
+                    {props.fees.map((fee) => {
+                      return (
+                        <ListTile
+                          href={`/panel/tarifas/${fee.identifier}`}
+                          title={fee.description}
+                        />
+                      );
+                    })}
+                  </List>
+                </div>
+              </Card>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="item-4">
+            <AccordionTrigger>
+              <h2 className="text-md">Lockers</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Card className="p-5">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <MultiSelect
+                      onValueChange={setSerieLockers}
+                      value={serieLockers}
+                      defaultValue={props.store.lockers.map(v => v.serieLocker)}
+                      options={props.lockers.map(v => ({
+                        label: v.nroSerieLocker,
+                        value: v.nroSerieLocker
+                      }))}
+                    />
+                  </div>
+                </div>
+              </Card>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="item-5" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar local</h2>
             </AccordionTrigger>

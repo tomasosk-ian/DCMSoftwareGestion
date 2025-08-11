@@ -4,8 +4,6 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { Toaster } from "~/components/ui/toaster";
-import { ClerkProvider } from "@clerk/nextjs";
 import ErrorBoundary from "~/components/ErrorBoundary";
 
 const inter = Inter({
@@ -26,9 +24,9 @@ export default function RootLayout({
 }) {
   return (
     <TRPCReactProvider cookies={cookies().toString()}>
-        <ErrorBoundary>
-          {children}
-    </ErrorBoundary>
-      </TRPCReactProvider>
+      <ErrorBoundary>
+        {children}
+      </ErrorBoundary>
+    </TRPCReactProvider>
   );
 }

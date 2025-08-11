@@ -18,7 +18,7 @@ export default async function Home() {
         <CarouselContent>
           {lockers.map((locker) => {
             const store = stores.find(
-              (store) => store.serieLocker === locker.nroSerieLocker,
+              (store) => store.lockers.some(l => l.serieLocker === locker.nroSerieLocker),
             );
 
             return (
@@ -47,7 +47,7 @@ async function fetchData() {
     api.locker.get.query(),
     api.store.get.query(),
     api.reserve.getLastReserveByBox.query(),
-    api.size.get.query(),
+    api.size.get.query({}),
   ]);
 
   return {

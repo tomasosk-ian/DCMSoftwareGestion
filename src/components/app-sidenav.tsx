@@ -60,17 +60,17 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
         <SidenavItem icon={<LayoutDashboardIcon />} href="/panel/monitor">
           Monitor
         </SidenavItem>
-        {/* <SidenavItem icon={<CloudIcon />} disabled={true}>
+        <SidenavItem icon={<CloudIcon />} href="/panel/ciudades">
           Ciudades{" "}
-        </SidenavItem> */}
+        </SidenavItem>
         <SidenavItem icon={<AlignStartVerticalIcon />} href="/panel/locales">
           Locales
         </SidenavItem>
         <SidenavItem icon={<GroupIcon />} href="/panel/tamanos">
           Tamaños
         </SidenavItem>
-        <SidenavItem icon={<DollarSignIcon />} href="/panel/tarifas">
-          Tarifas
+        <SidenavItem icon={<DollarSignIcon />} href="/panel/monedas">
+          Monedas
         </SidenavItem>
         <SidenavItem icon={<CloudIcon />} href="/panel/clientes">
           Clientes{" "}
@@ -81,7 +81,7 @@ export default function AppSidenav(props: { isAdmin: boolean }) {
         <SidenavItem icon={<PercentCircleIcon />} href="/panel/cupones">
           Cupones{" "}
         </SidenavItem>
-        <div className="absolute bottom-0 right-0 px-5">
+        <div className="bottom-0 right-0 px-5">
           <About />
         </div>
       </Sidenav>
