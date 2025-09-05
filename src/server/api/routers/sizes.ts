@@ -75,8 +75,6 @@ async function disponibilidad(nroSerieLocker: string, inicio: string, fin: strin
     "yyyy-MM-dd'T'HH:mm:ss"
   ); // Fix de las tardanzas - solo consultamos por el dia completo.
 
-  console.log("a", inicio, fin)
-
   const sizeResponse = await fetch(
     `${env.SERVER_URL}/api/token/disponibilidadlocker/${nroSerieLocker}/${inicio}/${fin}`,
   );
