@@ -93,7 +93,7 @@ export default function Home({ lang }: { lang?: string }) {
                 </span>
               </a>
             </div>
-            <div className="max-w-[140px] pl-4">
+            <div className="max-w-[140px] pr-4">
               <Select
                 defaultValue={lang}
                 onValueChange={(v) => setLang(v as Languages).catch(console.error)}
@@ -102,8 +102,8 @@ export default function Home({ lang }: { lang?: string }) {
                   <SelectValue placeholder={t("language")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="es">Español</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="es"><span className="text-green-400">Español</span></SelectItem>
+                  <SelectItem value="en"><span className="text-green-400">English</span></SelectItem>
                 </SelectContent>
               </Select>
             </div>
