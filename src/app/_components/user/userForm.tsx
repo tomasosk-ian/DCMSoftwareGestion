@@ -242,11 +242,7 @@ export default function UserForm({ t, ...props }: {
         </label>
         <span className="text-xxs text-red-500">{props.errors?.terms}</span>
       </div>
-      {/* <div className="col-span-1 text-center md:col-span-12">
-        <label htmlFor="terms" className="text-sm">
-          <strong>¿Necesitas ayuda? Llámanos al +54 9 294 492-7340</strong>
-        </label>
-      </div> */}
+   
     </div>
   );
 }
