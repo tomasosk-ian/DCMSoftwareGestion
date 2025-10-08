@@ -129,10 +129,14 @@ export const sizeRouter = createTRPCRouter({
   get: publicProcedure
     .input(
       z.object({
-        store: z.string().optional(),
+        store: z.string().nullable(),
       }),
     )
     .query(async ({ input }) => {
+      if (input.store === '') {
+        return null;
+      }
+
       return sizesList(input.store);
     }),
   getAvailability: publicProcedure
