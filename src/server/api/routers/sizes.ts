@@ -129,7 +129,7 @@ export const sizeRouter = createTRPCRouter({
   get: publicProcedure
     .input(
       z.object({
-        store: z.string(),
+        store: z.string().nullable(),
       }),
     )
     .query(async ({ input }) => {

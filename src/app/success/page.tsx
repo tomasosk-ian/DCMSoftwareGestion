@@ -85,7 +85,7 @@ export default async function Page({
   //   store: null,
   // }) ?? [];
 
-  sizes = await sizesList(null, store.entidadId);
+  sizes = await sizesList(null);
 
   const locale = await getLocale();
   return <html lang={locale}>
