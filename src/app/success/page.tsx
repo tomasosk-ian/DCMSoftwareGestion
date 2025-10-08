@@ -16,7 +16,6 @@ export default async function Page({
   searchParams
 }: {
   searchParams: {
-    entityId?: string,
     nReserve?: string,
     pagoId?: string,
     verifId?: string,
@@ -24,7 +23,7 @@ export default async function Page({
     endDate?: string,
   }
 }) {
-  if (!searchParams.entityId || !searchParams.pagoId || !searchParams.nReserve || !searchParams.verifId || !searchParams.startDate || !searchParams.endDate) {
+  if (!searchParams.pagoId || !searchParams.nReserve || !searchParams.verifId || !searchParams.startDate || !searchParams.endDate) {
     return <div></div>;
   }
 
@@ -33,10 +32,7 @@ export default async function Page({
 
   const nReserve = parseInt(searchParams.nReserve);
   const pago = await db.query.pagos.findFirst({
-    where: and(
-      eq(schema.pagos.identifier, parseInt(searchParams.pagoId)),
-      eq(schema.pagos.entidadId, searchParams.entityId),
-    )
+    where: eq(schema.pagos.identifier, parseInt(searchParams.pagoId)),
   });
 
   if (!pago) {
@@ -49,17 +45,11 @@ export default async function Page({
   }
 
   const reserves = await db.query.reservas.findMany({
-    where: and(
-      eq(schema.reservas.entidadId, searchParams.entityId),
-      inArray(schema.reservas.IdTransaction, data.id_transactions),
-    )
+    where: inArray(schema.reservas.IdTransaction, data.id_transactions),
   });
 
   const store = await db.query.stores.findFirst({
-    where: and(
-      eq(schema.stores.entidadId, searchParams.entityId),
-      eq(schema.stores.identifier, data.store_id),
-    )
+    where: eq(schema.stores.identifier, data.store_id),
   });
 
   if (!store || reserves.length < 1) {
