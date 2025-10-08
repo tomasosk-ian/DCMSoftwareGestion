@@ -21,7 +21,7 @@ import { List, ListTile } from "~/components/list";
 export default async function Home() {
   // const sizes = await api.size.get.query();
   const session = await getServerAuthSession();
-  const sizes = await api.size.get.query({});
+  const sizes = await api.size.get.query({ store: null });
 
   return (
     <section className="space-y-2">
@@ -29,7 +29,7 @@ export default async function Home() {
         <Title>Tamaños</Title>
       </div>
       <List>
-        {sizes.map((size: Size) => {
+        {(sizes ?? []).map((size: Size) => {
           return (
             <ListTile href={`/panel/tamanos/${size.id}`} title={size.nombre} />
           );

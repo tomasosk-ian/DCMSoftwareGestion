@@ -6,12 +6,12 @@ export default async function Channel(props: { params: { feeId: string } }) {
   const fee = await api.fee.getById.query({
     id: props.params.feeId,
   });
-  const sizes = await api.size.get.query({});
+  const sizes = await api.size.get.query({ store: null });
   const coins = await api.coin.get.query();
 
   if (!fee) {
     return <Title>No se encontró la moneda</Title>;
   }
 
-  return <FeePage fee={fee} sizes={sizes} coins={coins} />;
+  return <FeePage fee={fee} sizes={sizes ?? []} coins={coins} />;
 }

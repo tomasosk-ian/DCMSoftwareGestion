@@ -56,10 +56,7 @@ export default async function Page({
 
   const key: PublicConfigKeys = 'metodo_pago';
   const medio_pago = await db.query.publicConfig.findFirst({
-    where: and(
-      eq(schema.publicConfig.key, key),
-      eq(schema.publicConfig.entidadId, data.entidad_id),
-    )
+    where: eq(schema.publicConfig.key, key)
   });
 
   const allConfirmed = reserves.reduce((acc, r) => ((medio_pago?.value === "mercadopago" && typeof r.mpPagadoOk === 'boolean' && r.mpPagadoOk) || medio_pago?.value !== "mercadopago") && acc, true);

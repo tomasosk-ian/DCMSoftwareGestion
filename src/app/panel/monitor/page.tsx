@@ -30,7 +30,7 @@ export default async function Home() {
                   <BoxContent
                     locker={locker}
                     reservas={reservas}
-                    sizes={sizes}
+                    sizes={sizes ?? []}
                   />
                 </Card>
               </CarouselItem>
@@ -47,7 +47,7 @@ async function fetchData() {
     api.locker.get.query(),
     api.store.get.query(),
     api.reserve.getLastReserveByBox.query(),
-    api.size.get.query({}),
+    api.size.get.query({ store: null }),
   ]);
 
   return {

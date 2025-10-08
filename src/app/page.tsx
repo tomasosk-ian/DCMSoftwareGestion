@@ -11,7 +11,7 @@ const inter = Inter({
 
 export default async function Home() {
   const cities = await api.city.get.query();
-  const sizes = await api.size.get.query({});
+  const sizes = await api.size.get.query({ store: null });
   const stores = await api.store.get.query();
   const locale = await getLocale();
 
@@ -407,7 +407,7 @@ export default async function Home() {
         <main>
           <NextIntlClientProvider>
             <div>
-              <HomePage lang={locale} cities={cities} sizes={sizes} stores={stores} />
+              <HomePage lang={locale} cities={cities} sizes={sizes ?? []} stores={stores} />
             </div>
           </NextIntlClientProvider>
         </main>
