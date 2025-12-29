@@ -41,8 +41,13 @@ export default async function ReservesComponent({ stores, ...props }: {
   };
 
   // Datos formateados de reservas activas y todas las reservas
-  const activeReservesData = formatReserves(props.activesReserves);
-  const allReservesData = formatReserves(props.allReserves);
+  const activeReservesData = React.useMemo(() => {
+    return formatReserves(props.activesReserves).sort((a, b) => (b.nReserve ?? 0) - (a.nReserve ?? 0));
+  }, [props]);
+
+  const allReservesData = React.useMemo(() => {
+    return formatReserves(props.allReserves).sort((a, b) => (b.nReserve ?? 0) - (a.nReserve ?? 0));
+  }, [props]);
 
   return <section className="space-y-2">
     <div className="flex justify-between">
