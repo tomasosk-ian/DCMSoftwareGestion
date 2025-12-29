@@ -1,12 +1,20 @@
 import * as React from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import type { Reserves } from "~/server/api/routers/reserves";
+import type { Reserve, Reserves } from "~/server/api/routers/reserves";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Title } from "~/components/title";
 import type { Store } from "~/server/api/routers/store";
 import { ReserveExcel } from "./excel-component";
+
+export type ReserveInList = {
+  dataReserve: Reserve,
+  nReserve: number | null,
+  storeName: string,
+  client: string,
+  email: string,
+}
 
 export default async function ReservesComponent({ stores, ...props }: {
   activesReserves: Record<number, Reserves[]>;
@@ -37,6 +45,7 @@ export default async function ReservesComponent({ stores, ...props }: {
           stores?.find((x) => x.lockers.some(l => l.serieLocker === reserve.NroSerie))
             ?.name ?? "-",
         client: reserve.client ?? "-",
+        email: reserve.clients?.email ?? "-",
       }));
   };
 
